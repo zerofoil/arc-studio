@@ -13,6 +13,7 @@ import { DiscordLongTextField, LONG_TEXT_THRESHOLD } from '../ui/DiscordLongText
 import { apiUrl } from '../../core/api.js';
 import { onPageBlur } from '../../core/pageFocus.js';
 import { resolveVariableReference } from '../../core/projectVariables.js';
+import { NodeDefinitions } from "../../../../studio-server/src/engine/NodeRegistry.js";
 //
 const slashCommandNamePattern = /^[-_'\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u;
 const defaultValueForType = (type) => type === 'number' ? 0 : type === 'boolean' ? false : type === 'array' ? [] : type === 'object' ? {} : '';
@@ -420,6 +421,30 @@ function renderSchemaControls(node, controls, update, connectedInputIds) {
 
 function renderNodeConfig(node, nodeDef, update, graphVariables, callableGraphs, selectedVariable, onOpenVariables, onOpenEmbedStudio, onOpenTextStudio, onOpenPermissionStudio, onOpenSlashCommandStudio, onOpenModalStudio, connectedInputIds, appEmojis, authToken, modalFieldOptions, templatePreviewValues) {
   const isConnected = (pinId) => connectedInputIds.has(pinId);
+  try {
+    return NodeDefinitions[node.type].ui({
+        node,
+        nodeDef,
+        update,
+        graphVariables,
+        callableGraphs,
+        selectedVariable,
+        onOpenVariables,
+        onOpenEmbedStudio,
+        onOpenTextStudio,
+        onOpenPermissionStudio,
+        onOpenSlashCommandStudio,
+        onOpenModalStudio,
+        connectedInputIds,
+        appEmojis,
+        authToken,
+        modalFieldOptions,
+        templatePreviewValues,
+        isConnected,
+        FallbackField,
+        NodeNumberInput
+    });
+  } catch (e) { console.log(e); }
   if (node.type === 'branch_switch') {
     const cases = nodeDef.inputs.filter((pin) => /^case_\d+$/.test(pin.id));
     return <div className="node-config node-config-stack">
@@ -592,9 +617,6 @@ function renderNodeConfig(node, nodeDef, update, graphVariables, callableGraphs,
       {!isConnected('separator') && <FallbackField label="Separator"><input value={node.data?.separator ?? ','} onChange={(event) => update('separator', event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder="," aria-label="Split text separator" />
       </FallbackField>}
     </div>;
-  }
-  if (node.type === 'data_array_get' && !isConnected('index')) {
-    return <div className="node-config node-config-stack"><FallbackField label="Index"><NodeNumberInput min="0" step="1" value={node.data?.index ?? 0} onChange={(event) => update('index', numericNodeInputValue(event.target.value, { min: 0, integer: true }))} onPointerDown={(event) => event.stopPropagation()} placeholder="0" aria-label="Array item index" /></FallbackField><span className="node-config-hint">Zero-based index</span></div>;
   }
   if (node.type === 'data_regex') {
     const mode = ['test', 'match', 'replace'].includes(node.data?.mode) ? node.data.mode : 'test';

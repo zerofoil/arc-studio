@@ -1,4 +1,4 @@
-import { nodeDefinitions } from './nodes/index.js';
+import { nodeDefinitions } from './nodes/index.jsx';
 //
 export const NODE_SCHEMA_VERSION = 1;
 

@@ -1,12 +1,12 @@
 import { NodeDefinitions } from './NodeRegistry.js';
-import { evaluateDataNode } from './nodes/runtime/data.js';
-import { evaluateLogicNode } from './nodes/runtime/logic.js';
-import { buildDiscordComponents, buildDiscordModal } from './nodes/runtime/builders.js';
+import { evaluateDataNode } from './runtime/data.js';
+import { evaluateLogicNode } from './runtime/logic.js';
+import { buildDiscordComponents, buildDiscordModal } from './runtime/builders.js';
 import {
   executeCountedLoop, executeParallelBranches, executeRepeatWhile, parseWaitUntilTime,
   selectIfBranch, selectSwitchBranch, validateDelayDuration, validateLoopCount,
   validateRepeatInterval, validateWaitConditionSettings, waitFor
-} from './nodes/runtime/control_flow.js';
+} from './runtime/control_flow.js';
 import { PluginStore } from './PluginStore.js';
 import { EmbedBuilder, parseEmoji } from 'chezcord';
 import { evaluateMathNode } from './MathOperations.js';
