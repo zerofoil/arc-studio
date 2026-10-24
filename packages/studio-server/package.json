@@ -5,11 +5,11 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "start": "node scripts/start.mjs",
-    "start:server": "node scripts/start.mjs --server-only",
+    "start": "vite-node scripts/start.mjs",
+    "start:server": "vite-node node scripts/start.mjs --server-only",
     "dev": "vite-node --watch src/index.js",
-    "dev:desktop": "node scripts/dev-desktop.mjs",
-    "test": "node --test"
+    "dev:desktop": "vite-node scripts/dev-desktop.mjs",
+    "test": "vite-node --test"
   },
   "dependencies": {
     "chezcord": "*",

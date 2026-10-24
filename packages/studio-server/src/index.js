@@ -16,6 +16,7 @@ import { createApiRouter } from './routes/api.js';
 import { createBotManagerProxy } from './engine/RequestBotManager.js';
 import { CollaborationLastSeen } from './storage/CollaborationLastSeen.js';
 import { isArcStudioClientVersionAllowed } from './versioning/arcProjectCompatibility.js';
+import { nodeDefinitions } from "./engine/nodes/index.jsx";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1331,6 +1332,7 @@ server.listen(serverConfig.port, serverConfig.host, () => {
   console.log(`  ★ Chezcord:              v${serverConfig.chezcordVersion}`);
   console.log(`──────────────────────────────────────────────────────────────────────────────`);
   console.log(`  ➜ ${serverOnlyMode ? 'API / WebSocket' : 'Web Studio'}:        ${localUrl}`);
+  console.log(`  ➜ Nodes:                 ${nodeDefinitions.length}`)
   console.log(`  ➜ Setup:                 ${userStore.isSetupCompleted() ? 'Complete' : 'Required'}`);
   console.log(`  ➜ Master Setup Key:      Hidden`);
   console.log(`  ➜ Project Log Retention: ${retention}`);
