@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "A channel is created",
   "type": "event_channel_create",
   "category": "Events",
   "label": "On Channel Created",
   "color": "#5865F2",
+  icon: PanelsTopLeft,
   "gatewayEvent": "CHANNEL_CREATE",
   "gatewayIntents": [
     "GUILDS"

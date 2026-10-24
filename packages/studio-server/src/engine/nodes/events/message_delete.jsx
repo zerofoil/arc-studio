@@ -1,9 +1,11 @@
+import { MessageSquare } from "lucide-react";
 export const register = {
   "description": "A message is deleted",
   "type": "event_message_delete",
   "category": "Events",
   "label": "On Message Deleted",
   "color": "#5865F2",
+  icon: MessageSquare,
   "gatewayEvent": "MESSAGE_DELETE",
   "gatewayIntents": [
     "GUILD_MESSAGES",

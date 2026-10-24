@@ -1,9 +1,11 @@
+import { KeyRound } from "lucide-react";
 export const register = {
   "description": "Generates HMAC signatures for API & webhook verification",
   "type": "action_crypto_hmac",
   "category": "Cryptography & Security",
   "label": "HMAC Sign",
   "color": "#059669",
+  icon: KeyRound,
   "inputs": [
     {
       "id": "exec",

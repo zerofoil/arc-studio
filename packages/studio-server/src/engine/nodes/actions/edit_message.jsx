@@ -1,9 +1,11 @@
+import { MessageSquareReply } from "lucide-react";
 export const register = {
   "description": "Edits the content, embed, or components of an existing Discord message",
   "type": "action_edit_message",
   "category": "Discord Actions",
   "label": "Edit Message",
   "color": "#10b981",
+  icon: MessageSquareReply,
   "requiredIntents": [],
   "inferredPermissions": [
     "View Channels",

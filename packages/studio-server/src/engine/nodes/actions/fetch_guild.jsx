@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "Fetches a Discord server and exposes its full server object, owner, features, and common settings",
   "type": "action_fetch_guild",
   "category": "Discord Actions",
   "label": "Get Server Info",
   "color": "#10b981",
+  icon: PanelsTopLeft,
   "inputs": [
     {
       "id": "exec",

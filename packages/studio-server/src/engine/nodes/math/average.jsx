@@ -1,9 +1,11 @@
+import { BarChart3 } from "lucide-react";
 export const register = {
   "description": "Averages up to 50 values. Connect the last input to reveal another.",
   "type": "math_average",
   "category": "Math",
   "label": "Average",
   "color": "#38bdf8",
+  icon: BarChart3,
   "inputs": [
     {
       "id": "a",

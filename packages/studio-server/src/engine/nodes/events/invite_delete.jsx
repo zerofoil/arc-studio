@@ -1,9 +1,11 @@
+import { LogOut } from "lucide-react";
 export const register = {
   "description": "An invite is deleted",
   "type": "event_invite_delete",
   "category": "Events",
   "label": "On Invite Deleted",
   "color": "#5865F2",
+  icon: LogOut,
   "gatewayEvent": "INVITE_DELETE",
   "gatewayIntents": [
     "GUILD_INVITES"

@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "Updates specific fields on an existing embed without rebuilding it",
   "type": "modify_embed",
   "category": "Values & Data",
   "label": "Modify Embed",
   "color": "#ec4899",
+  icon: PanelsTopLeft,
   "inputs": [
     {
       "id": "embed",

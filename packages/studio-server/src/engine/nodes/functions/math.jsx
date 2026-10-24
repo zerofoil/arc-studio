@@ -1,3 +1,4 @@
+import { CalculatorIcon } from "lucide-react";
 export const register = {
   "description": "Legacy arithmetic node. Use the Math nodes for new graphs.",
   "hidden": true,
@@ -5,6 +6,7 @@ export const register = {
   "category": "Functions",
   "label": "Calculate",
   "color": "#a78bfa",
+  icon: CalculatorIcon,
   "defaultData": {
     "operation": "add"
   },

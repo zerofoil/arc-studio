@@ -1,9 +1,11 @@
+import { Timer } from "lucide-react";
 export const register = {
   "description": "Runs on a cron schedule",
   "type": "event_cron",
   "category": "Events",
   "label": "On Schedule",
   "color": "#5865F2",
+  icon: Timer,
   "gatewayEvent": "CRON_TICK",
   "gatewayIntents": [],
   "editorControls": [

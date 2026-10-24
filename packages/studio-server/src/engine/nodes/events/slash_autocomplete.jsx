@@ -1,9 +1,11 @@
+import { Slash } from "lucide-react";
 export const register = {
   "description": "Runs while a user types an autocomplete-enabled slash command option.",
   "type": "event_slash_autocomplete",
   "category": "Events",
   "label": "On Command Autocomplete",
   "color": "#5865F2",
+  icon: Slash,
   "gatewayEvent": "INTERACTION_CREATE",
   "gatewayInteractionType": 4,
   "gatewayCommandType": 1,

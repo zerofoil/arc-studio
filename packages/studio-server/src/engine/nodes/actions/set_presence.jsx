@@ -1,9 +1,11 @@
+import { Activity } from "lucide-react";
 export const register = {
   "description": "Updates live app status and activity message",
   "type": "action_set_presence",
   "category": "Discord Actions",
   "label": "Set Bot Presence",
   "color": "#10b981",
+  icon: Activity,
   "inputs": [
     {
       "id": "exec",

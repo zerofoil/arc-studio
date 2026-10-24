@@ -1,3 +1,4 @@
+import { Search } from "lucide-react";
 export const register = {
   "description": "Finds the first item equal to Value. Set Path to compare a nested property, such as id or user.name.",
   "createdAt": "2026-10-20T16:53:56.000Z",
@@ -5,6 +6,7 @@ export const register = {
   "category": "Values & Data",
   "label": "Find Array Item",
   "color": "#06b6d4",
+  icon: Search,
   "defaultData": {
     "path": "",
     "value": ""

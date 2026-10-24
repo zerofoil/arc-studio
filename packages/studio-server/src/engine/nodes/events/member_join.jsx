@@ -1,9 +1,11 @@
+import { UserRoundPlus } from "lucide-react";
 export const register = {
   "description": "Fires when a new user joins a guild",
   "type": "event_member_join",
   "category": "Events",
   "label": "On Member Joined",
   "color": "#5865F2",
+  icon: UserRoundPlus,
   "gatewayEvent": "GUILD_MEMBER_ADD",
   "gatewayIntents": [
     "GUILD_MEMBERS"

@@ -1,9 +1,11 @@
+import { SlidersHorizontal } from "lucide-react";
 export const register = {
   "description": "Restricts a value between a minimum and maximum",
   "type": "math_clamp",
   "category": "Math",
   "label": "Clamp",
   "color": "#38bdf8",
+  icon: SlidersHorizontal,
   "inputs": [
     {
       "id": "value",

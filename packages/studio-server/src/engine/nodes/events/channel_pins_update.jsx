@@ -1,9 +1,11 @@
+import { MessageSquare } from "lucide-react";
 export const register = {
   "description": "Channel pins are updated",
   "type": "event_channel_pins_update",
   "category": "Events",
   "label": "On Pins Updated",
   "color": "#5865F2",
+  icon: MessageSquare,
   "gatewayEvent": "CHANNEL_PINS_UPDATE",
   "gatewayIntents": [
     "GUILD_MESSAGES"

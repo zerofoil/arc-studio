@@ -1,9 +1,11 @@
+import { MessageSquareReply } from "lucide-react";
 export const register = {
   "description": "Edits the original reply to a slash command, button, or select menu interaction after it has already been sent",
   "type": "action_edit_interaction_reply",
   "category": "Discord Actions",
   "label": "Edit Interaction Reply",
   "color": "#f59e0b",
+  icon: MessageSquareReply,
   "inputs": [
     {
       "id": "exec",

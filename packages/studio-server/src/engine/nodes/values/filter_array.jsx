@@ -1,3 +1,4 @@
+import { ListFilter } from "lucide-react";
 export const register = {
   "description": "Keeps items whose value (or selected property path) matches the chosen comparison.",
   "createdAt": "2026-10-20T16:53:56.000Z",
@@ -5,6 +6,7 @@ export const register = {
   "category": "Values & Data",
   "label": "Filter Array",
   "color": "#06b6d4",
+  icon: ListFilter,
   "defaultData": {
     "path": "",
     "operator": "equals",

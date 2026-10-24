@@ -1,3 +1,4 @@
+import { Send } from "lucide-react";
 export const register = {
   "description": "Sends message text, embeds, attachments, and interactive components to a Discord channel",
   "createdAt": "2026-10-21T00:00:00.000Z",
@@ -5,6 +6,7 @@ export const register = {
   "category": "Discord Actions",
   "label": "Send Message",
   "color": "#10b981",
+  icon: Send,
   "inferredPermissions": [
     "View Channels",
     "Send Messages",

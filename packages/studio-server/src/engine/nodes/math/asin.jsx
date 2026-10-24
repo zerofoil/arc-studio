@@ -1,9 +1,11 @@
+import { Activity } from "lucide-react";
 export const register = {
   "description": "Inverse sine, returned in radians",
   "type": "math_asin",
   "category": "Math",
   "label": "Arcsine",
   "color": "#38bdf8",
+  icon: Activity,
   "inputs": [
     {
       "id": "value",

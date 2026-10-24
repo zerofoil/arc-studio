@@ -1,9 +1,11 @@
+import { LogIn } from "lucide-react";
 export const register = {
   "description": "An invite is created",
   "type": "event_invite_create",
   "category": "Events",
   "label": "On Invite Created",
   "color": "#5865F2",
+  icon: LogIn,
   "gatewayEvent": "INVITE_CREATE",
   "gatewayIntents": [
     "GUILD_INVITES"

@@ -265,13 +265,12 @@ export function evaluateDataNode(type, inputs = {}, data = {}) {
     return { array, length: array.length };
   }
   if (type === 'data_array_concat') {
-    const numberedArrays = Object.keys(inputs)
+    const arrays = Object.keys(inputs)
       .map((key) => ({ index: Number(/^array_(\d+)$/.exec(key)?.[1]), value: inputs[key] }))
       .filter(({ index }) => Number.isInteger(index) && index > 0)
       .sort((a, b) => a.index - b.index)
       .map(({ value }) => Array.isArray(value) ? value : []);
-    const legacyArrays = [inputs.array_a, inputs.array_b].filter(Array.isArray);
-    const array = [...numberedArrays.flat(), ...legacyArrays.flat()].slice(0, 10000);
+    const array = [...arrays.flat()].slice(0, 10000);
     return { array, length: array.length };
   }
   if (type === 'data_text_uppercase') return { text: String(inputs.text ?? '').toUpperCase() };

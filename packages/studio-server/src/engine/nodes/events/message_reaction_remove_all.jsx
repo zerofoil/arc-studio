@@ -1,9 +1,11 @@
+import { MousePointerClick } from "lucide-react";
 export const register = {
   "description": "All reactions are removed from a message",
   "type": "event_message_reaction_remove_all",
   "category": "Events",
   "label": "On All Reactions Removed",
   "color": "#5865F2",
+  icon: MousePointerClick,
   "gatewayEvent": "MESSAGE_REACTION_REMOVE_ALL",
   "gatewayIntents": [
     "GUILD_MESSAGE_REACTIONS"

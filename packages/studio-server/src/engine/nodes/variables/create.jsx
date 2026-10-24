@@ -1,9 +1,11 @@
+import { Database } from "lucide-react";
 export const register = {
   "description": "Creates or updates a graph variable. Its value type follows the connected value, otherwise choose a type and fallback value.",
   "type": "variable_create",
   "category": "Variables",
   "label": "Create Variable",
   "color": "#38bdf8",
+  icon: Database,
   "defaultData": {
     "name": "",
     "valueType": "string",

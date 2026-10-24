@@ -1,9 +1,11 @@
+import { Power } from "lucide-react";
 export const register = {
   "description": "Raises A to the power of B",
   "type": "math_power",
   "category": "Math",
   "label": "Power (^)",
   "color": "#38bdf8",
+  icon: Power,
   "inputs": [
     {
       "id": "a",

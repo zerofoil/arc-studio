@@ -1,9 +1,11 @@
+import { Activity } from "lucide-react";
 export const register = {
   "description": "A member presence or status changes",
   "type": "event_presence_update",
   "category": "Events",
   "label": "On Presence Updated",
   "color": "#5865F2",
+  icon: Activity,
   "gatewayEvent": "PRESENCE_UPDATE",
   "gatewayIntents": [
     "GUILD_PRESENCES"

@@ -1,9 +1,11 @@
+import { Activity } from "lucide-react";
 export const register = {
   "description": "Sets the bot profile status text",
   "type": "action_set_custom_status",
   "category": "Discord Actions",
   "label": "Set Custom Status",
   "color": "#10b981",
+  icon: Activity,
   "inputs": [
     {
       "id": "exec",

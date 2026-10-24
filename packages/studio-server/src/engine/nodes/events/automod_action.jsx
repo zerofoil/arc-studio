@@ -1,9 +1,11 @@
+import { ShieldCheck } from "lucide-react";
 export const register = {
   "description": "AutoMod takes action on content",
   "type": "event_automod_action",
   "category": "Events",
   "label": "On AutoMod Action",
   "color": "#5865F2",
+  icon: ShieldCheck,
   "gatewayEvent": "AUTO_MODERATION_ACTION_EXECUTION",
   "gatewayIntents": [
     "AUTO_MODERATION_EXECUTION"

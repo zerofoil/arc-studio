@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "A channel is updated",
   "type": "event_channel_update",
   "category": "Events",
   "label": "On Channel Updated",
   "color": "#5865F2",
+  icon: PanelsTopLeft,
   "gatewayEvent": "CHANNEL_UPDATE",
   "gatewayIntents": [
     "GUILDS"

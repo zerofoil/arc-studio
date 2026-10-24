@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "A server becomes unavailable",
   "type": "event_guild_delete",
   "category": "Events",
   "label": "On Server Unavailable",
   "color": "#5865F2",
+  icon: PanelsTopLeft,
   "gatewayEvent": "GUILD_DELETE",
   "gatewayIntents": [
     "GUILDS"

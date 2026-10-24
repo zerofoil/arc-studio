@@ -1,9 +1,11 @@
+import { ArrowDown } from "lucide-react";
 export const register = {
   "description": "Rounds down to an integer",
   "type": "math_floor",
   "category": "Math",
   "label": "Floor",
   "color": "#38bdf8",
+  icon: ArrowDown,
   "inputs": [
     {
       "id": "value",

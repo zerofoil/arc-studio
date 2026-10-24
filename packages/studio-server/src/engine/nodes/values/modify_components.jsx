@@ -1,9 +1,11 @@
+import { SlidersHorizontal } from "lucide-react";
 export const register = {
   "description": "Enables, disables, or updates buttons/select menus in an action row",
   "type": "modify_components",
   "category": "Values & Data",
   "label": "Modify Components",
   "color": "#f59e0b",
+  icon: SlidersHorizontal,
   "inputs": [
     {
       "id": "components",

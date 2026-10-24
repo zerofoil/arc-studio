@@ -1,9 +1,11 @@
+import { MessageSquareReply } from "lucide-react";
 export const register = {
   "description": "Returns up to 25 suggestions from a wired array of name and value objects.",
   "type": "action_respond_autocomplete",
   "category": "Discord Actions",
   "label": "Respond to Autocomplete",
   "color": "#10b981",
+  icon: MessageSquareReply,
   "inputs": [
     {
       "id": "exec",

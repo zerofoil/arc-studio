@@ -1,9 +1,11 @@
+import { MessageSquare } from "lucide-react";
 export const register = {
   "description": "A thread is deleted",
   "type": "event_thread_delete",
   "category": "Events",
   "label": "On Thread Deleted",
   "color": "#5865F2",
+  icon: MessageSquare,
   "gatewayEvent": "THREAD_DELETE",
   "gatewayIntents": [
     "GUILD_MESSAGES"

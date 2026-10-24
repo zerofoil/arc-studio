@@ -1,9 +1,11 @@
+import { MousePointerClick } from "lucide-react";
 export const register = {
   "description": "A select menu is submitted",
   "type": "event_select_menu",
   "category": "Events",
   "label": "On Select Menu Used",
   "color": "#5865F2",
+  icon: MousePointerClick,
   "gatewayEvent": "INTERACTION_CREATE",
   "gatewayIntents": [],
   "gatewayInteractionType": 3,

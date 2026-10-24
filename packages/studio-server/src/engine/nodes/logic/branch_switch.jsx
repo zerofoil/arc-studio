@@ -1,3 +1,4 @@
+import { GitBranch } from "lucide-react";
 export const register = {
   "description": "Compares one value with up to 50 cases and runs the first matching branch, or Default when none match.",
   "createdAt": "2026-10-20T16:53:56.000Z",
@@ -5,6 +6,7 @@ export const register = {
   "category": "Logic & Flow",
   "label": "Switch / Case",
   "color": "#8b5cf6",
+  icon: GitBranch,
   "defaultData": {
     "caseCount": 2,
     "value": "",

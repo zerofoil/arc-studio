@@ -51,9 +51,6 @@ export function getArrayCombinePins(node, connections = []) {
   }, 0);
   const count = Math.min(50, Math.max(2, highestConnected + 1));
   const pins = Array.from({ length: count }, (_, index) => ({ id: `array_${index + 1}`, label: `Array ${index + 1}`, type: 'object', defaultValue: [] }));
-  if (connections.some((connection) => connection.targetNodeId === node.id && ['array_a', 'array_b'].includes(connection.targetPinId))) {
-    pins.push({ id: 'array_a', label: 'Array A', type: 'object', defaultValue: [] }, { id: 'array_b', label: 'Array B', type: 'object', defaultValue: [] });
-  }
   return pins;
 }
 

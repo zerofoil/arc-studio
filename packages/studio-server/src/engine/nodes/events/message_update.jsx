@@ -1,9 +1,11 @@
+import { MessageSquare } from "lucide-react";
 export const register = {
   "description": "A message is edited",
   "type": "event_message_update",
   "category": "Events",
   "label": "On Message Updated",
   "color": "#5865F2",
+  icon: MessageSquare,
   "gatewayEvent": "MESSAGE_UPDATE",
   "gatewayIntents": [
     "GUILD_MESSAGES",

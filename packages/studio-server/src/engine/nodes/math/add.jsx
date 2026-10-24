@@ -1,9 +1,11 @@
+import { Plus } from "lucide-react";
 export const register = {
   "description": "Adds two numbers",
   "type": "math_add",
   "category": "Math",
   "label": "Add (+)",
   "color": "#38bdf8",
+  icon: Plus,
   "inputs": [
     {
       "id": "a",

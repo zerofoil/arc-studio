@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "A channel is deleted",
   "type": "event_channel_delete",
   "category": "Events",
   "label": "On Channel Deleted",
   "color": "#5865F2",
+  icon: PanelsTopLeft,
   "gatewayEvent": "CHANNEL_DELETE",
   "gatewayIntents": [
     "GUILDS"

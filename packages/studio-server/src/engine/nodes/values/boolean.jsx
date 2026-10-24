@@ -1,9 +1,11 @@
+import { ToggleLeft } from "lucide-react";
 export const register = {
   "description": "Provides a true or false constant",
   "type": "value_boolean",
   "category": "Values & Data",
   "label": "Boolean",
   "color": "#ef4444",
+  icon: ToggleLeft,
   "inputs": [
     {
       "id": "value",

@@ -444,7 +444,7 @@ function renderNodeConfig(node, nodeDef, update, graphVariables, callableGraphs,
         FallbackField,
         NodeNumberInput
     });
-  } catch (e) { console.log(e); }
+  } catch { }
   if (node.type === 'branch_switch') {
     const cases = nodeDef.inputs.filter((pin) => /^case_\d+$/.test(pin.id));
     return <div className="node-config node-config-stack">

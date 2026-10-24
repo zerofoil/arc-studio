@@ -1,9 +1,11 @@
+import { Hash } from "lucide-react";
 export const register = {
   "description": "Provides a numeric constant",
   "type": "value_number",
   "category": "Values & Data",
   "label": "Number",
   "color": "#06b6d4",
+  icon: Hash,
   "inputs": [
     {
       "id": "value",

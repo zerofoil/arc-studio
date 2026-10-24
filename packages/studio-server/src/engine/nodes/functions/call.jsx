@@ -1,9 +1,11 @@
+import { Workflow } from "lucide-react";
 export const register = {
   "description": "Runs a reusable function graph and returns its result",
   "type": "function_call",
   "category": "Functions",
   "label": "Call Function",
   "color": "#a78bfa",
+  icon: Workflow,
   "inputs": [
     {
       "id": "exec",

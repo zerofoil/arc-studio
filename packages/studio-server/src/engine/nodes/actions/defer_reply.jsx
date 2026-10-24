@@ -1,9 +1,11 @@
+import { MessageSquareReply } from "lucide-react";
 export const register = {
   "description": "Acknowledge a slash command now and send its reply later. Connect Reply to Interaction after this node.",
   "type": "action_defer_reply",
   "category": "Discord Actions",
   "label": "Defer Reply",
   "color": "#10b981",
+  icon: MessageSquareReply,
   "inputs": [
     {
       "id": "exec",

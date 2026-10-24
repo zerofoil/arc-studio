@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "vite-node scripts/start.mjs",
-    "start:server": "vite-node node scripts/start.mjs --server-only",
+    "start:server": "vite-node scripts/start.mjs --server-only",
     "dev": "vite-node --watch src/index.js",
     "dev:desktop": "vite-node scripts/dev-desktop.mjs",
     "test": "vite-node --test"

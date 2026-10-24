@@ -1,9 +1,11 @@
+import { MessageSquare } from "lucide-react";
 export const register = {
   "description": "A thread is created",
   "type": "event_thread_create",
   "category": "Events",
   "label": "On Thread Created",
   "color": "#5865F2",
+  icon: MessageSquare,
   "gatewayEvent": "THREAD_CREATE",
   "gatewayIntents": [
     "GUILD_MESSAGES"

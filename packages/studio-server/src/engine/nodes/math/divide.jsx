@@ -1,9 +1,11 @@
+import { Divide } from "lucide-react";
 export const register = {
   "description": "Divides A by B, division by zero returns 0",
   "type": "math_divide",
   "category": "Math",
   "label": "Divide (÷)",
   "color": "#38bdf8",
+  icon: Divide,
   "inputs": [
     {
       "id": "a",

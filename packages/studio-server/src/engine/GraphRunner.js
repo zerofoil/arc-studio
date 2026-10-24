@@ -121,9 +121,6 @@ function getNodeBaseInputs(node, connections = []) {
       return Math.max(value, Number(/^array_(\d+)$/.exec(wire.targetPinId)?.[1]) || 0);
     }, 0);
     const pins = Array.from({ length: Math.min(50, Math.max(2, highest + 1)) }, (_, index) => ({ id: `array_${index + 1}`, label: `Array ${index + 1}`, type: 'object', defaultValue: [] }));
-    if (connections.some((wire) => wire.targetNodeId === node.id && ['array_a', 'array_b'].includes(wire.targetPinId))) {
-      pins.push({ id: 'array_a', label: 'Array A', type: 'object', defaultValue: [] }, { id: 'array_b', label: 'Array B', type: 'object', defaultValue: [] });
-    }
     return pins;
   }
   if (node?.type === 'data_permission_overwrites') return getPermissionOverwritePins(node, connections);
@@ -908,6 +905,21 @@ export class GraphRunner {
           label: pin.label || pin.id,
           value: debugValue(resolveDataInput(targetNode, pin.id, targetNode.data?.[pin.id] ?? pin.defaultValue), pin.id)
         })) : [];
+        console.log(targetNode);
+        try {
+          NodeDefinitions[targetNode.type].exec({
+          targetNode,
+          currentExecWires,
+          findExecOutputs,
+          localVariableDefinitions,
+          resolveDataInput,
+          dataCache,
+          setVariableValue,
+          getVariableValue,
+          selectIfBranch,
+          log
+          });
+        } catch { }
         if (targetNode.type === 'utility_wire_extender') {
           currentExecWires.push(...findExecOutputs(targetNode.id, 'exec_out'));
         } else if (targetNode.type === 'variable_create') {
@@ -942,10 +954,6 @@ export class GraphRunner {
             log(`[Variable] Set ${definition.name}`);
           }
           currentExecWires.push(...findExecOutputs(targetNode.id, 'exec'));
-        } else if (targetNode.type === 'branch_if') {
-          const decision = selectIfBranch(resolveDataInput(targetNode, 'condition', false));
-          log(decision.logMessage);
-          currentExecWires.push(...findExecOutputs(targetNode.id, decision.branchPin));
         } else if (targetNode.type === 'branch_switch') {
           const value = resolveDataInput(targetNode, 'value', '');
           const decision = selectSwitchBranch(value, (index) => resolveDataInput(targetNode, `case_${index}`, ''));
@@ -1104,7 +1112,7 @@ export class GraphRunner {
           log(`[Plugin Adapter] ${definition.label} completed in its isolated WebAssembly worker.`);
           currentExecWires.push(...findExecOutputs(targetNode.id, 'exec'));
         } else if (DISCORD_GUILD_NODE_TYPES.has(targetNode.type)) {
-          const { executeDiscordGuildNode } = await import('./nodes/runtime/discord_guild.js');
+          const { executeDiscordGuildNode } = await import('./runtime/discord_guild.js');
           const result = await executeDiscordGuildNode(targetNode, {
             resolveInput: (pinId, fallback) => resolveDataInput(targetNode, pinId, fallback),
             isInputConnected: (pinId) => Boolean(findInputConnection(targetNode.id, pinId)),
@@ -1115,7 +1123,7 @@ export class GraphRunner {
           });
           if (result !== false) currentExecWires.push(...findExecOutputs(targetNode.id, result === 'failure' ? 'failure_exec' : 'exec'));
         } else if (targetNode.type === 'action_send_message' || targetNode.type === 'action_edit_message') {
-          const { executeDiscordMessageNode } = await import('./nodes/runtime/discord_messages.js');
+          const { executeDiscordMessageNode } = await import('./runtime/discord_messages.js');
           await executeDiscordMessageNode(targetNode, {
             resolveInput: (pinId, fallback) => resolveDataInput(targetNode, pinId, fallback),
             resolveComponents: () => resolveMessageComponents(targetNode),
@@ -1168,7 +1176,7 @@ export class GraphRunner {
           else log(`[Deploy Slash Commands] Deployed ${deployedCount} command(s).`);
           currentExecWires.push(...findExecOutputs(targetNode.id, 'exec'));
         } else if (DISCORD_INTERACTION_NODE_TYPES.has(targetNode.type)) {
-          const { executeDiscordInteractionNode } = await import('./nodes/runtime/discord_interactions.js');
+          const { executeDiscordInteractionNode } = await import('./runtime/discord_interactions.js');
           await executeDiscordInteractionNode(targetNode, {
             resolveInput: (pinId, fallback) => resolveDataInput(targetNode, pinId, fallback),
             resolveComponents: () => resolveMessageComponents(targetNode),
@@ -1183,7 +1191,7 @@ export class GraphRunner {
           });
           currentExecWires.push(...findExecOutputs(targetNode.id, 'exec'));
         } else if (targetNode.type === 'action_set_custom_status' || targetNode.type === 'action_set_presence') {
-          const { executePresenceNode } = await import('./nodes/runtime/discord_presence.js');
+          const { executePresenceNode } = await import('./runtime/discord_presence.js');
           executePresenceNode(targetNode, {
             resolveInput: (pinId, fallback) => resolveDataInput(targetNode, pinId, fallback),
             context,
@@ -1191,7 +1199,7 @@ export class GraphRunner {
           });
           currentExecWires.push(...findExecOutputs(targetNode.id, 'exec'));
         } else if (NETWORK_NODE_TYPES.has(targetNode.type)) {
-          const { executeNetworkNode } = await import('./nodes/runtime/network.js');
+          const { executeNetworkNode } = await import('./runtime/network.js');
           await executeNetworkNode(targetNode, {
             resolveInput: (pinId, fallback) => resolveDataInput(targetNode, pinId, fallback),
             setOutput: (pinId, value) => dataCache.set(`${targetNode.id}:${pinId}`, value),
@@ -1200,7 +1208,7 @@ export class GraphRunner {
           });
           currentExecWires.push(...findExecOutputs(targetNode.id, 'exec'));
         } else if (CRYPTO_NODE_TYPES.has(targetNode.type)) {
-          const { executeCryptoNode } = await import('./nodes/runtime/crypto.js');
+          const { executeCryptoNode } = await import('./runtime/crypto.js');
           executeCryptoNode(targetNode, {
             resolveInput: (pinId, fallback) => resolveDataInput(targetNode, pinId, fallback),
             setOutput: (pinId, value) => dataCache.set(`${targetNode.id}:${pinId}`, value),

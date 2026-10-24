@@ -1,9 +1,11 @@
+import { Hash } from "lucide-react";
 export const register = {
   "description": "Computes SHA-256 or SHA-512 cryptographic hash digests",
   "type": "action_crypto_hash",
   "category": "Cryptography & Security",
   "label": "Cryptographic Hash",
   "color": "#10b981",
+  icon: Hash,
   "inputs": [
     {
       "id": "exec",

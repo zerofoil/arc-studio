@@ -1,9 +1,11 @@
+import { Dices } from "lucide-react";
 export const register = {
   "description": "Generates secure cryptographic random hex, base64url tokens or numeric PINs",
   "type": "action_crypto_random",
   "category": "Cryptography & Security",
   "label": "Generate Crypto Token",
   "color": "#14b8a6",
+  icon: Dices,
   "inputs": [
     {
       "id": "exec",

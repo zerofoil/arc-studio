@@ -1,9 +1,11 @@
+import { ShieldCheck } from "lucide-react";
 export const register = {
   "description": "Constant-time verification of HMAC signatures",
   "type": "action_crypto_verify_hmac",
   "category": "Cryptography & Security",
   "label": "Verify HMAC",
   "color": "#047857",
+  icon: ShieldCheck,
   "inputs": [
     {
       "id": "exec",

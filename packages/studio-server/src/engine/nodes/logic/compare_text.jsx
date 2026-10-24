@@ -1,9 +1,12 @@
+import { CaseSensitive } from "lucide-react";
+
 export const register = {
   "description": "Compares two text strings (equals, contains, startsWith)",
   "type": "compare_text",
   "category": "Logic & Flow",
   "label": "Compare Text",
   "color": "#8b5cf6",
+  icon: CaseSensitive,
   "inputs": [
     {
       "id": "text_a",

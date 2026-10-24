@@ -1,9 +1,11 @@
+import { TextCursorInput } from "lucide-react";
 export const register = {
   "description": "A modal is submitted",
   "type": "event_modal_submit",
   "category": "Events",
   "label": "On Modal Submitted",
   "color": "#5865F2",
+  icon: TextCursorInput,
   "gatewayEvent": "INTERACTION_CREATE",
   "gatewayIntents": [],
   "gatewayInteractionType": 5,

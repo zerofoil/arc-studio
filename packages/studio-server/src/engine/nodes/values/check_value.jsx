@@ -1,3 +1,4 @@
+import { CircleDot } from "lucide-react";
 export const register = {
   "description": "Distinguishes missing, null, empty text, and real values. The Value output uses the fallback unless a real value is present.",
   "createdAt": "2026-10-20T16:53:56.000Z",
@@ -5,6 +6,7 @@ export const register = {
   "category": "Values & Data",
   "label": "Check Value",
   "color": "#06b6d4",
+  icon: CircleDot,
   "defaultData": {
     "fallback": ""
   },

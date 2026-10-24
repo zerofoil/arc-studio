@@ -1,9 +1,12 @@
+import { TextCursorInput } from "lucide-react";
+
 export const register = {
   "description": "A user starts typing",
   "type": "event_typing_start",
   "category": "Events",
   "label": "On Typing Started",
   "color": "#5865F2",
+  icon: TextCursorInput,
   "gatewayEvent": "TYPING_START",
   "gatewayIntents": [
     "GUILD_MESSAGE_TYPING"

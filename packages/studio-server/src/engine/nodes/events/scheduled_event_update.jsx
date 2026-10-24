@@ -1,9 +1,11 @@
+import { Timer } from "lucide-react";
 export const register = {
   "description": "A scheduled event is updated",
   "type": "event_scheduled_event_update",
   "category": "Events",
   "label": "On Scheduled Event Updated",
   "color": "#5865F2",
+  icon: Timer,
   "gatewayEvent": "GUILD_SCHEDULED_EVENT_UPDATE",
   "gatewayIntents": [
     "GUILD_SCHEDULED_EVENTS"

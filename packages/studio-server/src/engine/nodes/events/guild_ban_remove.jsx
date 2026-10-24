@@ -1,9 +1,11 @@
+import { ShieldCheck } from "lucide-react";
 export const register = {
   "description": "A user is unbanned from a server",
   "type": "event_guild_ban_remove",
   "category": "Events",
   "label": "On User Unbanned",
   "color": "#5865F2",
+  icon: ShieldCheck,
   "gatewayEvent": "GUILD_BAN_REMOVE",
   "gatewayIntents": [
     "GUILD_MODERATION"

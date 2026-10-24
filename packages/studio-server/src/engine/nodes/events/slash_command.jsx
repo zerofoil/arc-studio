@@ -1,9 +1,11 @@
+import { Slash } from "lucide-react";
 export const register = {
   "description": "Fires when an application slash command is invoked",
   "type": "event_slash_command",
   "category": "Events",
   "label": "On Slash Command",
   "color": "#5865F2",
+  icon: Slash,
   "gatewayEvent": "INTERACTION_CREATE",
   "gatewayInteractionType": 2,
   "gatewayCommandType": 1,

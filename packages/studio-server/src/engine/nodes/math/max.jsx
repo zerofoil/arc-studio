@@ -1,9 +1,11 @@
+import { ArrowUp } from "lucide-react";
 export const register = {
   "description": "Returns the larger number",
   "type": "math_max",
   "category": "Math",
   "label": "Maximum (max)",
   "color": "#38bdf8",
+  icon: ArrowUp,
   "inputs": [
     {
       "id": "a",

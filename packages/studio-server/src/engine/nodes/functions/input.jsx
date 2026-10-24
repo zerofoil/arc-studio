@@ -1,9 +1,11 @@
+import { LogIn } from "lucide-react";
 export const register = {
   "description": "Defines a typed argument for a reusable function graph",
   "type": "function_input",
   "category": "Functions",
   "label": "Function Input",
   "color": "#a78bfa",
+  icon: LogIn,
   "defaultData": {
     "name": "Input",
     "valueType": "number",

@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "The app becomes available in a server",
   "type": "event_guild_create",
   "category": "Events",
   "label": "On Server Available",
   "color": "#5865F2",
+  icon: PanelsTopLeft,
   "gatewayEvent": "GUILD_CREATE",
   "gatewayIntents": [
     "GUILDS"

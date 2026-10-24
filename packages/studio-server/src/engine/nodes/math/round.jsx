@@ -1,9 +1,11 @@
+import { CircleDot } from "lucide-react";
 export const register = {
   "description": "Rounds to the selected decimal places",
   "type": "math_round",
   "category": "Math",
   "label": "Round",
   "color": "#38bdf8",
+  icon: CircleDot,
   "editorControls": [
     {
       "type": "number",

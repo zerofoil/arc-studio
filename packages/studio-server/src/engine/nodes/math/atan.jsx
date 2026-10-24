@@ -1,9 +1,11 @@
+import { Activity } from "lucide-react";
 export const register = {
   "description": "Inverse tangent, returned in radians",
   "type": "math_atan",
   "category": "Math",
   "label": "Arctangent",
   "color": "#38bdf8",
+  icon: Activity,
   "inputs": [
     {
       "id": "value",

@@ -1,9 +1,11 @@
+import { ArrowUp } from "lucide-react";
 export const register = {
   "description": "Rounds up to an integer",
   "type": "math_ceil",
   "category": "Math",
   "label": "Ceiling",
   "color": "#38bdf8",
+  icon: ArrowUp,
   "inputs": [
     {
       "id": "value",

@@ -1,9 +1,11 @@
+import { Timer } from "lucide-react";
 export const register = {
   "description": "Awaits a short timer for this run. Other Discord events and graph runs continue while it waits.",
   "type": "delay",
   "category": "Logic & Flow",
   "label": "Wait (Async)",
   "color": "#8b5cf6",
+  icon: Timer,
   "inputs": [
     {
       "id": "exec",

@@ -1,9 +1,11 @@
+import { LogOut } from "lucide-react";
 export const register = {
   "description": "Returns the connected value from this function graph",
   "type": "function_return",
   "category": "Functions",
   "label": "Return Value",
   "color": "#a78bfa",
+  icon: LogOut,
   "defaultData": {
     "valueType": "number"
   },

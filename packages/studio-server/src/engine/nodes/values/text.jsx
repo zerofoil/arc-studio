@@ -1,3 +1,5 @@
+import { Type } from "lucide-react";
+
 export const register = {
   "description": "Provides a static or dynamic text string",
   "hidden": true,
@@ -5,6 +7,7 @@ export const register = {
   "category": "Values & Data",
   "label": "Text String",
   "color": "#f59e0b",
+  icon: Type,
   "inputs": [
     {
       "id": "value",

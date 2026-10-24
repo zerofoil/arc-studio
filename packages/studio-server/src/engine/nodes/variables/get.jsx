@@ -1,9 +1,11 @@
+import { Database } from "lucide-react";
 export const register = {
   "description": "Reads a graph variable as typed data",
   "type": "variable_get",
   "category": "Variables",
   "label": "Get Variable",
   "color": "#38bdf8",
+  icon: Database,
   "inputs": [
     {
       "id": "variable",

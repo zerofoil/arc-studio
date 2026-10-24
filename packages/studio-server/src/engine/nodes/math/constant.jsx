@@ -1,9 +1,11 @@
+import { Pi } from "lucide-react";
 export const register = {
   "description": "Provides a standard mathematical constant",
   "type": "math_constant",
   "category": "Math",
   "label": "Math Constant",
   "color": "#38bdf8",
+  icon: Pi,
   "editorControls": [
     {
       "type": "select",

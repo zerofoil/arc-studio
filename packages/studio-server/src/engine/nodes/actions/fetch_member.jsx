@@ -1,9 +1,11 @@
+import { UserRoundPlus } from "lucide-react";
 export const register = {
   "description": "Fetches a member in a server and exposes the full member and user objects, roles, and profile fields",
   "type": "action_fetch_member",
   "category": "Discord Actions",
   "label": "Get Server Member",
   "color": "#10b981",
+  icon: UserRoundPlus,
   "inputs": [
     {
       "id": "exec",

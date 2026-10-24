@@ -1,9 +1,11 @@
+import { GitCompare } from "lucide-react";
 export const register = {
   "description": "Compares two numbers and returns true or false",
   "type": "math_compare",
   "category": "Math",
   "label": "Compare Numbers",
   "color": "#38bdf8",
+  icon: GitCompare,
   "editorControls": [
     {
       "type": "select",

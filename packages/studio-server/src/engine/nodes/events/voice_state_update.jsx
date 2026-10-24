@@ -1,9 +1,11 @@
+import { Activity } from "lucide-react";
 export const register = {
   "description": "A member joins, leaves, or changes voice state",
   "type": "event_voice_state_update",
   "category": "Events",
   "label": "On Voice State Changed",
   "color": "#5865F2",
+  icon: Activity,
   "gatewayEvent": "VOICE_STATE_UPDATE",
   "gatewayIntents": [
     "GUILD_VOICE_STATES"

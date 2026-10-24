@@ -1,9 +1,11 @@
+import { Activity } from "lucide-react";
 export const register = {
   "description": "Tangent of an angle in radians",
   "type": "math_tan",
   "category": "Math",
   "label": "Tangent",
   "color": "#38bdf8",
+  icon: Activity,
   "inputs": [
     {
       "id": "value",

@@ -1,9 +1,11 @@
+import { MousePointerClick } from "lucide-react";
 export const register = {
   "description": "Fires when a message component button is pressed",
   "type": "event_button_click",
   "category": "Events",
   "label": "On Button Click",
   "color": "#5865F2",
+  icon: MousePointerClick,
   "gatewayEvent": "INTERACTION_CREATE",
   "gatewayInteractionType": 3,
   "gatewayComponentTypes": [

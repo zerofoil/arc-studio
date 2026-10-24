@@ -1,9 +1,11 @@
+import { PanelsTopLeft } from "lucide-react";
 export const register = {
   "description": "A server is updated",
   "type": "event_guild_update",
   "category": "Events",
   "label": "On Server Updated",
   "color": "#5865F2",
+  icon: PanelsTopLeft,
   "gatewayEvent": "GUILD_UPDATE",
   "gatewayIntents": [
     "GUILDS"

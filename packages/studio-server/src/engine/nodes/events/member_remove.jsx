@@ -1,9 +1,11 @@
+import { UserRoundPlus } from "lucide-react";
 export const register = {
   "description": "A user leaves a server",
   "type": "event_member_remove",
   "category": "Events",
   "label": "On Member Left",
   "color": "#5865F2",
+  icon: UserRoundPlus,
   "gatewayEvent": "GUILD_MEMBER_REMOVE",
   "gatewayIntents": [
     "GUILD_MEMBERS"

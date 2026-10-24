@@ -1,9 +1,11 @@
+import { ShieldCheck } from "lucide-react";
 export const register = {
   "description": "A user is banned from a server",
   "type": "event_guild_ban_add",
   "category": "Events",
   "label": "On User Banned",
   "color": "#5865F2",
+  icon: ShieldCheck,
   "gatewayEvent": "GUILD_BAN_ADD",
   "gatewayIntents": [
     "GUILD_MODERATION"

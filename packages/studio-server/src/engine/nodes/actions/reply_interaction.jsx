@@ -1,9 +1,11 @@
+import { MessageSquareReply } from "lucide-react";
 export const register = {
   "description": "Responds to a slash command or component interaction with text, embeds, attachments, and interactive components",
   "type": "action_reply_interaction",
   "category": "Discord Actions",
   "label": "Reply to Interaction",
   "color": "#10b981",
+  icon: MessageSquareReply,
   "inputs": [
     {
       "id": "exec",

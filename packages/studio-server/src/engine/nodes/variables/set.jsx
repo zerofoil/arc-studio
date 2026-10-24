@@ -1,9 +1,11 @@
+import { Database } from "lucide-react";
 export const register = {
   "description": "Updates a graph variable during execution",
   "type": "variable_set",
   "category": "Variables",
   "label": "Set Variable",
   "color": "#38bdf8",
+  icon: Database,
   "inputs": [
     {
       "id": "exec",

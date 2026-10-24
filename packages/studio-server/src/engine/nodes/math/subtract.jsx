@@ -1,9 +1,11 @@
+import { Minus } from "lucide-react";
 export const register = {
   "description": "Subtracts B from A",
   "type": "math_subtract",
   "category": "Math",
   "label": "Subtract (−)",
   "color": "#38bdf8",
+  icon: Minus,
   "inputs": [
     {
       "id": "a",

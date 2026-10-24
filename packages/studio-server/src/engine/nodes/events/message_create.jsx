@@ -1,93 +1,96 @@
+import { MessageSquare } from "lucide-react";
+
 export const register = {
-  "description": "Fires for every new message. Use Split Text to break message content into parts.",
-  "type": "event_message_create",
-  "category": "Events",
-  "label": "On Message Create",
-  "color": "#5865F2",
-  "gatewayEvent": "MESSAGE_CREATE",
-  "gatewayIntents": [
+  description: "Fires for every new message. Use Split Text to break message content into parts.",
+  type: "event_message_create",
+  category: "Events",
+  label: "On Message Create",
+  color: "#5865F2",
+  icon: MessageSquare,
+  gatewayEvent: "MESSAGE_CREATE",
+  gatewayIntents: [
     "GUILDS",
     "GUILD_MESSAGES",
     "DIRECT_MESSAGES",
     "MESSAGE_CONTENT"
   ],
-  "inputs": [],
-  "outputs": [
+  inputs: [],
+  outputs: [
     {
-      "id": "exec",
-      "label": "Exec",
-      "type": "exec"
+      id: "exec",
+      label: "Exec",
+      type: "exec"
     },
     {
-      "id": "message_id",
-      "label": "Message ID",
-      "type": "string",
-      "eventPath": "id"
+      id: "message_id",
+      label: "Message ID",
+      type: "string",
+      eventPath: "id"
     },
     {
-      "id": "content",
-      "label": "Message Content",
-      "type": "string"
+      id: "content",
+      label: "Message Content",
+      type: "string"
     },
     {
-      "id": "author_id",
-      "label": "Author ID",
-      "type": "string"
+      id: "author_id",
+      label: "Author ID",
+      type: "string"
     },
     {
-      "id": "author_name",
-      "label": "Author Name",
-      "type": "string"
+      id: "author_name",
+      label: "Author Name",
+      type: "string"
     },
     {
-      "id": "channel_id",
-      "label": "Channel ID",
-      "type": "string"
+      id: "channel_id",
+      label: "Channel ID",
+      type: "string"
     },
     {
-      "id": "is_bot",
-      "label": "Is Bot",
-      "type": "boolean"
+      id: "is_bot",
+      label: "Is Bot",
+      type: "boolean"
     },
     {
-      "id": "has_mentions",
-      "label": "Has Mentions",
-      "type": "boolean"
+      id: "has_mentions",
+      label: "Has Mentions",
+      type: "boolean"
     },
     {
-      "id": "mentions",
-      "label": "Mentioned Users",
-      "type": "object",
-      "eventPath": "mentions"
+      id: "mentions",
+      label: "Mentioned Users",
+      type: "object",
+      eventPath: "mentions"
     },
     {
-      "id": "mention_roles",
-      "label": "Mentioned Roles",
-      "type": "object",
-      "eventPath": "mention_roles"
+      id: "mention_roles",
+      label: "Mentioned Roles",
+      type: "object",
+      eventPath: "mention_roles"
     },
     {
-      "id": "mention_everyone",
-      "label": "Mentions Everyone",
-      "type": "boolean",
-      "eventPath": "mention_everyone"
+      id: "mention_everyone",
+      label: "Mentions Everyone",
+      type: "boolean",
+      eventPath: "mention_everyone"
     },
     {
-      "id": "is_reply",
-      "label": "Is Reply",
-      "type": "boolean"
+      id: "is_reply",
+      label: "Is Reply",
+      type: "boolean"
     },
     {
-      "id": "referenced_message_id",
-      "label": "Replied Message ID",
-      "type": "string",
-      "eventPath": "message_reference.message_id"
+      id: "referenced_message_id",
+      label: "Replied Message ID",
+      type: "string",
+      eventPath: "message_reference.message_id"
     },
     {
-      "id": "reply_author_id",
-      "label": "Replied Author ID",
-      "type": "string",
-      "eventPath": "referenced_message.author.id"
+      id: "reply_author_id",
+      label: "Replied Author ID",
+      type: "string",
+      eventPath: "referenced_message.author.id"
     }
   ]
 };

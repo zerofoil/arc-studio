@@ -1,9 +1,11 @@
+import { ShieldCheck } from "lucide-react";
 export const register = {
   "description": "A role is created",
   "type": "event_role_create",
   "category": "Events",
   "label": "On Role Created",
   "color": "#5865F2",
+  icon: ShieldCheck,
   "gatewayEvent": "GUILD_ROLE_CREATE",
   "gatewayIntents": [
     "GUILDS"
