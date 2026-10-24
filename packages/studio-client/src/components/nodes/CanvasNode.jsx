@@ -421,30 +421,42 @@ function renderSchemaControls(node, controls, update, connectedInputIds) {
 
 function renderNodeConfig(node, nodeDef, update, graphVariables, callableGraphs, selectedVariable, onOpenVariables, onOpenEmbedStudio, onOpenTextStudio, onOpenPermissionStudio, onOpenSlashCommandStudio, onOpenModalStudio, connectedInputIds, appEmojis, authToken, modalFieldOptions, templatePreviewValues) {
   const isConnected = (pinId) => connectedInputIds.has(pinId);
+  const textEditor = (id, label, maxLength = 2000, placeholder = '', autocomplete = true) => {
+    const value = String(node.data?.[id] ?? '');
+    const openTextEditor = () => onOpenTextStudio?.(node, id, label, value, maxLength);
+    const valuePaths = graphVariables.flatMap((variable) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(variable.name || '') ? variableValuePaths(variable.initialValue, variable.name) : []);
+    const templateSuggestions = nodeDef.inputs.filter((pin) => /^arg_\d+$/.test(pin.id)).map((pin) => ({ name: pin.id.replace(/^arg_/, 'arg'), label: pin.label }));
+    if (value.length > LONG_TEXT_THRESHOLD) return <DiscordLongTextField value={value} onOpenEditor={openTextEditor} label={label} maxLength={maxLength} />;
+    return <CharacterLimit value={value} maxLength={maxLength}><DiscordTextField onOpenTextEditor={openTextEditor} discordAutocomplete={autocomplete} templateAutocomplete templateValuePaths={valuePaths} templateSuggestions={templateSuggestions} graphVariables={graphVariables} as="textarea" rows={2} maxLength={maxLength} value={value} appEmojis={appEmojis} onChange={(event) => update(id, event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder={placeholder} aria-label={label} /></CharacterLimit>;
+  };
   try {
     return NodeDefinitions[node.type].ui({
-        node,
-        nodeDef,
-        update,
-        graphVariables,
-        callableGraphs,
-        selectedVariable,
-        onOpenVariables,
-        onOpenEmbedStudio,
-        onOpenTextStudio,
-        onOpenPermissionStudio,
-        onOpenSlashCommandStudio,
-        onOpenModalStudio,
-        connectedInputIds,
-        appEmojis,
-        authToken,
-        modalFieldOptions,
-        templatePreviewValues,
-        isConnected,
-        FallbackField,
-        NodeNumberInput
+      node,
+      nodeDef,
+      update,
+      graphVariables,
+      callableGraphs,
+      selectedVariable,
+      onOpenVariables,
+      onOpenEmbedStudio,
+      onOpenTextStudio,
+      onOpenPermissionStudio,
+      onOpenSlashCommandStudio,
+      onOpenModalStudio,
+      connectedInputIds,
+      appEmojis,
+      authToken,
+      modalFieldOptions,
+      templatePreviewValues,
+      isConnected,
+      FallbackField,
+      NodeNumberInput,
+      AttachmentPicker,
+      textEditor,
+      FallbackCheckbox,
+      Plus
     });
-  } catch { }
+  } catch (e) { console.log(e); }
   if (node.type === 'branch_switch') {
     const cases = nodeDef.inputs.filter((pin) => /^case_\d+$/.test(pin.id));
     return <div className="node-config node-config-stack">
@@ -455,14 +467,7 @@ function renderNodeConfig(node, nodeDef, update, graphVariables, callableGraphs,
       {cases.length < 50 && <button type="button" className="node-config-action" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.preventDefault(); event.stopPropagation(); update('caseCount', cases.length + 1); }}><Plus size={12} /> Add case</button>}
     </div>;
   }
-  const textEditor = (id, label, maxLength = 2000, placeholder = '', autocomplete = true) => {
-    const value = String(node.data?.[id] ?? '');
-    const openTextEditor = () => onOpenTextStudio?.(node, id, label, value, maxLength);
-    const valuePaths = graphVariables.flatMap((variable) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(variable.name || '') ? variableValuePaths(variable.initialValue, variable.name) : []);
-    const templateSuggestions = nodeDef.inputs.filter((pin) => /^arg_\d+$/.test(pin.id)).map((pin) => ({ name: pin.id.replace(/^arg_/, 'arg'), label: pin.label }));
-    if (value.length > LONG_TEXT_THRESHOLD) return <DiscordLongTextField value={value} onOpenEditor={openTextEditor} label={label} maxLength={maxLength} />;
-    return <CharacterLimit value={value} maxLength={maxLength}><DiscordTextField onOpenTextEditor={openTextEditor} discordAutocomplete={autocomplete} templateAutocomplete templateValuePaths={valuePaths} templateSuggestions={templateSuggestions} graphVariables={graphVariables} as="textarea" rows={2} maxLength={maxLength} value={value} appEmojis={appEmojis} onChange={(event) => update(id, event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder={placeholder} aria-label={label} /></CharacterLimit>;
-  };
+
   const templateInput = (id, label, { multiline = false, maxLength = 8192, inputMode, placeholder = 'Used when unconnected' } = {}) => {
     if (isConnected(id)) return null;
     const value = String(node.data?.[id] ?? '');
@@ -739,17 +744,6 @@ function renderNodeConfig(node, nodeDef, update, graphVariables, callableGraphs,
     return <EmbedNodeBuilder data={node.data || {}} connectedInputIds={connectedInputIds} appEmojis={appEmojis} graphVariables={graphVariables} templateValuePaths={templateValuePaths} templateSuggestions={templateSuggestions} templatePreviewValues={templatePreviewValues} onChange={(blocks) => update('blocks', blocks)} onOpenStudio={() => onOpenEmbedStudio?.(node)} onOpenTextStudio={(label, value, maxLength, applyValue, parentBlockContext) => onOpenTextStudio?.(node, null, label, value, maxLength, applyValue, '', parentBlockContext)} />;
   }
   if (node.type === 'build_modal') return <div className="node-config node-config-stack"><button type="button" className="node-config-action node-config-studio-action" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.preventDefault(); event.stopPropagation(); onOpenModalStudio?.(node); }}><Plus size={12} /> Edit popup modal{node.data?.modal?.components?.length ? ` · ${node.data.modal.components.length} fields` : ''}</button></div>;
-  if (node.type === 'action_send_message') {
-    const componentsConnected = isConnected('components');
-    return <div className="node-config node-config-stack">
-      {!isConnected('channel_id') && <label className="node-config-fallback"><span>Channel ID</span><input value={node.data?.channel_id ?? ''} onChange={(event) => update('channel_id', event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder="Used when unconnected" aria-label="Channel ID" /></label>}
-      {!isConnected('thread_id') && <label className="node-config-fallback"><span>Thread ID (Optional)</span><input value={node.data?.thread_id ?? ''} onChange={(event) => update('thread_id', event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder="Overrides Channel ID when set" aria-label="Thread ID" /></label>}
-      {!isConnected('content') && <label className="node-config-fallback"><span>Message content</span>{textEditor('content', 'Message content', 2000, 'Used when unconnected')}</label>}
-      {!isConnected('mention_replied_user') && <FallbackCheckbox label="Mention Replied User" checked={node.data?.mention_replied_user ?? (isConnected('reply_to_message_id') || Boolean(node.data?.reply_to_message_id))} onChange={(value) => update('mention_replied_user', value)} />}
-      {!isConnected('files') && <AttachmentPicker files={node.data?.files || []} authToken={authToken} onChange={(files) => update('files', files)} />}
-      <button type="button" className={`node-config-action ${componentsConnected ? 'is-disabled' : ''}`} disabled={componentsConnected} title={componentsConnected ? 'Components input is connected. Edit the source node on the canvas instead.' : undefined} onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { if (componentsConnected) return; event.stopPropagation(); onOpenEmbedStudio?.(node); }}><Plus size={12} /> {componentsConnected ? 'Components wired (edit source node)' : `Edit message components${node.data?.components?.length ? ` · ${node.data.components.length} rows` : ''}`}</button>
-    </div>;
-  }
   if (node.type === 'action_edit_message') {
     const componentsConnected = isConnected('components');
     return <div className="node-config node-config-stack">
