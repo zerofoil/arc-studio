@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Constant-time verification of HMAC signatures",
   "type": "action_crypto_verify_hmac",
   "category": "Cryptography & Security",

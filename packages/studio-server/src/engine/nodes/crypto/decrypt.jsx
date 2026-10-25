@@ -1,5 +1,5 @@
 import { UnlockKeyhole } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Decrypts and verifies AES-256-GCM authenticated envelopes",
   "type": "action_crypto_decrypt",
   "category": "Cryptography & Security",

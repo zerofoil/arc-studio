@@ -1,5 +1,5 @@
 import { Asterisk } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Multiplies two numbers",
   "type": "math_multiply",
   "category": "Math",

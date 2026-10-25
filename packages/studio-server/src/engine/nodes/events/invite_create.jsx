@@ -1,5 +1,5 @@
 import { LogIn } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "An invite is created",
   "type": "event_invite_create",
   "category": "Events",

@@ -1,5 +1,5 @@
 import { Timer } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Runs on a cron schedule",
   "type": "event_cron",
   "category": "Events",

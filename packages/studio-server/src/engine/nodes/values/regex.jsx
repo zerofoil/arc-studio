@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Tests, extracts, or replaces text with a JavaScript regular expression. Inputs are bounded and risky regex structures are rejected.",
   "type": "data_regex",
   "category": "Values & Data",

@@ -1,5 +1,5 @@
 import { Divide } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Divides A by B, division by zero returns 0",
   "type": "math_divide",
   "category": "Math",

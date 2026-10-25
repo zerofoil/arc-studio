@@ -1,5 +1,5 @@
 import { PanelsTopLeft } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A channel is deleted",
   "type": "event_channel_delete",
   "category": "Events",

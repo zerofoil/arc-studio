@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Converts booleans, numbers, and common text values (true/false, yes/no, 1/0, on/off). Unknown text returns false; check Valid.",
   "type": "data_to_boolean",
   "category": "Values & Data",

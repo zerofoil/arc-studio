@@ -1,5 +1,5 @@
 import { CircleDot } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Rounds to the selected decimal places",
   "type": "math_round",
   "category": "Math",

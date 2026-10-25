@@ -1,5 +1,5 @@
 import { MessageSquare } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A thread is created",
   "type": "event_thread_create",
   "category": "Events",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Sets or clears a voice channel status. Requires Set Voice Channel Status, Manage Channels may also be required.",
   "type": "action_voice_channel_status",
   "category": "Discord Actions",

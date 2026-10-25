@@ -1,6 +1,6 @@
 import { TextCursorInput } from "lucide-react";
 
-export const register = {
+export const registry = {
   "description": "A user starts typing",
   "type": "event_typing_start",
   "category": "Events",

@@ -1,5 +1,5 @@
 import { MousePointerClick } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "All reactions are removed from a message",
   "type": "event_message_reaction_remove_all",
   "category": "Events",

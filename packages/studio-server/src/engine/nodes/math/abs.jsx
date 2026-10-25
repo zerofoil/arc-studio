@@ -1,5 +1,5 @@
 import { SquareFunction } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns the distance from zero",
   "type": "math_abs",
   "category": "Math",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Collects connected values in order. One extra socket appears as you use each socket, up to 50 items, use Combine Arrays to combine arrays.",
   "type": "data_array_create",
   "category": "Values & Data",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Requests a Gateway voice-state change. Joining does not create an audio connection or play audio.",
   "type": "action_voice_state",
   "category": "Discord Actions",

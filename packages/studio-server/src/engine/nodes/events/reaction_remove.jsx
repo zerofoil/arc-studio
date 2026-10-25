@@ -1,5 +1,5 @@
 import { MousePointerClick } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A user removes a reaction",
   "type": "event_reaction_remove",
   "category": "Events",

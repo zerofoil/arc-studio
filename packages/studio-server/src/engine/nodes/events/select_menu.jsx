@@ -1,5 +1,5 @@
 import { MousePointerClick } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A select menu is submitted",
   "type": "event_select_menu",
   "category": "Events",

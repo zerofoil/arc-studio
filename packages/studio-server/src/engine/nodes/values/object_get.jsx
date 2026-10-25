@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Reads a property by key. Check Exists to distinguish a missing property from an empty value.",
   "type": "data_object_get",
   "category": "Values & Data",

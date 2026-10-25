@@ -1,5 +1,5 @@
 import { LogOut } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns the connected value from this function graph",
   "type": "function_return",
   "category": "Functions",
@@ -22,5 +22,18 @@ export const register = {
       "defaultValue": 0
     }
   ],
-  "outputs": []
+  "outputs": [],
+  ui: ui
 };
+
+function ui({
+  node,
+  AnimatedDropdown,
+  valueTypes,
+  update
+}) {
+  const type = node.data?.valueType || 'number';
+  return <div className="node-config node-config-stack function-node-config">
+    <AnimatedDropdown value={type} options={valueTypes} onChange={(value) => update('valueType', value)} onPointerDown={(event) => event.stopPropagation()} ariaLabel="Function return type" className="node-select" />
+  </div>;
+}

@@ -1,5 +1,5 @@
 import { Pi } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Provides a standard mathematical constant",
   "type": "math_constant",
   "category": "Math",

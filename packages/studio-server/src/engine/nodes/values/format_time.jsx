@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Formats an ISO date or Unix millisecond timestamp using a locale, time zone, and date/time styles.",
   "type": "data_format_time",
   "category": "Values & Data",

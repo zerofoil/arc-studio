@@ -1,5 +1,5 @@
 import { SlidersHorizontal } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Enables, disables, or updates buttons/select menus in an action row",
   "type": "modify_components",
   "category": "Values & Data",

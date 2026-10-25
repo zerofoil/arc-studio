@@ -1,5 +1,5 @@
 import { ToggleLeft } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Provides a true or false constant",
   "type": "value_boolean",
   "category": "Values & Data",

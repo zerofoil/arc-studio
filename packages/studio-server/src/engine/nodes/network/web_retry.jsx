@@ -1,5 +1,5 @@
 import { Timer } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Retries temporary network errors and HTTP 408, 425, 429, and 5xx responses with bounded backoff. Non-idempotent methods are not retried unless explicitly enabled.",
   "type": "action_web_retry",
   "category": "Web & Network",

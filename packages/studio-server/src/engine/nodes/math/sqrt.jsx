@@ -1,5 +1,5 @@
 import { Square } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns the non-negative square root, negative input returns 0",
   "type": "math_sqrt",
   "category": "Math",

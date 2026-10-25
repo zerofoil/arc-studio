@@ -1,5 +1,5 @@
 import { Activity } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Tangent of an angle in radians",
   "type": "math_tan",
   "category": "Math",

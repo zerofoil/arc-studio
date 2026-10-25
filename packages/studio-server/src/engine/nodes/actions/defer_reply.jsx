@@ -1,5 +1,5 @@
 import { MessageSquareReply } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Acknowledge a slash command now and send its reply later. Connect Reply to Interaction after this node.",
   "type": "action_defer_reply",
   "category": "Discord Actions",

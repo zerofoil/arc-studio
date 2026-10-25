@@ -1,5 +1,5 @@
 import { Activity } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Cosine of an angle in radians",
   "type": "math_cos",
   "category": "Math",

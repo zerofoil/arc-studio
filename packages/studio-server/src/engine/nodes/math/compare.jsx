@@ -1,5 +1,5 @@
 import { GitCompare } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Compares two numbers and returns true or false",
   "type": "math_compare",
   "category": "Math",

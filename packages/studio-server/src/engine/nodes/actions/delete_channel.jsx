@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Permanently deletes a channel. This cannot be undone. Requires Manage Channels.",
   "type": "action_delete_channel",
   "category": "Discord Actions",

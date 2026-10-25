@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Times out, kicks, bans, or unbans a server member. Route failures through the Failed output.",
   "type": "action_moderate_member",
   "category": "Discord Actions",

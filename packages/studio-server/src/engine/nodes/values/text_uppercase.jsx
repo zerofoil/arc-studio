@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Converts text to uppercase.",
   "type": "data_text_uppercase",
   "category": "Values & Data",

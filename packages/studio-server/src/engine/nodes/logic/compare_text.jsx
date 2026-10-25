@@ -1,6 +1,6 @@
 import { CaseSensitive } from "lucide-react";
 
-export const register = {
+export const registry = {
   "description": "Compares two text strings (equals, contains, startsWith)",
   "type": "compare_text",
   "category": "Logic & Flow",

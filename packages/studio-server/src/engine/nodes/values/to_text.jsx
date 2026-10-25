@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Converts a value to text. Objects and arrays become JSON, null becomes empty text. Check Valid if the value cannot be serialized.",
   "type": "data_to_text",
   "category": "Values & Data",

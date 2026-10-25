@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Builds structured channel access rules. Choose a role or member, then select which channel permissions it can allow or deny.",
   "type": "data_permission_overwrites",
   "category": "Values & Data",

@@ -1,5 +1,5 @@
 import { GitMerge } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Waits for both branches from one Parallel node, then continues once. For mutually exclusive If/Else paths, connect their exec wires directly to the same action node.",
   "type": "parallel_join",
   "category": "Logic & Flow",

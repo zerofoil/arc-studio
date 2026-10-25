@@ -1,6 +1,6 @@
 import { TextCursorInput } from "lucide-react";
 
-export const register = {
+export const registry = {
   "description": "Combines text and graph variables using {{name}} slots",
   "type": "format_text",
   "category": "Values & Data",

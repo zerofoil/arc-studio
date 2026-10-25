@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Returns a copy of an object with the selected property added or replaced.",
   "type": "data_object_set",
   "category": "Values & Data",

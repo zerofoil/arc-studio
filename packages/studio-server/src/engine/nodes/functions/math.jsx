@@ -1,5 +1,5 @@
 import { CalculatorIcon } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Legacy arithmetic node. Use the Math nodes for new graphs.",
   "hidden": true,
   "type": "function_math",

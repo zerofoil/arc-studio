@@ -1,5 +1,5 @@
 import { Sigma } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Adds up to 50 values. Connect the last input to reveal another.",
   "type": "math_sum",
   "category": "Math",

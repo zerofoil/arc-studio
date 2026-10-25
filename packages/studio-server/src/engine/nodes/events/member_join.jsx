@@ -1,5 +1,5 @@
 import { UserRoundPlus } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Fires when a new user joins a guild",
   "type": "event_member_join",
   "category": "Events",

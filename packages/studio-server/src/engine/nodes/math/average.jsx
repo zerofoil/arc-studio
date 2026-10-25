@@ -1,5 +1,5 @@
 import { BarChart3 } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Averages up to 50 values. Connect the last input to reveal another.",
   "type": "math_average",
   "category": "Math",

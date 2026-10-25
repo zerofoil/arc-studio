@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Joins array values into one string using the separator.",
   "type": "data_string_join",
   "category": "Values & Data",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Returns a copy with connected items appended in socket order. Connect an item to reveal another socket, up to 50, chain another Append Array Items node for more.",
   "type": "data_array_append",
   "category": "Values & Data",

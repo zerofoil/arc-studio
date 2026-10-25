@@ -1,5 +1,5 @@
 import { ArrowDown } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns the smaller number",
   "type": "math_min",
   "category": "Math",

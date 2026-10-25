@@ -1,5 +1,5 @@
 import { Hash } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Provides a numeric constant",
   "type": "value_number",
   "category": "Values & Data",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Make a bounded HTTP request with headers and an optional body. Local/private network destinations and redirects are blocked.",
   "type": "action_web_fetch",
   "category": "Web & Network",

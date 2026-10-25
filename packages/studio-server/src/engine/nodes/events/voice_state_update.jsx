@@ -1,5 +1,5 @@
 import { Activity } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A member joins, leaves, or changes voice state",
   "type": "event_voice_state_update",
   "category": "Events",

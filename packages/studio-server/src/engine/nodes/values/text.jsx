@@ -1,6 +1,6 @@
 import { Type } from "lucide-react";
 
-export const register = {
+export const registry = {
   "description": "Provides a static or dynamic text string",
   "hidden": true,
   "type": "value_text",

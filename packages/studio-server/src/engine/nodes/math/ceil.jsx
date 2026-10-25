@@ -1,5 +1,5 @@
 import { ArrowUp } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Rounds up to an integer",
   "type": "math_ceil",
   "category": "Math",

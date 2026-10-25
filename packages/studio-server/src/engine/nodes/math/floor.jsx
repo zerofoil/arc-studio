@@ -1,5 +1,5 @@
 import { ArrowDown } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Rounds down to an integer",
   "type": "math_floor",
   "category": "Math",

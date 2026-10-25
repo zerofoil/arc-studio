@@ -1,5 +1,5 @@
 import { TextCursorInput } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A modal is submitted",
   "type": "event_modal_submit",
   "category": "Events",

@@ -1,5 +1,5 @@
 import { PanelsTopLeft } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A server is updated",
   "type": "event_guild_update",
   "category": "Events",

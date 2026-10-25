@@ -1,5 +1,5 @@
 import { KeyRound } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Generates HMAC signatures for API & webhook verification",
   "type": "action_crypto_hmac",
   "category": "Cryptography & Security",

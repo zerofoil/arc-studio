@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Checks for a prefix, extracts the command, and parses whitespace-separated arguments. Quoted arguments can contain spaces.",
   "type": "data_parse_prefix_command",
   "category": "Values & Data",

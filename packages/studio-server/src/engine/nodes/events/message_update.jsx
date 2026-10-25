@@ -1,5 +1,5 @@
 import { MessageSquare } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A message is edited",
   "type": "event_message_update",
   "category": "Events",

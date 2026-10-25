@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Reads an item by its zero-based index. Check Found before using the result.",
   "type": "data_array_get",
   "category": "Values & Data",

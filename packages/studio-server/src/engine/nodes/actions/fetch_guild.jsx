@@ -1,5 +1,5 @@
 import { PanelsTopLeft } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Fetches a Discord server and exposes its full server object, owner, features, and common settings",
   "type": "action_fetch_guild",
   "category": "Discord Actions",

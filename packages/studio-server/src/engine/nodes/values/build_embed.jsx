@@ -1,5 +1,5 @@
 import { PanelsTopLeft } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Constructs a rich Discord embed object",
   "type": "build_embed",
   "category": "Values & Data",

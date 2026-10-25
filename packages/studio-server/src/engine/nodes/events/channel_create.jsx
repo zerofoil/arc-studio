@@ -1,5 +1,5 @@
 import { PanelsTopLeft } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A channel is created",
   "type": "event_channel_create",
   "category": "Events",

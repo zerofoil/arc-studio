@@ -1,5 +1,5 @@
 import { CircleDot } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Distinguishes missing, null, empty text, and real values. The Value output uses the fallback unless a real value is present.",
   "createdAt": "2026-10-20T16:53:56.000Z",
   "type": "data_check_value",

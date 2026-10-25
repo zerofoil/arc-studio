@@ -1,5 +1,5 @@
 import { ListFilter } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Keeps items whose value (or selected property path) matches the chosen comparison.",
   "createdAt": "2026-10-20T16:53:56.000Z",
   "type": "data_filter_array",

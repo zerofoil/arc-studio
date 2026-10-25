@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Passes execution or any typed data value straight through. Use it to route wires neatly around a busy canvas.",
   "introducedAt": "2026-10-16T00:00:00.000Z",
   "type": "utility_wire_extender",

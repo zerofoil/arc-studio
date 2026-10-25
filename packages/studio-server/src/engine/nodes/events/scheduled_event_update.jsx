@@ -1,5 +1,5 @@
 import { Timer } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A scheduled event is updated",
   "type": "event_scheduled_event_update",
   "category": "Events",

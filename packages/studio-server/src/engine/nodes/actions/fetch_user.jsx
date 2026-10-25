@@ -1,5 +1,5 @@
 import { UserRoundPlus } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Fetches a Discord user profile and exposes both the full user object and common profile fields",
   "type": "action_fetch_user",
   "category": "Discord Actions",

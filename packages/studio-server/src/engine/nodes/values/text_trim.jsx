@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Removes whitespace from the start and end of text.",
   "type": "data_text_trim",
   "category": "Values & Data",

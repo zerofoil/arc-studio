@@ -1,5 +1,5 @@
 import { Database } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Updates a graph variable during execution",
   "type": "variable_set",
   "category": "Variables",

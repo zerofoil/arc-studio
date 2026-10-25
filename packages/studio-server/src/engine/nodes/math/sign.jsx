@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns -1, 0, or 1 for the input sign",
   "type": "math_sign",
   "category": "Math",

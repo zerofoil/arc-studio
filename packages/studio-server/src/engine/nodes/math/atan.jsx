@@ -1,5 +1,5 @@
 import { Activity } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Inverse tangent, returned in radians",
   "type": "math_atan",
   "category": "Math",

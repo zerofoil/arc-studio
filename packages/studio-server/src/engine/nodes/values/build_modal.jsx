@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Builds a Discord modal with 1–5 labeled inputs, selects, or checkbox groups.",
   "type": "build_modal",
   "category": "Values & Data",

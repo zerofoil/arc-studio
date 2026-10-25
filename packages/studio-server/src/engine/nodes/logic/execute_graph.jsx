@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Runs another event graph for the same Discord event. The target must have a matching event node, graph cycles are rejected.",
   "type": "execute_graph",
   "category": "Logic & Flow",

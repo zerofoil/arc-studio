@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Runs when bot startup begins. Optionally wait for the Gateway to connect.",
   "type": "event_bot_startup",
   "category": "Events",

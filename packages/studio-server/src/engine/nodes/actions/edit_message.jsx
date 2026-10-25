@@ -1,5 +1,5 @@
 import { MessageSquareReply } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Edits the content, embed, or components of an existing Discord message",
   "type": "action_edit_message",
   "category": "Discord Actions",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Replaces every literal occurrence of a search string and reports how many replacements were made.",
   "type": "data_text_replace",
   "category": "Values & Data",

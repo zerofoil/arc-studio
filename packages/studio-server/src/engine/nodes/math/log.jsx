@@ -1,5 +1,5 @@
 import { TrendingUp } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Natural logarithm, non-positive input returns 0",
   "type": "math_log",
   "category": "Math",

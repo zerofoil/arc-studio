@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "AutoMod takes action on content",
   "type": "event_automod_action",
   "category": "Events",

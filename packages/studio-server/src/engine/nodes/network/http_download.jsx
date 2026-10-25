@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Downloads a public file over HTTP or HTTPS as a bounded binary attachment. Connect File to a message or interaction reply Files input.",
   "type": "action_http_download",
   "category": "Web & Network",

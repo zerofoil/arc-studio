@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Creates a role with a name, RGB color number, and mentionable setting. Requires Manage Roles.",
   "type": "action_create_role",
   "category": "Discord Actions",

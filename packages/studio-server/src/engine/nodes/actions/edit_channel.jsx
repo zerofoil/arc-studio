@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Changes a channel name, topic, or category. Requires Manage Channels.",
   "type": "action_edit_channel",
   "category": "Discord Actions",

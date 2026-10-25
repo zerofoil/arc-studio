@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Opens a configured Discord modal as the initial response to an interaction.",
   "type": "action_show_modal",
   "category": "Discord Actions",

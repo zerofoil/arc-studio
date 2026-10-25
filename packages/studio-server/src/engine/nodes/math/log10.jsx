@@ -1,5 +1,5 @@
 import { BarChart3 } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Base 10 logarithm, non-positive input returns 0",
   "type": "math_log10",
   "category": "Math",

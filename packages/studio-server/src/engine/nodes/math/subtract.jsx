@@ -1,5 +1,5 @@
 import { Minus } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Subtracts B from A",
   "type": "math_subtract",
   "category": "Math",

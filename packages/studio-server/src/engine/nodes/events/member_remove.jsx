@@ -1,5 +1,5 @@
 import { UserRoundPlus } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A user leaves a server",
   "type": "event_member_remove",
   "category": "Events",

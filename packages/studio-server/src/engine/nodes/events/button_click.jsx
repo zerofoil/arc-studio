@@ -1,5 +1,5 @@
 import { MousePointerClick } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Fires when a message component button is pressed",
   "type": "event_button_click",
   "category": "Events",

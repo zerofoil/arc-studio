@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Waits until an ISO date/time or Unix timestamp in milliseconds. Maximum wait is 7 days.",
   "type": "wait_until_time",
   "category": "Logic & Flow",

@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Adds two numbers",
   "type": "math_add",
   "category": "Math",

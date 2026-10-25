@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Creates a text, voice, category, announcement, or stage channel. Requires Manage Channels.",
   "type": "action_create_channel",
   "category": "Discord Actions",

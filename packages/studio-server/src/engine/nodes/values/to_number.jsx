@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Parses a complete decimal number, including sign and exponent. Invalid or non-finite input returns 0, check Valid before using it.",
   "type": "data_to_number",
   "category": "Values & Data",

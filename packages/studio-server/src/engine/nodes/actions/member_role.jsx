@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Adds or removes a role from a guild member. Requires Manage Roles.",
   "type": "action_member_role",
   "category": "Discord Actions",

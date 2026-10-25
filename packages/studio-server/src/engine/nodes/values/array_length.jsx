@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Returns the number of items in an array and whether it is empty.",
   "type": "data_array_length",
   "category": "Values & Data",

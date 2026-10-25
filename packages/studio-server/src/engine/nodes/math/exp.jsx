@@ -1,5 +1,5 @@
 import { TrendingUp } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Raises Euler’s number to the input power",
   "type": "math_exp",
   "category": "Math",

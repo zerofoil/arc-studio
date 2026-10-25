@@ -1,5 +1,5 @@
 import { SlidersHorizontal } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Restricts a value between a minimum and maximum",
   "type": "math_clamp",
   "category": "Math",

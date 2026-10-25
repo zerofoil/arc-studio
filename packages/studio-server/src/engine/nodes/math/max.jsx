@@ -1,5 +1,5 @@
 import { ArrowUp } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns the larger number",
   "type": "math_max",
   "category": "Math",

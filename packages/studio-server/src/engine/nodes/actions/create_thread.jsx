@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Creates a public or private thread inside a text channel. Requires the matching thread permission.",
   "createdAt": "2026-10-21T00:00:00.000Z",
   "type": "action_create_thread",

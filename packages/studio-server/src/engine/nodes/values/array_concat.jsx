@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Concatenates connected arrays in input order into a new array. Use another Create Array node for more than 50 individual items.",
   "type": "data_array_concat",
   "category": "Values & Data",

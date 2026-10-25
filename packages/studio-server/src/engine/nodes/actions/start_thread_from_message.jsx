@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Starts a public thread from an existing message in a text channel.",
   "createdAt": "2026-10-21T00:00:00.000Z",
   "type": "action_start_thread_from_message",

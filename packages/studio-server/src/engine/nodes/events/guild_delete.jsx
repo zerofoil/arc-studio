@@ -1,5 +1,5 @@
 import { PanelsTopLeft } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A server becomes unavailable",
   "type": "event_guild_delete",
   "category": "Events",

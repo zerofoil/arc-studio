@@ -1,5 +1,5 @@
 import { Dices } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns a random number between the connected minimum and maximum",
   "type": "math_random",
   "category": "Math",

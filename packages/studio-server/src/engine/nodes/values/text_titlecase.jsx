@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Capitalizes the first letter of each word.",
   "type": "data_text_titlecase",
   "category": "Values & Data",

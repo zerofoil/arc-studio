@@ -1,5 +1,5 @@
 import { Percent } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns the remainder after division",
   "type": "math_modulo",
   "category": "Math",

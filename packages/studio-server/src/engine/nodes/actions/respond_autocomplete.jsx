@@ -1,5 +1,5 @@
 import { MessageSquareReply } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Returns up to 25 suggestions from a wired array of name and value objects.",
   "type": "action_respond_autocomplete",
   "category": "Discord Actions",

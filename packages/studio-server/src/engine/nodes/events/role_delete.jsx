@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A role is deleted",
   "type": "event_role_delete",
   "category": "Events",

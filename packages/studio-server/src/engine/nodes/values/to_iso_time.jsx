@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Converts an ISO date or Unix millisecond timestamp to a UTC ISO 8601 string.",
   "type": "data_to_iso_time",
   "category": "Values & Data",

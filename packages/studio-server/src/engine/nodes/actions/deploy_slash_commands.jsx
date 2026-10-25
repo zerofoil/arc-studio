@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Deploys workspace slash commands when triggered by a server manager with Manage Server or Administrator.",
   "type": "action_deploy_slash_commands",
   "category": "Discord Actions",

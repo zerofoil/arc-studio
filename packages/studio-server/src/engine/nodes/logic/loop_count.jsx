@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Runs the Body branch once per iteration, then continues from Completed. Iterations are capped at 1,000 per run.",
   "type": "loop_count",
   "category": "Logic & Flow",

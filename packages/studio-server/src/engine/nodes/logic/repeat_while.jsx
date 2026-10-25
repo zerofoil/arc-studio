@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "While Condition is true, waits at least 100 ms, runs Body once, and checks again. It can run indefinitely. Route changes through shared graph variables or other live inputs to stop it.",
   "introducedAt": "2026-10-17T00:00:00.000Z",
   "type": "repeat_while",

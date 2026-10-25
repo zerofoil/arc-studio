@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "True when either input is true",
   "introducedAt": "2026-10-16T00:00:00.000Z",
   "type": "logic_or",

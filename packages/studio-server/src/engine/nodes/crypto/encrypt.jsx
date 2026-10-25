@@ -1,5 +1,5 @@
 import { LockKeyhole } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Encrypts data using authenticated AES-256-GCM with PBKDF2",
   "type": "action_crypto_encrypt",
   "category": "Cryptography & Security",

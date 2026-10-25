@@ -1,5 +1,5 @@
 import { Slash } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Runs while a user types an autocomplete-enabled slash command option.",
   "type": "event_slash_autocomplete",
   "category": "Events",

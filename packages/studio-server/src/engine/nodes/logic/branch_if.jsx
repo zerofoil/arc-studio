@@ -12,7 +12,7 @@ function exec({
   currentExecWires.push(...findExecOutputs(targetNode.id, decision.branchPin));
 }
 
-export const register = {
+export const registry = {
   "description": "Splits execution flow based on a boolean condition",
   "type": "branch_if",
   "category": "Logic & Flow",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Converts text to lowercase.",
   "type": "data_text_lowercase",
   "category": "Values & Data",

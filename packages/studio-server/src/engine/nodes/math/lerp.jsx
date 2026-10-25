@@ -1,5 +1,5 @@
 import { ArrowLeftRight } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Linearly interpolates between A and B using a factor from 0 to 1",
   "type": "math_lerp",
   "category": "Math",

@@ -1,5 +1,5 @@
 import { MessageSquare } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Channel pins are updated",
   "type": "event_channel_pins_update",
   "category": "Events",

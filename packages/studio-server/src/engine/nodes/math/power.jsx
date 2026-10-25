@@ -1,5 +1,5 @@
 import { Power } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Raises A to the power of B",
   "type": "math_power",
   "category": "Math",

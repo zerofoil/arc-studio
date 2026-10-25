@@ -1,5 +1,5 @@
 import { UserRoundPlus } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Fetches a member in a server and exposes the full member and user objects, roles, and profile fields",
   "type": "action_fetch_member",
   "category": "Discord Actions",

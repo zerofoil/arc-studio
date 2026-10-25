@@ -1,6 +1,6 @@
 import { MessageSquare } from "lucide-react";
 
-export const register = {
+export const registry = {
   description: "Fires for every new message. Use Split Text to break message content into parts.",
   type: "event_message_create",
   category: "Events",
@@ -92,5 +92,12 @@ export const register = {
       type: "string",
       eventPath: "referenced_message.author.id"
     }
-  ]
+  ],
+  ui: ui
 };
+
+function ui() {
+  return <div className="node-config node-config-stack">
+    <span className="node-config-hint">Use Split Text on Message Content to get parts as separate outputs.</span>
+  </div>;
+}

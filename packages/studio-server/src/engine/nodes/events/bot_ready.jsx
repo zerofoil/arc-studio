@@ -1,5 +1,5 @@
 import { Power } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Runs when the bot connects",
   "type": "event_bot_ready",
   "category": "Events",

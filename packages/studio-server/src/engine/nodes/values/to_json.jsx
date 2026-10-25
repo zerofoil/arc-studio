@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Serializes a value to compact JSON. Cyclic or unsupported values return an empty string and valid=false.",
   "type": "data_to_json",
   "category": "Values & Data",

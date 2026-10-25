@@ -1,5 +1,5 @@
 import { CalculatorIcon } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Formats a finite number with locale grouping, decimal, percent, or currency style. Percent style scales the number by 100.",
   "createdAt": "2026-10-20T16:53:56.000Z",
   "type": "data_format_number",

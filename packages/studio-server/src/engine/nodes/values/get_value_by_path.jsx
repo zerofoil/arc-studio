@@ -1,5 +1,5 @@
 import { Database } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Safely reads a nested object or array path such as user.profile.name or items[0].id. Check Exists when the path may be missing.",
   "createdAt": "2026-10-20T16:53:56.000Z",
   "type": "data_get_value_by_path",

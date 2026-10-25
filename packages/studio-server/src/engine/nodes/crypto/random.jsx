@@ -1,5 +1,5 @@
 import { Dices } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Generates secure cryptographic random hex, base64url tokens or numeric PINs",
   "type": "action_crypto_random",
   "category": "Cryptography & Security",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Returns a copy of the array with an existing zero-based index replaced. The source array is unchanged.",
   "type": "data_array_set",
   "category": "Values & Data",

@@ -1,5 +1,5 @@
 import { RefreshCw } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Acknowledge a button or select interaction now and update its message later. Connect Reply to Interaction after this node.",
   "type": "action_defer_update",
   "category": "Discord Actions",

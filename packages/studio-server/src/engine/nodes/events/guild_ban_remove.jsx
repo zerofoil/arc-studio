@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "A user is unbanned from a server",
   "type": "event_guild_ban_remove",
   "category": "Events",

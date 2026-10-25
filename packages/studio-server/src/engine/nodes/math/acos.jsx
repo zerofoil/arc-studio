@@ -1,5 +1,5 @@
 import { Activity } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Inverse cosine, returned in radians",
   "type": "math_acos",
   "category": "Math",

@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Checks a boolean condition until it becomes true. Times out through the Timed Out branch, polling is bounded.",
   "type": "wait_until_condition",
   "category": "Logic & Flow",

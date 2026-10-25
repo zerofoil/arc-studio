@@ -1,5 +1,5 @@
 import { GitFork } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "Runs two execution branches concurrently. Both branches must connect to the same Join node before execution continues.",
   "type": "parallel",
   "category": "Logic & Flow",

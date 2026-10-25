@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Returns the enumerable property names of an object as an array.",
   "type": "data_object_keys",
   "category": "Values & Data",

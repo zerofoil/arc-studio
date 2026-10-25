@@ -1,4 +1,4 @@
-export const register = {
+export const registry = {
   "description": "Parses JSON text into a value. Check Valid before using the parsed output.",
   "type": "data_parse_json",
   "category": "Values & Data",

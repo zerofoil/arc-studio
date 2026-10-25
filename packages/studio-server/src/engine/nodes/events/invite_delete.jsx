@@ -1,5 +1,5 @@
 import { LogOut } from "lucide-react";
-export const register = {
+export const registry = {
   "description": "An invite is deleted",
   "type": "event_invite_delete",
   "category": "Events",
