@@ -905,7 +905,6 @@ export class GraphRunner {
             label: pin.label || pin.id,
             value: debugValue(resolveDataInput(targetNode, pin.id, targetNode.data?.[pin.id] ?? pin.defaultValue), pin.id)
           })) : [];
-          console.log(targetNode);
           try {
             NodeDefinitions[targetNode.type].exec({
               targetNode,
@@ -919,7 +918,11 @@ export class GraphRunner {
               selectIfBranch,
               log
             });
-          } catch { }
+          } catch (e) {
+            if (NodeDefinitions[targetNode.type]?.exec) {
+              console.log(`EXEC error at ${targetNode.type}\n${e}`)
+            }
+          }
           if (targetNode.type === 'utility_wire_extender') {
             currentExecWires.push(...findExecOutputs(targetNode.id, 'exec_out'));
           } else if (targetNode.type === 'variable_create') {
