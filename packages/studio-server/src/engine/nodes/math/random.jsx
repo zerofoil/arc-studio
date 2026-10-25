@@ -26,5 +26,21 @@ export const registry = {
       "label": "Result",
       "type": "number"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  node,
+  isConnected,
+  update,
+  numericNodeInputValue,
+  NodeNumberInput,
+  FallbackField
+}) {
+  return <div className="node-config node-config-stack">
+    {!isConnected('min') && <FallbackField label="Minimum"><NodeNumberInput allowEmpty step="any" value={node.data?.min ?? 0} onChange={(event) => update('min', numericNodeInputValue(event.target.value, { allowEmpty: true }))} onPointerDown={(event) => event.stopPropagation()} aria-label="Random number minimum" />
+    </FallbackField>}
+    {!isConnected('max') && <FallbackField label="Maximum"><NodeNumberInput allowEmpty step="any" value={node.data?.max ?? 1} onChange={(event) => update('max', numericNodeInputValue(event.target.value, { allowEmpty: true }))} onPointerDown={(event) => event.stopPropagation()} aria-label="Random number maximum" /></FallbackField>}
+  </div>;
+}

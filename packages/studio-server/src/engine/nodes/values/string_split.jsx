@@ -29,5 +29,18 @@ export const registry = {
       "label": "Count",
       "type": "number"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  isConnected,
+  update,
+  FallbackField,
+  node
+}) {
+  return <div className="node-config node-config-stack">
+    {!isConnected('separator') && <FallbackField label="Separator"><input value={node.data?.separator ?? ','} onChange={(event) => update('separator', event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder="," aria-label="Split text separator" />
+    </FallbackField>}
+  </div>;
+}

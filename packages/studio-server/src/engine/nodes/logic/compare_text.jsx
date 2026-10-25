@@ -33,5 +33,19 @@ export const registry = {
       "label": "Result",
       "type": "boolean"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  isConnected,
+  AnimatedDropdown,
+  update,
+  node
+}) {
+  return <div className="node-config node-config-stack compare-text-config">
+    {!isConnected('text_a') && <label className="node-config-fallback"><span>Text A</span><input value={node.data?.text_a ?? ''} onChange={(event) => update('text_a', event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder="Used when unconnected" aria-label="Text A" /></label>}
+    {!isConnected('text_b') && <label className="node-config-fallback"><span>Text B</span><input value={node.data?.text_b ?? ''} onChange={(event) => update('text_b', event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder="Used when unconnected" aria-label="Text B" /></label>}
+    {!isConnected('operator') && <AnimatedDropdown value={node.data?.operator ?? 'equals'} onChange={(value) => update('operator', value)} onPointerDown={(event) => event.stopPropagation()} ariaLabel="Text comparison operator" options={[{ value: 'equals', label: 'Equals' }, { value: 'contains', label: 'Contains' }, { value: 'startsWith', label: 'Starts with' }, { value: 'endsWith', label: 'Ends with' }]} className="node-select" />}
+  </div>;
+}

@@ -1,4 +1,5 @@
 import { Hash } from "lucide-react";
+
 export const registry = {
   "description": "Provides a numeric constant",
   "type": "value_number",
@@ -20,5 +21,14 @@ export const registry = {
       "label": "Number",
       "type": "number"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  node,
+  NodeNumberInput,
+  update
+}) {
+  return <div className="node-config"><NodeNumberInput value={node.data?.value ?? 0} onChange={(event) => update('value', numericNodeInputValue(event.target.value))} onPointerDown={(event) => event.stopPropagation()} aria-label="Number value" /></div>;
+}

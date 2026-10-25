@@ -93,7 +93,7 @@ export const registry = {
       eventPath: "referenced_message.author.id"
     }
   ],
-  ui: ui
+  ui
 };
 
 function ui() {

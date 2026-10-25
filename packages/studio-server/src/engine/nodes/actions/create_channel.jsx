@@ -64,5 +64,21 @@ export const registry = {
       "label": "Channel ID",
       "type": "string"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  textField,
+  isConnected,
+  FallbackField,
+  AnimatedDropdown,
+  node,
+  update
+}) {
+  return <div className="node-config node-config-stack">
+    {textField('guild_id', 'Server ID')}{textField('name', 'Channel name')}
+    {!isConnected('channel_type') && <FallbackField label="Channel type"><AnimatedDropdown value={node.data?.channel_type || 'text'} options={['text', 'voice', 'category', 'announcement', 'stage'].map((value) => ({ value, label: value[0].toUpperCase() + value.slice(1) }))} onChange={(value) => update('channel_type', value)} onPointerDown={(event) => event.stopPropagation()} ariaLabel="Channel type" className="node-select" /></FallbackField>}
+    {textField('parent_id', 'Category ID')}{['text', 'announcement'].includes(node.data?.channel_type || 'text') && textField('topic', 'Topic')}{textField('reason', 'Audit Log Reason')}
+  </div>
+}

@@ -1,3 +1,5 @@
+import { AlertTriangle } from "lucide-react";
+
 export const registry = {
   "description": "Permanently deletes a channel. This cannot be undone. Requires Manage Channels.",
   "type": "action_delete_channel",
@@ -34,5 +36,14 @@ export const registry = {
       "label": "Deleted Channel ID",
       "type": "string"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  textField
+}) {
+  return <div className="node-config node-config-stack">
+    {textField('channel_id', 'Channel ID')}{textField('reason', 'Audit Log Reason')}<span className="node-config-warning"><AlertTriangle size={12} /> Deleting a channel cannot be undone.</span>
+  </div>
+}

@@ -27,7 +27,7 @@ export const registry = {
       "type": "exec"
     }
   ],
-  ui: ui
+  ui
 };
 
 function ui({

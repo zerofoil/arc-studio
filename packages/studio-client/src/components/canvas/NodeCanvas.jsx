@@ -1107,7 +1107,7 @@ export function NodeCanvas({
       let inferredType = createdSource?.type || sourcePin?.type || node.data?.valueType || 'string';
       if (sourcePin?.type === 'object' && ['data_array_create', 'data_array_append', 'data_array_concat'].includes(sourceNode?.type)) inferredType = 'array';
       if (sourceNode?.type === 'data_parse_json' && !connectionByNodePin.incoming.get(sourceNode.id)?.has('json')) {
-        try { inferredType = Array.isArray(JSON.parse(sourceNode.data?.json || '')) ? 'array' : 'object'; } catch {}
+        try { inferredType = Array.isArray(JSON.parse(sourceNode.data?.json || '')) ? 'array' : 'object'; } catch { }
       }
       const socketType = ['array', 'object'].includes(inferredType) ? 'object' : inferredType;
       const inputs = definition.inputs.map((pin) => pin.id === 'value' ? { ...pin, colorType: inferredType } : pin);
@@ -1153,13 +1153,15 @@ export function NodeCanvas({
     if (node.type === 'format_text') {
       const variableNames = new Set(canvasGraphVariables.map((variable) => variable.name?.toLowerCase()).filter(Boolean));
       const placeholders = getTextTemplateSlots(node.data?.template);
-      return withArgumentPins({ ...definition, inputs: placeholders.flatMap((name) => {
-        const argument = /^arg(\d+)$/i.exec(name);
-        return argument
-          ? [{ id: `arg_${argument[1]}`, label: `arg${argument[1]}`, type: 'arg', defaultValue: '' }]
-          : variableNames.has(name.toLowerCase()) ? []
-            : [{ id: `slot_${name}`, label: name, type: 'arg', defaultValue: '' }];
-      }) });
+      return withArgumentPins({
+        ...definition, inputs: placeholders.flatMap((name) => {
+          const argument = /^arg(\d+)$/i.exec(name);
+          return argument
+            ? [{ id: `arg_${argument[1]}`, label: `arg${argument[1]}`, type: 'arg', defaultValue: '' }]
+            : variableNames.has(name.toLowerCase()) ? []
+              : [{ id: `slot_${name}`, label: name, type: 'arg', defaultValue: '' }];
+        })
+      });
     }
     if (node.type === 'function_input') {
       const type = node.data?.valueType || 'number';
@@ -1302,9 +1304,9 @@ export function NodeCanvas({
     const embedRaw = readTransferData(event.dataTransfer, 'application/x-arc-embed-asset');
     const fallback = parseLibraryTransferText(readTransferData(event.dataTransfer, 'text/plain'));
     let payload = activePayload;
-    if (!payload && raw) { try { payload = JSON.parse(raw); } catch {} }
-    if (!payload && graphRaw) { try { payload = { type: 'graph-call', ...JSON.parse(graphRaw) }; } catch {} }
-    if (!payload && embedRaw) { try { payload = JSON.parse(embedRaw); } catch {} }
+    if (!payload && raw) { try { payload = JSON.parse(raw); } catch { } }
+    if (!payload && graphRaw) { try { payload = { type: 'graph-call', ...JSON.parse(graphRaw) }; } catch { } }
+    if (!payload && embedRaw) { try { payload = JSON.parse(embedRaw); } catch { } }
     if (!payload && fallback) payload = window.__arcLibraryDragPayloads?.[fallback.token]?.payload;
     if (!payload || (!payload.previewNode?.type && !payload.nodeType && !payload.prefabNode?.type && payload.type !== 'graph-call' && payload.type !== 'embed-asset')) {
       setLibraryDragPreview(null);
@@ -1963,9 +1965,9 @@ export function NodeCanvas({
       const snapTarget = settings.magneticSnap === false ? null : findClosestPin(event.clientX, event.clientY, connectingWire);
       const currentPos = snapTarget
         ? {
-            x: ((snapTarget.screenPosition.x - rect.left) / displayScale - pan.x) / zoom,
-            y: ((snapTarget.screenPosition.y - rect.top) / displayScale - pan.y) / zoom
-          }
+          x: ((snapTarget.screenPosition.x - rect.left) / displayScale - pan.x) / zoom,
+          y: ((snapTarget.screenPosition.y - rect.top) / displayScale - pan.y) / zoom
+        }
         : { x: ((event.clientX - rect.left) / displayScale - pan.x) / zoom, y: ((event.clientY - rect.top) / displayScale - pan.y) / zoom };
       setConnectingWire((current) => current ? ({
         ...current,
@@ -2059,7 +2061,7 @@ export function NodeCanvas({
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
       shiftKey: event.shiftKey,
-      preventDefault() {}
+      preventDefault() { }
     };
     canvasInteractionActiveRef.current = true;
     schedulePointerMoveFrame();
@@ -2279,10 +2281,12 @@ export function NodeCanvas({
     }
     onHistoryGroupEnd?.();
     if (activeWire?.clickToConnect) {
-      setConnectingWire((current) => current ? { ...current, currentPos: finishBounds ? {
-        x: ((event.clientX - finishBounds.left) / finishScale - pan.x) / zoom,
-        y: ((event.clientY - finishBounds.top) / finishScale - pan.y) / zoom
-      } : current.currentPos } : null);
+      setConnectingWire((current) => current ? {
+        ...current, currentPos: finishBounds ? {
+          x: ((event.clientX - finishBounds.left) / finishScale - pan.x) / zoom,
+          y: ((event.clientY - finishBounds.top) / finishScale - pan.y) / zoom
+        } : current.currentPos
+      } : null);
     } else if (activeWire) {
       const snapTarget = settings.magneticSnap === false ? null : findClosestPin(event.clientX, event.clientY, activeWire, 30);
       const targetRow = document.elementFromPoint(event.clientX, event.clientY)?.closest('.node-pin-row');
@@ -2327,7 +2331,7 @@ export function NodeCanvas({
     const displayScale = getCanvasDisplayScale(containerRef.current);
     const pointer = { x: ((event.clientX - bounds.left) / displayScale - pan.x) / zoom, y: ((event.clientY - bounds.top) / displayScale - pan.y) / zoom };
     setConnectingWire({ nodeId, pinId, direction, pinType, startPos: position, currentPos: pointer, snapTarget: null });
-      onCollaborationAction?.({ kind: 'wire-drag', cursor: pointer, start: position, pinType, nodeId, pinId, direction });
+    onCollaborationAction?.({ kind: 'wire-drag', cursor: pointer, start: position, pinType, nodeId, pinId, direction });
     if (Number.isInteger(event.pointerId)) containerRef.current?.setPointerCapture?.(event.pointerId);
   };
 
@@ -2438,11 +2442,11 @@ export function NodeCanvas({
     if (direction === 'input' && !originalConnection) return;
     const wireStart = direction === 'input' && originalConnection
       ? {
-          nodeId: originalConnection.sourceNodeId,
-          pinId: originalConnection.sourcePinId,
-          direction: 'output',
-          pinType: originalConnection.type || target.pinType
-        }
+        nodeId: originalConnection.sourceNodeId,
+        pinId: originalConnection.sourcePinId,
+        direction: 'output',
+        pinType: originalConnection.type || target.pinType
+      }
       : target;
     const bounds = containerRef.current.getBoundingClientRect();
     const displayScale = getCanvasDisplayScale(containerRef.current);
@@ -2831,74 +2835,74 @@ export function NodeCanvas({
     }
     return { baseConnections: base, elevatedConnections: elevated, relatedNodeIds: relatedIds };
   }, [connections, selectedNodeIds]);
-const previewOutput = (node, outputId, seen = new Set()) => {
-  if (!node || seen.has(node.id) || seen.size > 24) return undefined;
-  const nextSeen = new Set(seen).add(node.id);
-  const data = node.data || {};
-  if (node.type.startsWith('event_') || node.type === 'function_input' || node.type === 'function_call') return undefined;
-  if (node.type === 'value_text' || node.type === 'value_number' || node.type === 'value_boolean') return data.value ?? (node.type === 'value_boolean');
-  if (node.type === 'variable_get') return canvasGraphVariables.find((item) => item.id === data.variableId)?.initialValue;
-  const definition = getNodeDefinition(node);
-  const input = (id, fallback) => {
-    const wire = inputConnectionByNodePin.get(node.id)?.get(id);
-    if (wire) return previewOutput(nodeById.get(wire.sourceNodeId), wire.sourcePinId, nextSeen);
-    return data[id] ?? fallback;
-  };
-  if (node.type.startsWith('math_')) {
-    const a = Number(input('a', 0)); const b = Number(input('b', 0)); const value = Number(input('value', 0));
-    const operations = { math_add: a + b, math_subtract: a - b, math_multiply: a * b, math_divide: b ? a / b : 0, math_modulo: b ? a % b : 0, math_power: a ** b, math_min: Math.min(a, b), math_max: Math.max(a, b), math_abs: Math.abs(value), math_sqrt: value >= 0 ? Math.sqrt(value) : 0, math_round: Number(value.toFixed(Math.max(0, Math.min(12, Number(data.precision) || 0)))), math_floor: Math.floor(value), math_ceil: Math.ceil(value), math_sin: Math.sin(value), math_cos: Math.cos(value), math_tan: Math.tan(value), math_asin: Math.asin(value), math_acos: Math.acos(value), math_atan: Math.atan(value), math_log: value > 0 ? Math.log(value) : 0, math_log10: value > 0 ? Math.log10(value) : 0, math_exp: Math.exp(value), math_sign: Math.sign(value), math_clamp: Math.min(Number(input('max', 1)), Math.max(Number(input('min', 0)), value)), math_lerp: Number(input('a', 0)) + (Number(input('b', 1)) - Number(input('a', 0))) * Number(input('t', 0.5)), math_compare: ({ less_than: a < b, less_or_equal: a <= b, equal: a === b, not_equal: a !== b, greater_or_equal: a >= b, greater_than: a > b }[data.operation || 'less_than']) };
-    if (node.type === 'math_constant') return ({ pi: Math.PI, tau: Math.PI * 2, e: Math.E, golden_ratio: (1 + Math.sqrt(5)) / 2, sqrt_two: Math.SQRT2 }[data.constant || 'pi']);
-    const result = operations[node.type];
-    return Number.isFinite(result) ? result : undefined;
-  }
-  if (node.type === 'logic_not') return !input('value', false);
-  if (node.type === 'logic_and') return Boolean(input('a', false)) && Boolean(input('b', false));
-  if (node.type === 'logic_or') return Boolean(input('a', false)) || Boolean(input('b', false));
-  if (node.type === 'logic_xor') return Boolean(input('a', false)) !== Boolean(input('b', false));
-  if (node.type === 'data_text_uppercase') return String(input('text', '')).toLocaleUpperCase();
-  if (node.type === 'data_text_lowercase') return String(input('text', '')).toLocaleLowerCase();
-  if (node.type === 'data_text_trim') return String(input('text', '')).trim();
-  if (node.type === 'data_check_value') {
-    const value = input('value', undefined); const fallback = input('fallback', '');
-    const state = value === undefined ? 'missing' : value === null ? 'null' : typeof value === 'string' && !value.trim() ? 'empty' : 'value';
-    return ({ value: state === 'value' ? value : fallback, state, is_missing: state === 'missing', is_null: state === 'null', is_empty: state === 'empty', has_value: state === 'value' })[outputId];
-  }
-  if (node.type === 'data_array_get') {
-    const array = input('array', []); const index = Math.trunc(Number(input('index', 0))); const found = Array.isArray(array) && index >= 0 && index < array.length;
-    return ({ value: found ? array[index] : null, found })[outputId];
-  }
-  if (node.type === 'data_object_get' || node.type === 'data_get_value_by_path') {
-    const source = input(node.type === 'data_object_get' ? 'object' : 'value', {});
-    const path = node.type === 'data_object_get' ? String(input('key', '')) : String(input('path', ''));
-    if (node.type === 'data_object_get') {
-      const exists = Boolean(path) && source != null && Object.hasOwn(Object(source), path);
-      return ({ value: exists ? source[path] : null, exists })[outputId];
-    }
-    const keys = path.match(/(?:^|\.)([A-Za-z_$][A-Za-z0-9_$-]*)|\[(?:([0-9]+)|"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)')\]/g);
-    let current = source; let exists = Boolean(path);
-    if (!keys || keys.join('').replace(/^\./, '') !== path.replace(/^\./, '')) exists = false;
-    for (const token of keys || []) {
-      const key = /\[(\d+)\]/.exec(token)?.[1] ?? /\["((?:\\.|[^"\\])*)"\]/.exec(token)?.[1] ?? /\['((?:\\.|[^'\\])*)'\]/.exec(token)?.[1] ?? token.replace(/^\./, '');
-      if (['__proto__', 'prototype', 'constructor'].includes(key) || current == null || !Object.hasOwn(Object(current), key)) { exists = false; break; }
-      current = current[key];
-    }
-    const fallback = input('fallback', '');
-    return ({ value: exists ? current : fallback, exists })[outputId];
-  }
-  if (node.type === 'data_find_array_item' || node.type === 'data_filter_array') {
-    const array = input('array', []); const items = Array.isArray(array) ? array : []; const path = String(input('path', '') || ''); const wanted = input('value', '');
-    const select = (item) => {
-      if (!path) return { exists: true, value: item };
-      const tokens = path.replace(/\[(\d+)\]/g, '.$1').split('.').filter(Boolean); let value = item;
-      for (const key of tokens) { if (['__proto__', 'prototype', 'constructor'].includes(key) || value == null || !Object.hasOwn(Object(value), key)) return { exists: false, value: undefined }; value = value[key]; }
-      return { exists: true, value };
+  const previewOutput = (node, outputId, seen = new Set()) => {
+    if (!node || seen.has(node.id) || seen.size > 24) return undefined;
+    const nextSeen = new Set(seen).add(node.id);
+    const data = node.data || {};
+    if (node.type.startsWith('event_') || node.type === 'function_input' || node.type === 'function_call') return undefined;
+    if (node.type === 'value_number' || node.type === 'value_boolean') return data.value ?? (node.type === 'value_boolean');
+    if (node.type === 'variable_get') return canvasGraphVariables.find((item) => item.id === data.variableId)?.initialValue;
+    const definition = getNodeDefinition(node);
+    const input = (id, fallback) => {
+      const wire = inputConnectionByNodePin.get(node.id)?.get(id);
+      if (wire) return previewOutput(nodeById.get(wire.sourceNodeId), wire.sourcePinId, nextSeen);
+      return data[id] ?? fallback;
     };
-    if (node.type === 'data_find_array_item') { const index = items.findIndex((item) => { const found = select(item); return found.exists && Object.is(found.value, wanted); }); return ({ item: index >= 0 ? items[index] : null, index, found: index >= 0 })[outputId]; }
-    const operator = String(input('operator', 'equals')); const filtered = items.filter((item) => { const actual = select(item); const value = actual.value; if (operator === 'exists') return actual.exists; if (!actual.exists) return false; if (operator === 'not_equals') return !Object.is(value, wanted); if (operator === 'contains') return typeof value === 'string' ? value.includes(String(wanted)) : Array.isArray(value) && value.some((entry) => Object.is(entry, wanted)); if (operator === 'starts_with') return typeof value === 'string' && value.startsWith(String(wanted)); if (operator === 'ends_with') return typeof value === 'string' && value.endsWith(String(wanted)); if (operator === 'greater_than') return value > wanted; if (operator === 'greater_or_equal') return value >= wanted; if (operator === 'less_than') return value < wanted; if (operator === 'less_or_equal') return value <= wanted; if (operator === 'is_empty') return value == null || value === '' || Array.isArray(value) && !value.length || typeof value === 'object' && !Array.isArray(value) && !Object.keys(value).length; return Object.is(value, wanted); }); return ({ array: filtered, count: filtered.length })[outputId];
-  }
-  if (definition?.inputs?.some((pin) => pin.id === outputId)) return undefined;
-  return undefined;
-};
+    if (node.type.startsWith('math_')) {
+      const a = Number(input('a', 0)); const b = Number(input('b', 0)); const value = Number(input('value', 0));
+      const operations = { math_add: a + b, math_subtract: a - b, math_multiply: a * b, math_divide: b ? a / b : 0, math_modulo: b ? a % b : 0, math_power: a ** b, math_min: Math.min(a, b), math_max: Math.max(a, b), math_abs: Math.abs(value), math_sqrt: value >= 0 ? Math.sqrt(value) : 0, math_round: Number(value.toFixed(Math.max(0, Math.min(12, Number(data.precision) || 0)))), math_floor: Math.floor(value), math_ceil: Math.ceil(value), math_sin: Math.sin(value), math_cos: Math.cos(value), math_tan: Math.tan(value), math_asin: Math.asin(value), math_acos: Math.acos(value), math_atan: Math.atan(value), math_log: value > 0 ? Math.log(value) : 0, math_log10: value > 0 ? Math.log10(value) : 0, math_exp: Math.exp(value), math_sign: Math.sign(value), math_clamp: Math.min(Number(input('max', 1)), Math.max(Number(input('min', 0)), value)), math_lerp: Number(input('a', 0)) + (Number(input('b', 1)) - Number(input('a', 0))) * Number(input('t', 0.5)), math_compare: ({ less_than: a < b, less_or_equal: a <= b, equal: a === b, not_equal: a !== b, greater_or_equal: a >= b, greater_than: a > b }[data.operation || 'less_than']) };
+      if (node.type === 'math_constant') return ({ pi: Math.PI, tau: Math.PI * 2, e: Math.E, golden_ratio: (1 + Math.sqrt(5)) / 2, sqrt_two: Math.SQRT2 }[data.constant || 'pi']);
+      const result = operations[node.type];
+      return Number.isFinite(result) ? result : undefined;
+    }
+    if (node.type === 'logic_not') return !input('value', false);
+    if (node.type === 'logic_and') return Boolean(input('a', false)) && Boolean(input('b', false));
+    if (node.type === 'logic_or') return Boolean(input('a', false)) || Boolean(input('b', false));
+    if (node.type === 'logic_xor') return Boolean(input('a', false)) !== Boolean(input('b', false));
+    if (node.type === 'data_text_uppercase') return String(input('text', '')).toLocaleUpperCase();
+    if (node.type === 'data_text_lowercase') return String(input('text', '')).toLocaleLowerCase();
+    if (node.type === 'data_text_trim') return String(input('text', '')).trim();
+    if (node.type === 'data_check_value') {
+      const value = input('value', undefined); const fallback = input('fallback', '');
+      const state = value === undefined ? 'missing' : value === null ? 'null' : typeof value === 'string' && !value.trim() ? 'empty' : 'value';
+      return ({ value: state === 'value' ? value : fallback, state, is_missing: state === 'missing', is_null: state === 'null', is_empty: state === 'empty', has_value: state === 'value' })[outputId];
+    }
+    if (node.type === 'data_array_get') {
+      const array = input('array', []); const index = Math.trunc(Number(input('index', 0))); const found = Array.isArray(array) && index >= 0 && index < array.length;
+      return ({ value: found ? array[index] : null, found })[outputId];
+    }
+    if (node.type === 'data_object_get' || node.type === 'data_get_value_by_path') {
+      const source = input(node.type === 'data_object_get' ? 'object' : 'value', {});
+      const path = node.type === 'data_object_get' ? String(input('key', '')) : String(input('path', ''));
+      if (node.type === 'data_object_get') {
+        const exists = Boolean(path) && source != null && Object.hasOwn(Object(source), path);
+        return ({ value: exists ? source[path] : null, exists })[outputId];
+      }
+      const keys = path.match(/(?:^|\.)([A-Za-z_$][A-Za-z0-9_$-]*)|\[(?:([0-9]+)|"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)')\]/g);
+      let current = source; let exists = Boolean(path);
+      if (!keys || keys.join('').replace(/^\./, '') !== path.replace(/^\./, '')) exists = false;
+      for (const token of keys || []) {
+        const key = /\[(\d+)\]/.exec(token)?.[1] ?? /\["((?:\\.|[^"\\])*)"\]/.exec(token)?.[1] ?? /\['((?:\\.|[^'\\])*)'\]/.exec(token)?.[1] ?? token.replace(/^\./, '');
+        if (['__proto__', 'prototype', 'constructor'].includes(key) || current == null || !Object.hasOwn(Object(current), key)) { exists = false; break; }
+        current = current[key];
+      }
+      const fallback = input('fallback', '');
+      return ({ value: exists ? current : fallback, exists })[outputId];
+    }
+    if (node.type === 'data_find_array_item' || node.type === 'data_filter_array') {
+      const array = input('array', []); const items = Array.isArray(array) ? array : []; const path = String(input('path', '') || ''); const wanted = input('value', '');
+      const select = (item) => {
+        if (!path) return { exists: true, value: item };
+        const tokens = path.replace(/\[(\d+)\]/g, '.$1').split('.').filter(Boolean); let value = item;
+        for (const key of tokens) { if (['__proto__', 'prototype', 'constructor'].includes(key) || value == null || !Object.hasOwn(Object(value), key)) return { exists: false, value: undefined }; value = value[key]; }
+        return { exists: true, value };
+      };
+      if (node.type === 'data_find_array_item') { const index = items.findIndex((item) => { const found = select(item); return found.exists && Object.is(found.value, wanted); }); return ({ item: index >= 0 ? items[index] : null, index, found: index >= 0 })[outputId]; }
+      const operator = String(input('operator', 'equals')); const filtered = items.filter((item) => { const actual = select(item); const value = actual.value; if (operator === 'exists') return actual.exists; if (!actual.exists) return false; if (operator === 'not_equals') return !Object.is(value, wanted); if (operator === 'contains') return typeof value === 'string' ? value.includes(String(wanted)) : Array.isArray(value) && value.some((entry) => Object.is(entry, wanted)); if (operator === 'starts_with') return typeof value === 'string' && value.startsWith(String(wanted)); if (operator === 'ends_with') return typeof value === 'string' && value.endsWith(String(wanted)); if (operator === 'greater_than') return value > wanted; if (operator === 'greater_or_equal') return value >= wanted; if (operator === 'less_than') return value < wanted; if (operator === 'less_or_equal') return value <= wanted; if (operator === 'is_empty') return value == null || value === '' || Array.isArray(value) && !value.length || typeof value === 'object' && !Array.isArray(value) && !Object.keys(value).length; return Object.is(value, wanted); }); return ({ array: filtered, count: filtered.length })[outputId];
+    }
+    if (definition?.inputs?.some((pin) => pin.id === outputId)) return undefined;
+    return undefined;
+  };
 
   const activeCanvasNodeId = containerRef.current?.ownerDocument?.activeElement?.closest?.('[data-node-card-id]')?.dataset.nodeCardId || '';
   const visibleCanvasNodeIds = useMemo(() => {
@@ -3346,9 +3350,9 @@ const previewOutput = (node, outputId, seen = new Set()) => {
         let nodePayload = window.__arcNodeDragPayload;
         let graphPayload = window.__arcGraphDragPayload;
         let embedPayload = window.__arcEmbedDragPayload;
-        if (raw) { try { nodePayload = JSON.parse(raw); } catch {} }
-        if (graphRaw) { try { graphPayload = JSON.parse(graphRaw); } catch {} }
-        if (embedRaw) { try { embedPayload = JSON.parse(embedRaw); } catch {} }
+        if (raw) { try { nodePayload = JSON.parse(raw); } catch { } }
+        if (graphRaw) { try { graphPayload = JSON.parse(graphRaw); } catch { } }
+        if (embedRaw) { try { embedPayload = JSON.parse(embedRaw); } catch { } }
         const fallbackPayload = fallback && window.__arcLibraryDragPayloads?.[fallback.token]?.payload;
         if (!nodePayload && !graphPayload && !embedPayload && fallbackPayload) {
           if (fallback.mimeType === 'application/x-arc-node') nodePayload = fallbackPayload;
@@ -3378,7 +3382,7 @@ const previewOutput = (node, outputId, seen = new Set()) => {
           } else {
             onNodeDrop?.(graphPayload ? { type: 'graph-call', ...graphPayload } : nodePayload, position);
           }
-        } catch {}
+        } catch { }
       }}
       style={{ '--grid-size': `${gridSize}px`, '--grid-x': `${viewportRef.current.pan.x}px`, '--grid-y': `${viewportRef.current.pan.y}px` }}
     >
@@ -3743,10 +3747,10 @@ const previewOutput = (node, outputId, seen = new Set()) => {
           {(() => {
             const selectedIds = (contextMenu.nodeIds?.length ? contextMenu.nodeIds : [contextMenu.nodeId]).filter((id) => nodes.some((node) => node.id === id));
             return nearbyTagGroups(selectedIds).map((group) => {
-            const groupNodeIds = group.nodeIds || [];
-            const removeSelected = selectedIds.length > 0 && selectedIds.every((id) => groupNodeIds.includes(id));
-            const actionLabel = selectedIds.length > 1 ? `${removeSelected ? 'Remove selected from' : 'Add selected to'}` : `${removeSelected ? 'Remove from' : 'Add to'}`;
-            return <button key={group.id} role="menuitem" disabled={isLocked} onClick={() => { onTagGroupsChange?.(tagGroups.map((item) => item.id === group.id ? { ...item, nodeIds: removeSelected ? groupNodeIds.filter((id) => !selectedIds.includes(id)) : [...new Set([...groupNodeIds, ...selectedIds])] } : item)); setContextMenu(null); }}>{actionLabel} {group.name}</button>;
+              const groupNodeIds = group.nodeIds || [];
+              const removeSelected = selectedIds.length > 0 && selectedIds.every((id) => groupNodeIds.includes(id));
+              const actionLabel = selectedIds.length > 1 ? `${removeSelected ? 'Remove selected from' : 'Add selected to'}` : `${removeSelected ? 'Remove from' : 'Add to'}`;
+              return <button key={group.id} role="menuitem" disabled={isLocked} onClick={() => { onTagGroupsChange?.(tagGroups.map((item) => item.id === group.id ? { ...item, nodeIds: removeSelected ? groupNodeIds.filter((id) => !selectedIds.includes(id)) : [...new Set([...groupNodeIds, ...selectedIds])] } : item)); setContextMenu(null); }}>{actionLabel} {group.name}</button>;
             });
           })()}
           <button role="menuitem" disabled={isLocked} onClick={() => { onSaveNodePrefab?.(contextMenu.node); setContextMenu(null); }}>Save as node prefab</button>

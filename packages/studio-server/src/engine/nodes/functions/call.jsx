@@ -26,7 +26,7 @@ export const registry = {
       "type": "number"
     }
   ],
-  ui: ui
+  ui
 };
 
 function ui({

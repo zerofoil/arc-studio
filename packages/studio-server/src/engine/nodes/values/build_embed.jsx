@@ -89,5 +89,23 @@ export const registry = {
       "label": "Components",
       "type": "object"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  node,
+  graphVariables,
+  EmbedNodeBuilder,
+  variableValuePaths,
+  onOpenEmbedStudio,
+  onOpenTextStudio,
+  nodeDef,
+  connectedInputIds,
+  appEmojis,
+  templatePreviewValues
+}) {
+  const templateValuePaths = graphVariables.flatMap((variable) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(variable.name || '') ? variableValuePaths(variable.initialValue, variable.name) : []);
+  const templateSuggestions = nodeDef.inputs.filter((pin) => /^arg_\d+$/.test(pin.id)).map((pin) => ({ name: pin.id.replace(/^arg_/, 'arg'), label: pin.label }));
+  return <EmbedNodeBuilder data={node.data || {}} connectedInputIds={connectedInputIds} appEmojis={appEmojis} graphVariables={graphVariables} templateValuePaths={templateValuePaths} templateSuggestions={templateSuggestions} templatePreviewValues={templatePreviewValues} onChange={(blocks) => update('blocks', blocks)} onOpenStudio={() => onOpenEmbedStudio?.(node)} onOpenTextStudio={(label, value, maxLength, applyValue, parentBlockContext) => onOpenTextStudio?.(node, null, label, value, maxLength, applyValue, '', parentBlockContext)} />;
+}

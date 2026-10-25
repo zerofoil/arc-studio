@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+
 export const registry = {
   "description": "Builds structured channel access rules. Choose a role or member, then select which channel permissions it can allow or deny.",
   "type": "data_permission_overwrites",
@@ -25,5 +27,15 @@ export const registry = {
       "label": "Overwrites",
       "type": "object"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  onOpenPermissionStudio,
+  node
+}) {
+  return <div className="node-config node-config-stack">
+    <button type="button" className="node-config-action node-config-studio-action" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.preventDefault(); event.stopPropagation(); onOpenPermissionStudio?.(node); }}><Plus size={12} /> Edit channel permissions</button>
+  </div>;
+}

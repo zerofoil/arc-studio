@@ -41,5 +41,21 @@ export const registry = {
       "label": "Exec",
       "type": "exec"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  textField,
+  isConnected,
+  FallbackCheckbox,
+  node,
+  update
+}) {
+  return <div className="node-config node-config-stack">
+    {textField('guild_id', 'Server ID')}{textField('channel_id', 'Voice channel ID (blank leaves)')}
+    {!isConnected('self_mute') && <FallbackCheckbox label="Self Mute" checked={node.data?.self_mute ?? false} onChange={(value) => update('self_mute', value)} />}
+    {!isConnected('self_deaf') && <FallbackCheckbox label="Self Deafen" checked={node.data?.self_deaf ?? false} onChange={(value) => update('self_deaf', value)} />}
+    <span className="node-config-hint">Requests a Gateway join or leave. It does not stream audio.</span>
+  </div>
+}

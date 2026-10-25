@@ -32,7 +32,7 @@ export const registry = {
       "type": "boolean"
     }
   ],
-  ui: ui
+  ui
 };
 
 function ui({

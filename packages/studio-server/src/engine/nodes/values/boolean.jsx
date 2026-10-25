@@ -20,5 +20,14 @@ export const registry = {
       "label": "Boolean",
       "type": "boolean"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  node,
+  AnimatedCheckbox,
+  update
+}) {
+  return <div className="node-config node-config-inline"><div className="node-checkbox-label"><AnimatedCheckbox checked={node.data?.value ?? true} onChange={(checked) => update('value', checked)} onPointerDown={(event) => event.stopPropagation()} label="Boolean value" /> <span>True</span></div></div>;
+}

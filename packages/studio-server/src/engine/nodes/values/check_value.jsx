@@ -55,5 +55,19 @@ export const registry = {
       "label": "Has value",
       "type": "boolean"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  node,
+  FallbackField,
+  update,
+  isConnected
+}) {
+  return <div className="node-config node-config-stack">
+    {!isConnected('value') && <span className="node-config-hint">Leave Value unconnected to detect a missing value.</span>}
+    {!isConnected('fallback') && <FallbackField label="Fallback"><input value={node.data?.fallback ?? ''} onChange={(event) => update('fallback', event.target.value)} onPointerDown={(event) => event.stopPropagation()} placeholder="Used for missing, null, or empty text" aria-label="Value check fallback" /></FallbackField>}
+    <span className="node-config-hint">State is missing, null, empty, or value. Zero and false count as values.</span>
+  </div>;
+}

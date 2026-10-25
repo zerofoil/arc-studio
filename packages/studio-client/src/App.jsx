@@ -38,7 +38,7 @@ const GraphValidationModal = lazyNamed(() => import('./components/modals/GraphVa
 const BotSettingsModal = lazyNamed(() => import('./components/modals/BotSettingsModal.jsx'), 'BotSettingsModal');
 const PluginStoreModal = lazyNamed(() => import('./components/modals/PluginStoreModal.jsx'), 'PluginStoreModal');
 [NodePalette, CommandPalette, EditorSettingsModal, GraphVariablesModal, GraphLibraryPanel, BotSettingsModal].forEach((Component) => {
-  void Component.preload().catch(() => {});
+  void Component.preload().catch(() => { });
 });
 import { ToastContainer } from './components/ui/ToastContainer.jsx';
 import { Modal } from './components/ui/Modal.jsx';
@@ -168,7 +168,7 @@ function getNodeOutputSample(source, pinId, variables, graphNodes) {
     const field = graphNodes.flatMap((item) => item.type === 'build_modal' ? item.data?.modal?.components || [] : []).find((item) => item.customId === fieldId);
     return ['string_select', 'user_select', 'role_select', 'mentionable_select', 'channel_select', 'checkbox_group'].includes(field?.type) ? ['selected_value'] : '';
   }
-  if (source.type === 'value_text' || source.type === 'value_number' || source.type === 'value_boolean') return source.data?.value;
+  if (source.type === 'value_number' || source.type === 'value_boolean') return source.data?.value;
   if (source.type === 'data_array_create' && pinId === 'array') return Object.keys(source.data || {}).filter((key) => /^item_\d+$/.test(key)).sort().map((key) => source.data[key]);
   const direct = source.data?.[pinId];
   if (direct !== undefined && typeof direct !== 'string') return direct;
@@ -434,14 +434,14 @@ function readLocalDesktopSessionToken() {
 
 function writeLocalDesktopSessionToken(token) {
   try { localStorage.setItem('arc_local_session_token', token); }
-  catch {}
+  catch { }
 }
 
 function removeLocalDesktopSessionToken() {
   try { localStorage.removeItem('arc_local_session_token'); }
-  catch {}
-  try { window.__TAURI_INTERNALS__?.invoke?.('delete_local_session_token').catch(() => {}); }
-  catch {}
+  catch { }
+  try { window.__TAURI_INTERNALS__?.invoke?.('delete_local_session_token').catch(() => { }); }
+  catch { }
 }
 
 function getInitialAuthToken(desktopMode) {
@@ -450,7 +450,7 @@ function getInitialAuthToken(desktopMode) {
       if (localStorage.getItem('arc_workspace_mode') !== 'remote') {
         return readLocalDesktopSessionToken() || safeStorageGet('arc_token');
       }
-    } catch {}
+    } catch { }
   }
   return safeStorageGet('arc_token');
 }
@@ -820,11 +820,13 @@ export function App() {
       return;
     }
     projectImportPathRef.current = path;
-    setProjectImportFile({ name, path, text: async () => {
-      const invoke = window.__TAURI_INTERNALS__?.invoke;
-      if (typeof invoke !== 'function') throw new Error('ARC Studio could not open this project file.');
-      return invoke('read_arc_project_file', { path });
-    } });
+    setProjectImportFile({
+      name, path, text: async () => {
+        const invoke = window.__TAURI_INTERNALS__?.invoke;
+        if (typeof invoke !== 'function') throw new Error('ARC Studio could not open this project file.');
+        return invoke('read_arc_project_file', { path });
+      }
+    });
     setProjectImportTrusted(false);
     setProjectImportError('');
     setProjectImportCompatibility(null);
@@ -908,7 +910,7 @@ export function App() {
           title: release.name || `ARC Studio Server ${version}`,
           kind: classifyArcUpdate(version, studioServerVersion)
         });
-      } catch {}
+      } catch { }
     };
     checkForServerUpdate();
     const interval = window.setInterval(checkForServerUpdate, 6 * 60 * 60 * 1000);
@@ -953,7 +955,7 @@ export function App() {
         if (!active) { await update?.close(); return; }
         const previous = updateRef.current;
         updateRef.current = update;
-        if (previous && previous !== update) await previous.close().catch(() => {});
+        if (previous && previous !== update) await previous.close().catch(() => { });
         if (!update) { setAppUpdate(null); return; }
         const version = String(update.version || '').replace(/^v/i, '');
         setStableUpdateReady(null);
@@ -976,7 +978,7 @@ export function App() {
       window.clearInterval(interval);
       const update = updateRef.current;
       updateRef.current = null;
-      update?.close().catch(() => {});
+      update?.close().catch(() => { });
     };
   }, [desktopMode, networkOnline, settings.autoUpdateChecks, studioVersion, desktopReleaseChannel]);
 
@@ -998,7 +1000,7 @@ export function App() {
       if (!seenVersions.includes(detected.version)) seenVersions.push(detected.version);
       if (studioVersion && !seenVersions.includes(studioVersion)) seenVersions.push(studioVersion);
       localStorage.setItem(seenKey, JSON.stringify(seenVersions.slice(-100)));
-    } catch {}
+    } catch { }
 
     setReleaseNotesNotice(null);
     setUpdateNotice({ ...detected, notes: detected.notes || 'Loading release notes…' });
@@ -1244,7 +1246,7 @@ export function App() {
       if (type !== 'object') return type || null;
       if (['data_array_create', 'data_array_append', 'data_array_concat'].includes(source.type) || source.type === 'data_regex' && ['captures', 'matches'].includes(sourcePinId)) return 'array';
       if (source.type === 'data_parse_json' && !graphConnections.some((item) => item.targetNodeId === source.id && item.targetPinId === 'json')) {
-        try { return Array.isArray(JSON.parse(source.data?.json || '')) ? 'array' : 'object'; } catch {}
+        try { return Array.isArray(JSON.parse(source.data?.json || '')) ? 'array' : 'object'; } catch { }
       }
       return 'object';
     };
@@ -1435,7 +1437,7 @@ export function App() {
     try {
       const stored = JSON.parse(localStorage.getItem(seenKey) || '[]');
       if (Array.isArray(stored)) seenVersions = stored.filter((version) => typeof version === 'string');
-    } catch {}
+    } catch { }
     if (seenVersions.includes(studioVersion)) return undefined;
 
     let cancelled = false;
@@ -1480,7 +1482,7 @@ export function App() {
         const versions = Array.isArray(stored) ? stored.filter((version) => typeof version === 'string') : [];
         if (!versions.includes(releaseNotesNotice.version)) versions.push(releaseNotesNotice.version);
         localStorage.setItem(seenKey, JSON.stringify(versions.slice(-100)));
-      } catch {}
+      } catch { }
     }
     setReleaseNotesNotice(null);
   }, [releaseNotesNotice]);
@@ -1506,7 +1508,7 @@ export function App() {
         if (!blob || cancelled) return;
         const bytes = Array.from(new Uint8Array(await blob.arrayBuffer()));
         await invoke('set_release_channel_icon', { iconPng: bytes });
-      } catch {}
+      } catch { }
     };
     updateDockIcon();
     return () => { cancelled = true; };
@@ -1567,7 +1569,7 @@ export function App() {
       return undefined;
     }
     if (authToken) {
-      if (typeof invoke === 'function') invoke('save_local_session_token', { token: authToken }).catch(() => {});
+      if (typeof invoke === 'function') invoke('save_local_session_token', { token: authToken }).catch(() => { });
       setLocalSessionRestoreReady(true);
       return undefined;
     }
@@ -1583,7 +1585,7 @@ export function App() {
         localSessionRef.current = { token, user: null };
         setAuthToken(token);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => { if (!cancelled) setLocalSessionRestoreReady(true); });
     return () => { cancelled = true; };
   }, [desktopMode, workspaceMode]);
@@ -1650,9 +1652,9 @@ export function App() {
           setWorkspaceCompatibilityNotice(workspaceOnlyNodeCount
             ? `${workspaceOnlyNodeCount} workspace node type${workspaceOnlyNodeCount === 1 ? '' : 's'} use server-provided schemas and generic editors. Node behavior runs on the workspace server.`
             : registryLoadIssue ? `${registryLoadIssue} The bundled node schemas will be used.`
-            : versionOrder === null ? 'Connected using workspace-provided node support metadata.'
-              : versionOrder < 0 ? `Connected to older workspace version ${serverVersion}. Node behavior runs on the workspace server.`
-                : versionOrder > 0 ? `Connected to newer workspace version ${serverVersion}. Some editor-specific controls may not be available.` : '');
+              : versionOrder === null ? 'Connected using workspace-provided node support metadata.'
+                : versionOrder < 0 ? `Connected to older workspace version ${serverVersion}. Node behavior runs on the workspace server.`
+                  : versionOrder > 0 ? `Connected to newer workspace version ${serverVersion}. Some editor-specific controls may not be available.` : '');
         } else {
           setWorkspaceNodeDefinitions(null);
           setSupportedWorkspaceNodeTypes(null);
@@ -1673,7 +1675,7 @@ export function App() {
           const name = system.workspaceName.trim().slice(0, 35);
           setRemoteWorkspaceName(name);
           if (desktopMode && workspaceMode === 'remote') {
-            try { localStorage.setItem('arc_remote_workspace_name', name); } catch {}
+            try { localStorage.setItem('arc_remote_workspace_name', name); } catch { }
           }
         }
         const localOwnerMissing = desktopMode && workspaceMode === 'local' && system.hasLocalAccount === false;
@@ -1739,7 +1741,7 @@ export function App() {
         if (!cancelled && Array.isArray(data.variables)) setProjectVariables(data.variables);
         if (!cancelled && Array.isArray(data.disabledBuiltInVariables)) setDisabledBuiltInVariables(data.disabledBuiltInVariables);
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => { cancelled = true; };
   }, [authToken, activeProjectId, workspaceRevision, workspaceMode]);
 
@@ -1749,7 +1751,7 @@ export function App() {
     fetch(apiUrl('/api/projects/templates'), { headers: { 'x-arc-token': authToken } })
       .then((response) => response.json())
       .then((data) => { if (!cancelled && Array.isArray(data.templates)) setProjectStarters(data.templates); })
-      .catch(() => {});
+      .catch(() => { });
     return () => { cancelled = true; };
   }, [authToken, projectStarters.length, workspaceMode, workspaceRevision]);
 
@@ -1805,7 +1807,7 @@ export function App() {
               }
               if (migrated) safeStorageRemove('arc_embed_assets');
             }
-          } catch {}
+          } catch { }
         }
         if (current) setEmbedAssets(embeds);
       } catch (error) {
@@ -2157,7 +2159,7 @@ export function App() {
               const graphs = Array.isArray(payload.graphs) ? payload.graphs : [];
               const byId = new Map(graphs.map((graph) => [graph.id, graph]));
               let ids = [];
-              try { ids = JSON.parse(safeStorageGet(`arc_project_${nextProjectId}_arc_open_graph_ids`, '[]')); } catch {}
+              try { ids = JSON.parse(safeStorageGet(`arc_project_${nextProjectId}_arc_open_graph_ids`, '[]')); } catch { }
               const opened = (Array.isArray(ids) ? ids.map((id) => byId.get(id)).filter(Boolean) : []).slice(0, MAX_OPEN_GRAPH_TABS);
               setTabs(opened);
               const preferred = safeStorageGet(`arc_project_${nextProjectId}_arc_active_graph_id`, '');
@@ -2261,9 +2263,9 @@ export function App() {
               try {
                 const stored = JSON.parse(safeStorageGet(recoveryStorageKeyRef.current, '[]'));
                 if (Array.isArray(stored)) storedRecoveryDrafts = stored;
-              } catch {}
+              } catch { }
               recoveryDraftsRef.current = [...storedRecoveryDrafts.filter((entry) => entry?.graph?.id !== recoveryGraph.id), { graph: recoveryGraph, savedAt: Date.now(), localOnly: true }].slice(-MAX_OPEN_GRAPH_TABS);
-              try { safeStorageSet(recoveryStorageKeyRef.current, JSON.stringify(recoveryDraftsRef.current)); } catch {}
+              try { safeStorageSet(recoveryStorageKeyRef.current, JSON.stringify(recoveryDraftsRef.current)); } catch { }
               arcEvents.emit('toast:notify', { title: 'Disconnected draft preserved', message: 'A local recovery graph was kept while the latest shared graph loaded.', type: 'warning' });
             }
             if (isOwnUpdate || payload.resync) pendingLiveGraphRef.current.delete(incoming.id);
@@ -2713,7 +2715,7 @@ export function App() {
             snapshots.push(snapshot);
             snapshotBytes += size;
           } else if (size <= 30_000_000) deferredSnapshots.push(snapshot);
-        } catch {}
+        } catch { }
       }
       socket.send(JSON.stringify({ type: 'PROJECT_TABS_SYNC', graphIds, ...(snapshots.length ? { graphs: snapshots } : {}) }));
       for (const graph of deferredSnapshots) socket.send(JSON.stringify({ type: 'PROJECT_TAB_OPEN', graphId: graph.id, graph }));
@@ -2731,7 +2733,7 @@ export function App() {
         try {
           const candidate = snapshotGraph(graph);
           if (JSON.stringify(candidate).length <= 30_000_000) snapshot = candidate;
-        } catch {}
+        } catch { }
       }
       socket.send(JSON.stringify({ type: 'PROJECT_TAB_OPEN', graphId, ...(snapshot ? { graph: snapshot } : {}) }));
     }
@@ -2995,7 +2997,7 @@ export function App() {
             setProjectVariables(data.variables);
             if (Array.isArray(data.disabledBuiltInVariables)) setDisabledBuiltInVariables(data.disabledBuiltInVariables);
           }
-        } catch {}
+        } catch { }
       } finally {
         if (projectVariablesSaveRef.current.revision === revision) setSavingProjectVariables(false);
       }
@@ -3136,7 +3138,7 @@ export function App() {
     if (!authToken || !activeProjectId || !graphsHydratedRef.current || recoveryLoadedKey === recoveryStorageKey) return;
     recoveryDraftsRef.current = [];
     let stored = [];
-    try { stored = JSON.parse(safeStorageGet(recoveryStorageKey, '[]')); } catch {}
+    try { stored = JSON.parse(safeStorageGet(recoveryStorageKey, '[]')); } catch { }
     const savedById = new Map(savedGraphs.map((graph) => [graph.id, graph]));
     const recoverable = (Array.isArray(stored) ? stored : []).filter((entry) => entry?.graph?.id
       && (!savedById.has(entry.graph.id) || !sameGraphContent(entry.graph, savedById.get(entry.graph.id))))
@@ -3176,7 +3178,7 @@ export function App() {
     try {
       if (next.length) safeStorageSet(recoveryStorageKey, JSON.stringify(next));
       else safeStorageRemove(recoveryStorageKey);
-    } catch {}
+    } catch { }
   }, [authToken, activeProjectId, recoveryLoadedKey, recoveryStorageKey, savedGraphs, tabs]);
 
   const handleSaveGraph = useCallback(async () => {
@@ -3644,7 +3646,7 @@ export function App() {
           canIncludeBotToken = botState.canExportBotToken === true;
           hasBotToken = exportProjectId === activeProjectId && Boolean(botState.hasToken);
         }
-      } catch {}
+      } catch { }
       const summary = {
         graphNames,
         graphCount: exportGraphs.length,
@@ -3721,7 +3723,7 @@ export function App() {
           try {
             const data = JSON.parse(await request.response.text());
             message = data.error || message;
-          } catch {}
+          } catch { }
           reject(new Error(message));
         });
         request.addEventListener('error', () => reject(new Error('The server could not be reached. Check the connection and try again.')));
@@ -3775,7 +3777,7 @@ export function App() {
   const handleValidateGraph = useCallback(() => {
     if (!activeGraph) return;
     const report = validateGraph(activeGraph, graphLookup, botProfile?.intentSummary, projectVariables);
-      setValidationResult({ ...report, graphId: activeGraph.id, graphName: activeGraph?.name || 'Untitled graph' });
+    setValidationResult({ ...report, graphId: activeGraph.id, graphName: activeGraph?.name || 'Untitled graph' });
   }, [activeGraph, graphLookup, botProfile?.intentSummary, projectVariables]);
 
   const validationStatus = graphValidation.errors.length ? 'error' : graphValidation.warnings.length ? 'warning' : 'success';
@@ -4164,7 +4166,7 @@ export function App() {
         }
         if (!targetPin) continue;
         const label = sourcePinLabel(wire);
-      wiredFields[targetPin.id] = { label, source: `${activeNodes.find((item) => item.id === wire.sourceNodeId)?.label || BuiltInNodeDefinitions.find((item) => item.type === activeNodes.find((entry) => entry.id === wire.sourceNodeId)?.type)?.label || 'Node'} · ${label}`, token: `{{${makeToken(label)}}}` };
+        wiredFields[targetPin.id] = { label, source: `${activeNodes.find((item) => item.id === wire.sourceNodeId)?.label || BuiltInNodeDefinitions.find((item) => item.type === activeNodes.find((entry) => entry.id === wire.sourceNodeId)?.type)?.label || 'Node'} · ${label}`, token: `{{${makeToken(label)}}}` };
       }
     }
 
@@ -4194,9 +4196,7 @@ export function App() {
           : sourceDefinition?.outputs?.find((pin) => pin.id === contentWire.sourcePinId)?.label || contentWire.sourcePinId;
       const token = String(outputLabel).replace(/([a-z0-9])([A-Z])/g, '$1 $2').match(/[A-Za-z0-9]+/g)?.map((word, index) => index ? `${word[0].toUpperCase()}${word.slice(1)}` : `${word[0].toLowerCase()}${word.slice(1)}`).join('') || 'value';
       initialContent = `{{${token}}}`;
-      if (contentSourceNode.type === 'value_text') {
-        initialContent = String(contentSourceNode.data?.value ?? '');
-      } else if (contentSourceNode.type === 'format_text') {
+      if (contentSourceNode.type === 'format_text') {
         initialContent = String(contentSourceNode.data?.template ?? '');
       } else if (contentSourceNode.type === 'variable_get') {
         const v = availableVariables.find((item) => item.id === contentSourceNode.data?.variableId);
@@ -4447,7 +4447,7 @@ export function App() {
           currentIntents = intentData.intents;
           setBotProfile((profile) => profile ? { ...profile, intentSummary: intentData.intents } : profile);
         }
-      } catch {}
+      } catch { }
       const unavailablePrivileged = currentIntents.filter((intent) => intent.required && intent.privileged && intent.portalEnabled === false);
       if (unavailablePrivileged.length && confirmed !== true) {
         setGatewayIntentConfirm(unavailablePrivileged);
@@ -4508,7 +4508,7 @@ export function App() {
 
   const handleLogout = () => {
     if (authToken) {
-      fetch(apiUrl('/api/auth/logout'), { method: 'POST', headers: { 'x-arc-token': authToken } }).catch(() => {});
+      fetch(apiUrl('/api/auth/logout'), { method: 'POST', headers: { 'x-arc-token': authToken } }).catch(() => { });
     }
     safeStorageRemove('arc_token');
     if (desktopMode && workspaceMode === 'local') {
@@ -4570,12 +4570,12 @@ export function App() {
         setActiveProjectId(data.activeProjectId || '');
         shouldCreateProject = nextProjects.length === 0 || nextProjects.some((project) => project.id === data.activeProjectId && project.pendingStarterChoice);
       }
-    } catch {}
+    } catch { }
     try {
       const response = await fetch(apiUrl('/api/projects/templates'), { headers: { 'x-arc-token': token } });
       const data = await response.json();
       if (response.ok && Array.isArray(data.templates)) setProjectStarters(data.templates);
-    } catch {}
+    } catch { }
     setNeedsProjectOnboarding(shouldCreateProject);
     setAuthToken(token);
     setCurrentUser(user);
@@ -4835,7 +4835,7 @@ export function App() {
       if (localDesktopWorkspace) {
         const storedIds = safeStorageGet(`arc_project_${projectId}_arc_open_graph_ids`, null);
         let openIds = [];
-        try { openIds = storedIds ? JSON.parse(storedIds) : []; } catch {}
+        try { openIds = storedIds ? JSON.parse(storedIds) : []; } catch { }
         const graphs = data.graphs || [];
         const graphById = new Map(graphs.map((graph) => [graph.id, graph]));
         const opened = (Array.isArray(openIds) ? openIds.map((id) => graphById.get(id)).filter(Boolean) : []).slice(0, MAX_OPEN_GRAPH_TABS);
@@ -5195,7 +5195,7 @@ export function App() {
     try {
       localStorage.setItem('arc_workspace_mode', mode);
       if (mode === 'remote') localStorage.setItem('arc_remote_workspace_url', url);
-    } catch {}
+    } catch { }
     deletedGraphsRef.current.clear();
     reconnectGraphBaseRef.current.clear();
     collaborationPresenceRef.current = { projectId: '', graphId: '' };
@@ -5304,7 +5304,7 @@ export function App() {
       }
       const name = (typeof status.workspaceName === 'string' && status.workspaceName.trim() ? status.workspaceName.trim() : new URL(url).host).slice(0, 35);
       setRemoteWorkspaceName(name);
-      try { localStorage.setItem('arc_remote_workspace_name', name); } catch {}
+      try { localStorage.setItem('arc_remote_workspace_name', name); } catch { }
       activateWorkspace('remote', url);
       setTransientCanvasMotionSupported(status.collaborationFeatures?.transientCanvasMotion === true);
       setSupportedWorkspaceNodeTypes(supportedNodeTypes);
@@ -5338,7 +5338,7 @@ export function App() {
         else removeLocalDesktopSessionToken();
       } catch { writeLocalDesktopSessionToken(authToken); }
     } else if (workspaceMode === 'remote' && authToken) {
-      try { await fetch(apiUrl('/api/auth/logout'), { method: 'POST', headers: { 'x-arc-token': authToken } }); } catch {}
+      try { await fetch(apiUrl('/api/auth/logout'), { method: 'POST', headers: { 'x-arc-token': authToken } }); } catch { }
       safeStorageRemove('arc_token');
       setAuthToken('');
       setCurrentUser(null);
@@ -5349,7 +5349,7 @@ export function App() {
   const handleBackToLocalEditor = async () => {
     const session = localSessionRef.current;
     if (!session?.token) return;
-    try { localStorage.setItem('arc_workspace_mode', 'local'); } catch {}
+    try { localStorage.setItem('arc_workspace_mode', 'local'); } catch { }
     setWorkspaceMode('local');
     setWorkspaceError('');
     try {
@@ -5396,7 +5396,7 @@ export function App() {
       }
       localStorage.setItem('arc_workspace_mode', 'local');
       sessionStorage.clear();
-    } catch {}
+    } catch { }
   };
 
   const adjustUiScale = (step) => {
@@ -5630,7 +5630,7 @@ export function App() {
     }
     if (!/^https:\/\/github\.com\/relentiousdragon\/arc-studio\/releases\//.test(String(url || ''))) return;
     const invoke = window.__TAURI_INTERNALS__?.invoke;
-    if (desktopMode && typeof invoke === 'function') invoke('open_external_url', { url }).catch(() => {});
+    if (desktopMode && typeof invoke === 'function') invoke('open_external_url', { url }).catch(() => { });
     else window.open(url, '_blank', 'noopener,noreferrer');
   }, [appUpdate, desktopMode]);
 
@@ -5657,7 +5657,7 @@ export function App() {
       setAppUpdate(null);
       setUpdateInstallPromptOpen(false);
       setUpdateNotice(null);
-      await update.close().catch(() => {});
+      await update.close().catch(() => { });
     } catch (error) {
       const message = typeof error === 'string' ? error.trim() : typeof error?.message === 'string' ? error.message.trim() : '';
       arcEvents.emit('toast:notify', { id: 'arc-studio-update-progress', title: 'Update failed', message: message || 'ARC Studio could not install the update.', type: 'error', duration: 10000 });
@@ -5767,656 +5767,655 @@ export function App() {
   return (
     <div className={`app-root ${macOSDesktop ? 'is-macos' : ''}`} data-theme={theme} data-release-channel={currentUpdateChannel} data-ui-scale={uiScale} data-font-scale={fontScale} data-compact-context={settings.compactContextMenus ? 'true' : undefined} data-reduce-motion={settings.reduceMotion ? 'true' : undefined} onContextMenu={(event) => { if (desktopMode) event.preventDefault(); }} style={{ '--arc-ui-scale': Number(uiScale) / 100, '--arc-font-scale': Number(fontScale) / 100 }}>
       <div className="app-client-surface">
-      <TopBar
-        tabs={tabs}
-        projectCollaborators={projectCollaboration.projectId === activeProjectId ? projectCollaboration.users : []}
-        graphTabStatuses={graphTabStatuses}
-        saveFeedbackGraphId={saveFeedback?.graphId}
-        hideGraphSave={embedStudioOpenForActiveGraph || discordTextStudioOpenForActiveGraph || permissionStudioOpenForActiveGraph || slashCommandStudioOpenForActiveGraph || modalStudioOpenForActiveGraph}
-        activeTabId={activeTabId}
-        botStatus={botStatus}
-        networkOnline={networkOnline}
-        botProfile={botProfile}
-        currentUser={currentUser}
-        localWorkspace={localDesktopWorkspace}
-        isLocked={isLocked || !canWriteGraphs}
-        onToggleLock={canWriteGraphs ? handleToggleLock : undefined}
-        onSelectTab={(graphId) => { setFollowCollaboratorRequest(null); setActiveTabId(graphId); rememberUserGraph(graphId); }}
-        onFollowCollaborator={followCollaborator}
-        onAddTab={handleAddTab}
-        onAddBlankGraph={handleAddBlankGraph}
-        onAddFunctionGraph={handleAddFunctionGraph}
-        onNewEmbed={createEmbedAsset}
-        graphTemplates={graphTemplates}
-        desktopMode={desktopMode}
-        shortcutPlatform={shortcutPlatform}
-        workspaceLabel={workspaceLabel}
-        uploadProgress={graphUploadProgress}
-        onUseTemplate={(template) => handleAddTab(template)}
-        onCloseTab={handleCloseTab}
-        onRenameGraph={handleRenameGraph}
-        onDuplicateGraph={handleDuplicateGraph}
-        onSetDefault={handleSetDefaultGraph}
-        defaultGraphId={defaultGraphId}
-        onSaveGraph={handleSaveGraph}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        canUndo={historyAvailability.canUndo}
-        canRedo={historyAvailability.canRedo}
-        onValidate={handleValidateGraph}
-        validationStatus={validationStatus}
-        validationErrors={graphValidation.errors.length}
-        validationWarnings={graphValidation.warnings.length}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        serverUpdateAvailable={Boolean(serverUpdate)}
-        onOpenBotSettings={() => setIsBotSettingsOpen(true)}
-        onOpenUsers={() => setIsUserMgmtOpen(true)}
-        onLogout={handleLogout}
-        onSwitchWorkspace={handleSwitchWorkspace}
-        appUpdate={appUpdate}
-        onOpenStudioUpdate={handleOpenStudioUpdate}
-        onStartBot={handleStartBot}
-        onStopBot={handleStopBot}
-        onEnsureGraphsSaved={ensureWorkspaceGraphsSaved}
-      />
+        <TopBar
+          tabs={tabs}
+          projectCollaborators={projectCollaboration.projectId === activeProjectId ? projectCollaboration.users : []}
+          graphTabStatuses={graphTabStatuses}
+          saveFeedbackGraphId={saveFeedback?.graphId}
+          hideGraphSave={embedStudioOpenForActiveGraph || discordTextStudioOpenForActiveGraph || permissionStudioOpenForActiveGraph || slashCommandStudioOpenForActiveGraph || modalStudioOpenForActiveGraph}
+          activeTabId={activeTabId}
+          botStatus={botStatus}
+          networkOnline={networkOnline}
+          botProfile={botProfile}
+          currentUser={currentUser}
+          localWorkspace={localDesktopWorkspace}
+          isLocked={isLocked || !canWriteGraphs}
+          onToggleLock={canWriteGraphs ? handleToggleLock : undefined}
+          onSelectTab={(graphId) => { setFollowCollaboratorRequest(null); setActiveTabId(graphId); rememberUserGraph(graphId); }}
+          onFollowCollaborator={followCollaborator}
+          onAddTab={handleAddTab}
+          onAddBlankGraph={handleAddBlankGraph}
+          onAddFunctionGraph={handleAddFunctionGraph}
+          onNewEmbed={createEmbedAsset}
+          graphTemplates={graphTemplates}
+          desktopMode={desktopMode}
+          shortcutPlatform={shortcutPlatform}
+          workspaceLabel={workspaceLabel}
+          uploadProgress={graphUploadProgress}
+          onUseTemplate={(template) => handleAddTab(template)}
+          onCloseTab={handleCloseTab}
+          onRenameGraph={handleRenameGraph}
+          onDuplicateGraph={handleDuplicateGraph}
+          onSetDefault={handleSetDefaultGraph}
+          defaultGraphId={defaultGraphId}
+          onSaveGraph={handleSaveGraph}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={historyAvailability.canUndo}
+          canRedo={historyAvailability.canRedo}
+          onValidate={handleValidateGraph}
+          validationStatus={validationStatus}
+          validationErrors={graphValidation.errors.length}
+          validationWarnings={graphValidation.warnings.length}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          serverUpdateAvailable={Boolean(serverUpdate)}
+          onOpenBotSettings={() => setIsBotSettingsOpen(true)}
+          onOpenUsers={() => setIsUserMgmtOpen(true)}
+          onLogout={handleLogout}
+          onSwitchWorkspace={handleSwitchWorkspace}
+          appUpdate={appUpdate}
+          onOpenStudioUpdate={handleOpenStudioUpdate}
+          onStartBot={handleStartBot}
+          onStopBot={handleStopBot}
+          onEnsureGraphsSaved={ensureWorkspaceGraphsSaved}
+        />
 
-      <div className="editor-workspace">
-        <aside className="workspace-rail" aria-label="Workspace tools">
-          <button className={`rail-button rail-button-primary ${isProjectsOpen ? 'is-selected' : ''}`} onClick={() => { setProjectError(''); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(false); setIsProjectsOpen((open) => !open); }} title={`${projects.find((project) => project.id === activeProjectId)?.name || 'Projects'} · switch project`} aria-label="Projects"><Plus size={18} /></button>
-          <div className="rail-divider" />
-          <button className={`rail-button ${isBotSidebarOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsVariablesOpen(false); setIsBotSidebarOpen((open) => !open); }} title="App settings and profile" aria-label="App settings and profile"><Bot size={17} /></button>
-          <button className={`rail-button ${isVariablesOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen((open) => !open); }} title="Graph variables" aria-label="Graph variables"><Database size={17} /></button>
-          <button className={`rail-button ${isLibraryOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(false); setIsLibraryOpen((open) => !open); }} title="Graph library (Shift + L)" aria-label="Graph library"><FolderTree size={17} /></button>
-          <button className={`rail-button ${isPluginStoreOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(false); setIsPluginStoreOpen((open) => !open); }} title="Plugin store" aria-label="Plugin store"><PackageOpen size={17} /></button>
-          <button className="rail-button" onClick={() => setIsSettingsOpen(true)} title="Canvas settings" aria-label="Canvas settings"><SlidersHorizontal size={17} /></button>
-          {localDesktopWorkspace && <button className="rail-button" onClick={handleAutoLayout} title="Arrange nodes" aria-label="Arrange nodes"><LayoutGrid size={17} /></button>}
-          <button className="rail-button" onClick={handleExportGraph} disabled={!activeGraph} title={activeGraph ? 'Export graph' : 'Open a graph to export it'} aria-label="Export graph"><Braces size={17} /></button>
-          <div className="rail-spacer" />
-          {!desktopMode && currentUser?.role === 'admin' && <button className="rail-button" onClick={() => setIsUserMgmtOpen(true)} title="Team access" aria-label="Team access"><Users size={17} /></button>}
-          <button className="rail-button" onClick={() => setIsShortcutsOpen(true)} title="Keyboard shortcuts" aria-label="Keyboard shortcuts"><CircleHelp size={17} /></button>
-        </aside>
+        <div className="editor-workspace">
+          <aside className="workspace-rail" aria-label="Workspace tools">
+            <button className={`rail-button rail-button-primary ${isProjectsOpen ? 'is-selected' : ''}`} onClick={() => { setProjectError(''); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(false); setIsProjectsOpen((open) => !open); }} title={`${projects.find((project) => project.id === activeProjectId)?.name || 'Projects'} · switch project`} aria-label="Projects"><Plus size={18} /></button>
+            <div className="rail-divider" />
+            <button className={`rail-button ${isBotSidebarOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsVariablesOpen(false); setIsBotSidebarOpen((open) => !open); }} title="App settings and profile" aria-label="App settings and profile"><Bot size={17} /></button>
+            <button className={`rail-button ${isVariablesOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen((open) => !open); }} title="Graph variables" aria-label="Graph variables"><Database size={17} /></button>
+            <button className={`rail-button ${isLibraryOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(false); setIsLibraryOpen((open) => !open); }} title="Graph library (Shift + L)" aria-label="Graph library"><FolderTree size={17} /></button>
+            <button className={`rail-button ${isPluginStoreOpen ? 'is-selected' : ''}`} onClick={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(false); setIsPluginStoreOpen((open) => !open); }} title="Plugin store" aria-label="Plugin store"><PackageOpen size={17} /></button>
+            <button className="rail-button" onClick={() => setIsSettingsOpen(true)} title="Canvas settings" aria-label="Canvas settings"><SlidersHorizontal size={17} /></button>
+            {localDesktopWorkspace && <button className="rail-button" onClick={handleAutoLayout} title="Arrange nodes" aria-label="Arrange nodes"><LayoutGrid size={17} /></button>}
+            <button className="rail-button" onClick={handleExportGraph} disabled={!activeGraph} title={activeGraph ? 'Export graph' : 'Open a graph to export it'} aria-label="Export graph"><Braces size={17} /></button>
+            <div className="rail-spacer" />
+            {!desktopMode && currentUser?.role === 'admin' && <button className="rail-button" onClick={() => setIsUserMgmtOpen(true)} title="Team access" aria-label="Team access"><Users size={17} /></button>}
+            <button className="rail-button" onClick={() => setIsShortcutsOpen(true)} title="Keyboard shortcuts" aria-label="Keyboard shortcuts"><CircleHelp size={17} /></button>
+          </aside>
 
-        <main
-          className="canvas-workspace"
-          style={{
-            '--arc-active-sidebar-width': `${
-              isLibraryOpen
-                ? (sidebarWidths.library || DEFAULT_SIDEBAR_WIDTHS.library)
-                : isProjectsOpen
-                  ? (sidebarWidths.projects || DEFAULT_SIDEBAR_WIDTHS.projects)
-                  : isVariablesOpen
-                    ? (sidebarWidths.variables || DEFAULT_SIDEBAR_WIDTHS.variables)
-                    : isBotSidebarOpen
-                      ? (sidebarWidths.bot || DEFAULT_SIDEBAR_WIDTHS.bot)
-                      : isPluginStoreOpen
-                        ? (sidebarWidths.plugins || DEFAULT_SIDEBAR_WIDTHS.plugins)
-                        : 0
-            }px`
-          }}
-          aria-label="Graph editor"
-        >
-          <Suspense fallback={<LazyFeatureLoading label="Opening editor…" kind="editor" isDesktop={desktopMode} />}>
-          {embedStudioOpenForActiveGraph && <EmbedStudioView
-            key={`${embedStudio.graphId}:${embedStudio.nodeId || embedStudio.id || 'new'}`}
-            name={embedStudio.name}
-            content={embedStudio.content || ''}
-            blocks={embedStudio.blocks}
-            wiredFields={embedStudio.wiredFields || {}}
-            hasParentNode={Boolean(embedStudio.nodeId)}
-            components={embedStudio.components || []}
-            componentsOnly={embedStudio.mode === 'components-node'}
-            initialTab={embedStudio.route?.tab}
-            isEmbedWired={Boolean(embedStudio.isEmbedWired)}
-            isComponentsWired={Boolean(embedStudio.isComponentsWired)}
-            isContentWired={Boolean(embedStudio.isContentWired)}
-            contentSourceLabel={embedStudio.contentSourceLabel}
-            embedSourceLabel={embedStudio.embedSourceLabel}
-            componentsSourceLabel={embedStudio.componentsSourceLabel}
-            appEmojis={appEmojis}
-            graphVariables={availableVariables}
-            templateValuePaths={embedTemplateValuePaths}
-            templatePreviewValues={getTemplatePreviewInputs({ nodes: activeNodes, connections: activeConnections }, activeNodes.find((item) => item.id === embedStudio.nodeId), availableVariables)}
-            templateSuggestions={embedTemplateSuggestions}
-            botProfile={botProfile}
-            botStatus={botStatus}
-            theme={theme}
-            collaborators={studioCollaborators}
-            onNameChange={(name) => updateEmbedStudioDraft({ name })}
-            onBlocksChange={(blocks) => updateEmbedStudioDraft({ blocks })}
-            attachments={embedStudio.attachments || []}
-            onAttachmentsChange={(attachments) => updateEmbedStudioDraft({ attachments })}
-            onOpenTextStudio={(label, value, maxLength, applyValue, parentBlockContext) => openDiscordTextStudio(null, null, label, value, maxLength, applyValue, embedStudio.collabId, parentBlockContext)}
-            onActiveTabChange={(tab) => setEmbedStudio((current) => current ? { ...current, route: { ...current.route, tab } } : current)}
-            onContentChange={(content) => updateEmbedStudioDraft({ content })}
-            onComponentsChange={(components) => updateEmbedStudioDraft({ components })}
-            onSave={handleSaveEmbedStudio}
-            onSaveAs={handleSaveEmbedAsAsset}
-            onClose={() => setEmbedStudio(null)}
-            saveLabel={['node', 'components-node'].includes(embedStudio.mode) ? 'Apply to node' : 'Save embed'}
-            showSave={embedStudio.mode !== 'new'}
-          />}
-
-          {discordTextStudioOpenForActiveGraph && <TextStudioView
-            key={discordTextStudio.collabId}
-            label={discordTextStudio.label}
-            value={discordTextStudio.value}
-            readOnly={Boolean(discordTextStudio.readOnly)}
-            sharedDraft={discordTextStudio.sharedDraft}
-            maxLength={discordTextStudio.maxLength}
-            appEmojis={appEmojis}
-            graphVariables={availableVariables}
-            templatePreviewValues={getTemplatePreviewInputs({ nodes: activeNodes, connections: activeConnections }, activeNodes.find((item) => item.id === (discordTextStudio.nodeId || embedStudio?.nodeId)), availableVariables)}
-            templateValuePaths={discordTextStudio.templateValuePaths || []}
-            templateSuggestions={discordTextStudio.templateSuggestions || []}
-            collaborators={studioCollaborators}
-            remoteCursors={textStudioCursors}
-            onDraftChange={(draft, caret) => {
-              const collabId = discordTextStudio.collabId;
-              const previous = textCollaborationRef.current.get(collabId) || { baseText: String(discordTextStudio.value || ''), localText: '', caret: 0 };
-              textCollaborationRef.current.set(collabId, { ...previous, localText: String(draft), caret: Number(caret) || 0 });
-              setDiscordTextStudio((current) => current?.collabId === collabId ? { ...current, localDraft: String(draft) } : current);
-              sendCollaborationAction({ kind: 'studio-draft', studioId: collabId, studioType: 'text', draft: { text: draft, caret } });
+          <main
+            className="canvas-workspace"
+            style={{
+              '--arc-active-sidebar-width': `${isLibraryOpen
+                  ? (sidebarWidths.library || DEFAULT_SIDEBAR_WIDTHS.library)
+                  : isProjectsOpen
+                    ? (sidebarWidths.projects || DEFAULT_SIDEBAR_WIDTHS.projects)
+                    : isVariablesOpen
+                      ? (sidebarWidths.variables || DEFAULT_SIDEBAR_WIDTHS.variables)
+                      : isBotSidebarOpen
+                        ? (sidebarWidths.bot || DEFAULT_SIDEBAR_WIDTHS.bot)
+                        : isPluginStoreOpen
+                          ? (sidebarWidths.plugins || DEFAULT_SIDEBAR_WIDTHS.plugins)
+                          : 0
+                }px`
             }}
-            onCursorChange={(caret) => sendCollaborationAction({ kind: 'studio-cursor', studioId: discordTextStudio.collabId, caret })}
-            onApply={applyDiscordTextStudio}
-            onClose={() => setDiscordTextStudio(null)}
-          />}
+            aria-label="Graph editor"
+          >
+            <Suspense fallback={<LazyFeatureLoading label="Opening editor…" kind="editor" isDesktop={desktopMode} />}>
+              {embedStudioOpenForActiveGraph && <EmbedStudioView
+                key={`${embedStudio.graphId}:${embedStudio.nodeId || embedStudio.id || 'new'}`}
+                name={embedStudio.name}
+                content={embedStudio.content || ''}
+                blocks={embedStudio.blocks}
+                wiredFields={embedStudio.wiredFields || {}}
+                hasParentNode={Boolean(embedStudio.nodeId)}
+                components={embedStudio.components || []}
+                componentsOnly={embedStudio.mode === 'components-node'}
+                initialTab={embedStudio.route?.tab}
+                isEmbedWired={Boolean(embedStudio.isEmbedWired)}
+                isComponentsWired={Boolean(embedStudio.isComponentsWired)}
+                isContentWired={Boolean(embedStudio.isContentWired)}
+                contentSourceLabel={embedStudio.contentSourceLabel}
+                embedSourceLabel={embedStudio.embedSourceLabel}
+                componentsSourceLabel={embedStudio.componentsSourceLabel}
+                appEmojis={appEmojis}
+                graphVariables={availableVariables}
+                templateValuePaths={embedTemplateValuePaths}
+                templatePreviewValues={getTemplatePreviewInputs({ nodes: activeNodes, connections: activeConnections }, activeNodes.find((item) => item.id === embedStudio.nodeId), availableVariables)}
+                templateSuggestions={embedTemplateSuggestions}
+                botProfile={botProfile}
+                botStatus={botStatus}
+                theme={theme}
+                collaborators={studioCollaborators}
+                onNameChange={(name) => updateEmbedStudioDraft({ name })}
+                onBlocksChange={(blocks) => updateEmbedStudioDraft({ blocks })}
+                attachments={embedStudio.attachments || []}
+                onAttachmentsChange={(attachments) => updateEmbedStudioDraft({ attachments })}
+                onOpenTextStudio={(label, value, maxLength, applyValue, parentBlockContext) => openDiscordTextStudio(null, null, label, value, maxLength, applyValue, embedStudio.collabId, parentBlockContext)}
+                onActiveTabChange={(tab) => setEmbedStudio((current) => current ? { ...current, route: { ...current.route, tab } } : current)}
+                onContentChange={(content) => updateEmbedStudioDraft({ content })}
+                onComponentsChange={(components) => updateEmbedStudioDraft({ components })}
+                onSave={handleSaveEmbedStudio}
+                onSaveAs={handleSaveEmbedAsAsset}
+                onClose={() => setEmbedStudio(null)}
+                saveLabel={['node', 'components-node'].includes(embedStudio.mode) ? 'Apply to node' : 'Save embed'}
+                showSave={embedStudio.mode !== 'new'}
+              />}
 
-          {permissionStudioOpenForActiveGraph && <PermissionStudioView
-            key={`${permissionStudio.graphId}:${permissionStudio.nodeId}`}
-            mode={permissionStudio.mode}
-            nodeName={permissionStudio.nodeName}
-            data={permissionStudio.data}
-            connectedTargetIds={permissionStudio.connectedTargetIds}
-            permissionsConnected={permissionStudio.permissionsConnected}
-            variables={availableVariables}
-            onApply={applyPermissionStudio}
-            onClose={() => setPermissionStudio(null)}
-          />}
+              {discordTextStudioOpenForActiveGraph && <TextStudioView
+                key={discordTextStudio.collabId}
+                label={discordTextStudio.label}
+                value={discordTextStudio.value}
+                readOnly={Boolean(discordTextStudio.readOnly)}
+                sharedDraft={discordTextStudio.sharedDraft}
+                maxLength={discordTextStudio.maxLength}
+                appEmojis={appEmojis}
+                graphVariables={availableVariables}
+                templatePreviewValues={getTemplatePreviewInputs({ nodes: activeNodes, connections: activeConnections }, activeNodes.find((item) => item.id === (discordTextStudio.nodeId || embedStudio?.nodeId)), availableVariables)}
+                templateValuePaths={discordTextStudio.templateValuePaths || []}
+                templateSuggestions={discordTextStudio.templateSuggestions || []}
+                collaborators={studioCollaborators}
+                remoteCursors={textStudioCursors}
+                onDraftChange={(draft, caret) => {
+                  const collabId = discordTextStudio.collabId;
+                  const previous = textCollaborationRef.current.get(collabId) || { baseText: String(discordTextStudio.value || ''), localText: '', caret: 0 };
+                  textCollaborationRef.current.set(collabId, { ...previous, localText: String(draft), caret: Number(caret) || 0 });
+                  setDiscordTextStudio((current) => current?.collabId === collabId ? { ...current, localDraft: String(draft) } : current);
+                  sendCollaborationAction({ kind: 'studio-draft', studioId: collabId, studioType: 'text', draft: { text: draft, caret } });
+                }}
+                onCursorChange={(caret) => sendCollaborationAction({ kind: 'studio-cursor', studioId: discordTextStudio.collabId, caret })}
+                onApply={applyDiscordTextStudio}
+                onClose={() => setDiscordTextStudio(null)}
+              />}
 
-          {slashCommandStudioOpenForActiveGraph && <SlashCommandStudioView
-            key={slashCommandStudio.collabId}
-            commandName={slashCommandStudio.commandName}
-            options={slashCommandStudio.options}
-            collaborators={studioCollaborators}
-            onDraftChange={updateSlashCommandStudioDraft}
-            onApply={applySlashCommandStudio}
-            onClose={() => setSlashCommandStudio(null)}
-          />}
+              {permissionStudioOpenForActiveGraph && <PermissionStudioView
+                key={`${permissionStudio.graphId}:${permissionStudio.nodeId}`}
+                mode={permissionStudio.mode}
+                nodeName={permissionStudio.nodeName}
+                data={permissionStudio.data}
+                connectedTargetIds={permissionStudio.connectedTargetIds}
+                permissionsConnected={permissionStudio.permissionsConnected}
+                variables={availableVariables}
+                onApply={applyPermissionStudio}
+                onClose={() => setPermissionStudio(null)}
+              />}
 
-          {modalStudioOpenForActiveGraph && <PopupModalStudioView
-            key={`${modalStudio.projectId}:${modalStudio.graphId}:${modalStudio.nodeId}`}
-            graphName={activeGraph?.name || 'Untitled graph'}
-            nodeName={modalStudio.nodeName}
-            theme={theme}
-            modal={modalStudio.modal}
-            onDraftChange={updateModalStudioDraft}
-            onApply={applyModalStudio}
-            onClose={() => setModalStudio(null)}
-          />}
-          </Suspense>
+              {slashCommandStudioOpenForActiveGraph && <SlashCommandStudioView
+                key={slashCommandStudio.collabId}
+                commandName={slashCommandStudio.commandName}
+                options={slashCommandStudio.options}
+                collaborators={studioCollaborators}
+                onDraftChange={updateSlashCommandStudioDraft}
+                onApply={applySlashCommandStudio}
+                onClose={() => setSlashCommandStudio(null)}
+              />}
 
-          {!embedStudioOpenForActiveGraph && !discordTextStudioOpenForActiveGraph && !permissionStudioOpenForActiveGraph && !slashCommandStudioOpenForActiveGraph && !modalStudioOpenForActiveGraph && <>
-          <div className="canvas-connection-guard" inert={remoteWorkspaceBlocked}>
-          <NodeCanvas
-            graphId={activeTabId}
-            projectId={activeProjectId}
-            focusRequest={nodeFocusRequest}
-            followRequest={followCollaboratorRequest}
-            onFollowComplete={completeFollowCollaborator}
-            nodes={activeNodes}
-            connections={activeConnections}
-            authToken={authToken}
-            graphName={activeGraph?.name || 'Untitled graph'}
-            onSelectedNodeChange={handleCanvasNodeSelect}
-            onSelectedNodeCountChange={setSelectedCanvasNodeCount}
-            activePulseNodeIds={activePulseGraphId === activeTabId ? activePulseNodeIds : []}
-            debugStep={activeDebugStep}
-            onDebugAction={(action) => { if (action === 'continue') { setActiveDebugStep(null); setActivePulseNodeIds([]); } arcEvents.emit('simulation:debug-action-request', action); }}
-            graphVariables={availableVariables}
-            functionGraphs={functionGraphs}
-            callableGraphs={callableGraphs}
-            appEmojis={appEmojis}
-            nodeDefinitions={availableNodeDefinitions}
-            settings={settings}
-            isLocked={isLocked || !canWriteGraphs}
-            canvasLocked={isLocked}
-            canWriteGraphs={canWriteGraphs}
-            desktopMode={desktopMode}
-            shortcutPlatform={shortcutPlatform}
-            onNodesChange={handleNodesChange}
-            tagGroups={activeGraph?.tagGroups || []}
-            notes={activeGraph?.notes || []}
-            arrows={activeGraph?.arrows || []}
-            transientArrows={transientCanvasArrows.filter((arrow) => arrow.projectId === activeProjectId && arrow.graphId === activeTabId)}
-            currentUser={currentUser}
-            projectOwnerId={projects.find((project) => project.id === activeProjectId)?.ownerId || ''}
-            onNotesChange={handleGraphNotesChange}
-            onArrowsChange={handleGraphArrowsChange}
-            onCanvasArrowAction={sendCanvasArrowAction}
-            noteEditLocks={noteEditLockState.roomKey === `${activeProjectId}:${activeTabId}` ? noteEditLockState.locks : {}}
-            collaborationOnline={Boolean(authToken)}
-            collaborationReady={collaborationSocketStatus === 'connected' && liveGraphReadyRef.current.has(`${activeProjectId}:${activeTabId}`)}
-            collaborationMotionSupported={transientCanvasMotionSupported}
-            collaborationClientId={collaborationClientIdRef.current}
-            onRequestNoteEditLock={requestNoteEditLock}
-            onReleaseNoteEditLock={releaseNoteEditLock}
-            onTagGroupsChange={handleTagGroupsChange}
-            onRequestCreateTagGroup={(nodeIds, noteIds) => openTagGroupDialog(nodeIds, null, noteIds)}
-            onRequestEditTagGroup={(group) => openTagGroupDialog(null, group)}
-            onRenameNode={openNodeRename}
-            onConnectionsChange={handleConnectionsChange}
-            onOpenPalette={openPaletteAt}
-            onViewportCenterChange={(position) => { viewportCenterRef.current = position; }}
-            onOpenLibrary={() => { setIsProjectsOpen(false); setIsPluginStoreOpen(false); setIsLibraryOpen(true); }}
-            onOpenVariables={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(true); }}
-            onHistoryGroupStart={handleHistoryGroupStart}
-            onHistoryGroupEnd={handleHistoryGroupEnd}
-            onNodeDrop={handleDropNode}
-            onSaveNodePrefab={handleRequestSaveNodePrefab}
-            onOpenEmbedStudio={openEmbedStudioForNode}
-            onOpenTextStudio={openDiscordTextStudio}
-            onOpenPermissionStudio={openPermissionStudio}
-            onOpenSlashCommandStudio={openSlashCommandStudio}
-            onOpenModalStudio={openModalStudioForNode}
-            onOpenFunctionGraph={handleOpenGraph}
-            remoteActions={remoteCollaborationActions}
-            onCollaborationAction={sendCollaborationAction}
-            graphChatEnabled={!localDesktopWorkspace && Boolean(activeGraph) && !activeGraphIsLocalRecovery}
-            graphChatBubbles={graphChatBubbles}
-            onSendGraphChat={sendGraphChatMessage}
-            onMoveGraphChatBubble={moveGraphChatBubble}
-          />
-          </div>
-          <div className={`canvas-context-label ${!activeGraph ? 'is-no-graph' : graphValidation.errors.length ? 'has-validation-errors' : graphValidation.warnings.length ? 'has-validation-warnings' : 'is-validation-ready'}`}>
-            {activeGraph ? <><span className="context-dot" />
-              {activeNodes.length} nodes <span className="context-separator">·</span> {activeConnections.length} connections
-              <span className="context-separator">·</span> {graphValidation.errors.length || graphValidation.warnings.length
-                ? <button type="button" className="canvas-context-validation" onClick={handleValidateGraph} aria-label={`Open graph review with ${graphValidation.errors.length ? `${graphValidation.errors.length} issues` : `${graphValidation.warnings.length} warnings`}`}>{graphValidation.errors.length ? `${graphValidation.errors.length} issues` : 'Review'}</button>
-                : 'Ready'}</>
-              : 'Open a graph to run checks.'}
-            {(!desktopMode || !localDesktopWorkspace) && collaborationSocketStatus !== 'connected' && <span className="collaboration-connection is-reconnecting" role="status" aria-live="polite">{collaborationSocketStatus === 'incompatible' ? `Update ARC Studio to ${minimumRequiredClientVersion} or newer to connect.` : collaborationSocketStatus === 'connecting' ? 'Connecting…' : 'Reconnecting…'}</span>}
-            {activeGraph && (!desktopMode || !localDesktopWorkspace) && collaborationSocketStatus === 'connected' && collaborationConnectionFlaky && <span className="collaboration-connection is-flaky" role="status" aria-live="polite">Flaky connection</span>}
-            {activeGraph && collaborators.length > 0 && <span className="canvas-collaborators" title={collaborators.slice(0, 8).map((person) => person.username).concat(collaborators.length > 8 ? [`…and ${collaborators.length - 8} more`] : []).join('\n')}><span className="context-separator">·</span> {collaborators.slice(0, 2).map((person) => person.username).join(', ')}{collaborators.length > 2 ? ` …and ${collaborators.length - 2} more` : ''}</span>}
-          </div>
-          {isLocked && <div className="canvas-lock-state"><LockKeyhole size={13} /> Locked</div>}
-          </>}
+              {modalStudioOpenForActiveGraph && <PopupModalStudioView
+                key={`${modalStudio.projectId}:${modalStudio.graphId}:${modalStudio.nodeId}`}
+                graphName={activeGraph?.name || 'Untitled graph'}
+                nodeName={modalStudio.nodeName}
+                theme={theme}
+                modal={modalStudio.modal}
+                onDraftChange={updateModalStudioDraft}
+                onApply={applyModalStudio}
+                onClose={() => setModalStudio(null)}
+              />}
+            </Suspense>
 
-          {isLibraryOpen && <Suspense fallback={<LazyFeatureLoading label="Opening Library…" kind="sidebar" isDesktop={desktopMode} width={sidebarWidths.library} />}><GraphLibraryPanel definitions={availableNodeDefinitions} newNodesUserKey={newNodesUserKey} graphActivity={projectCollaboration.projectId === activeProjectId ? projectCollaboration.graphActivity || [] : []} sidebarWidth={sidebarWidths.library} onSidebarResize={(width) => handleSidebarResize('library', width)} activeSection={librarySection} onActiveSectionChange={setLibrarySection} usageScope={activeProjectId} desktopMode={desktopMode} canImportGraph={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} onImportGraph={handleImportGraph} graphs={savedGraphs} templates={graphTemplates} snapshots={graphSnapshots} nodePrefabs={nodePrefabs} embedAssets={embedAssets} graphVariables={availableVariables} defaultGraphId={defaultGraphId} activeGraph={activeGraph} openGraphIds={tabs.map((tab) => tab.id)} activeTabId={activeTabId} onClose={() => setIsLibraryOpen(false)} onOpenGraph={handleOpenGraph} onUseTemplate={(template) => handleAddTab(template)} onCreateFunction={handleAddFunctionGraph} onDeleteGraph={handleDeleteSavedGraph} onDeleteGraphs={handleDeleteSavedGraphs} onDuplicateGraph={handleDuplicateGraph} onRenameGraph={handleRenameGraph} onSaveTemplate={handleSaveGraphTemplate} onDeleteTemplate={handleDeleteGraphTemplate} onSetDefault={handleSetDefaultGraph} onExportBot={handleExportBot} exportInProgress={exportInProgress} onAddNode={handlePlaceNode} onAddPrefab={(prefab) => handleDropNode({ type: 'prefab', prefabId: prefab.id })} onDeletePrefab={handleDeleteNodePrefab} onCreateEmbed={createEmbedAsset} onOpenEmbed={openEmbedAsset} onDeleteEmbed={handleDeleteEmbedAsset} onManageVariables={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(true); }} onCreateSnapshot={async (graph, name) => {
-            await ensureWorkspaceGraphsSaved();
-            const response = await fetch(apiUrl(`/api/graphs/${encodeURIComponent(graph.id)}/snapshots`), { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-arc-token': authToken }, body: JSON.stringify({ graph, name }) });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Could not create graph snapshot.');
-            setGraphSnapshots(data.snapshots || []);
-            arcEvents.emit('toast:notify', { title: 'Snapshot saved', message: data.snapshot.name, type: 'success' });
-          }} onDeleteSnapshot={async (snapshot) => {
-            const response = await fetch(apiUrl(`/api/graphs/snapshots/${encodeURIComponent(snapshot.id)}`), { method: 'DELETE', headers: { 'x-arc-token': authToken } });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Could not delete snapshot.');
-            setGraphSnapshots(data.snapshots || []);
-          }} onRestoreSnapshot={(snapshot) => {
-            const restored = { ...structuredClone(snapshot.graph), id: activeGraph.id, name: activeGraph.name, isDirty: true };
-            recordHistory(activeGraph.id);
-            setActiveNodes(restored.nodes || []);
-            setActiveConnections(restored.connections || []);
-            setTabs((previous) => previous.map((tab) => tab.id === activeGraph.id ? restored : tab));
-            arcEvents.emit('toast:notify', { title: 'Snapshot restored', message: `${snapshot.name} · save to keep these changes`, type: 'success' });
-          }} /></Suspense>}
-          {isProjectsOpen && <aside className="project-sidebar" aria-label="Projects" style={{ '--arc-sidebar-width': `${sidebarWidths.projects}px` }}>
-            <SidebarResizeHandle width={sidebarWidths.projects} defaultWidth={DEFAULT_SIDEBAR_WIDTHS.projects} onResize={(width) => handleSidebarResize('projects', width)} />
-            <header className="graph-library-header">
-              <span><FolderTree size={14} />Projects <small>{projects.length}</small></span>
-              <button className="icon-button compact" type="button" aria-label="Close projects" onClick={() => { if (!projectBusy) setIsProjectsOpen(false); }} disabled={projectBusy}><X size={14} /></button>
-            </header>
-            <p className="project-sidebar-description">Switch between bot projects or create a new one. {!localDesktopWorkspace && (maxProjects === null ? 'No project limit.' : `${projects.length} of ${maxProjects} projects.`)}</p>
-            {projects.length > 10 && <label className="project-sidebar-search"><Search size={14} /><input type="search" value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Search projects" aria-label="Search projects" /></label>}
-            <div className={`project-switcher-list ${projects.length ? '' : 'is-empty'}`}>
-              {filteredProjects.map((project) => <div key={project.id} className={`project-switcher-row ${project.id === activeProjectId ? 'is-active' : ''}`} onContextMenu={(event) => openProjectMenu(event, project)}>
-                <button
-                  type="button"
-                  className="project-switcher-item"
-                  title={projectUsers[project.id]?.length ? `Online: ${projectUsers[project.id].map((user) => user.username).join(', ')}` : projectLastSeen[project.id]?.username ? `Last here: ${projectLastSeen[project.id].username} · ${formatCompactLastSeen(projectLastSeen[project.id].updatedAt)}` : 'No recent activity'}
-                  onClick={() => handleActivateProject(project.id)}
-                  disabled={projectBusy || project.id === activeProjectId}
-                  aria-current={project.id === activeProjectId ? 'page' : undefined}
-                >
-                  <span className="project-switcher-copy"><strong>{project.name}</strong>{projectUsers[project.id]?.length > 0 && <small className="project-online-users">Online · {projectUsers[project.id].map((user) => user.username).join(', ')}</small>}{projectLastSeen[project.id]?.username && <small className="project-last-seen">Last here · {projectLastSeen[project.id].username} · {formatCompactLastSeen(projectLastSeen[project.id].updatedAt)}</small>}{!projectUsers[project.id]?.length && !projectLastSeen[project.id]?.username && <small className="project-last-seen">No recent activity</small>}</span>
-                  {project.id === activeProjectId && <span className="project-active-mark">Current</span>}
-                </button>
-                <button type="button" className="project-more-button" aria-label={`More actions for ${project.name}`} title="Project options" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => {
-                  const rect = event.currentTarget.getBoundingClientRect();
-                  openProjectMenu(event, project, { x: rect.right, y: rect.bottom });
-                }}><MoreHorizontal size={15} /></button>
-              </div>)}
-              {!projects.length && <div className="project-switcher-empty">
-                <FolderTree size={19} aria-hidden="true" />
-                <strong>No projects yet</strong>
-                <span>Create a project below to start building a bot.</span>
-              </div>}
-              {projects.length > 0 && !filteredProjects.length && <div className="project-switcher-empty">
-                <Search size={19} aria-hidden="true" />
-                <strong>No projects found</strong>
-                <span>Try a different search.</span>
-              </div>}
-            </div>
-            <form className="project-create-form" onSubmit={handleCreateProject}>
-              <TextInput key={projectNameShakeKey} id="new-project-name" label="New project" placeholder="e.g. Moderation bot" value={newProjectName} maxLength={64} error={projectNameInvalid ? 'Enter a project name.' : undefined} wrapperClassName={projectNameInvalid ? 'project-name-invalid-shake' : ''} onChange={(event) => { setNewProjectName(event.target.value); setProjectNameInvalid(false); setProjectError(''); }} />
-              {projectError && <p className="field-error">{projectError}</p>}
-              <Button type="submit" icon={Plus} onContextMenu={(event) => openProjectMenu(event, null)} disabled={projectBusy || maxProjects !== null && projects.length >= maxProjects} loading={projectBusy}>Create project</Button>
-              <button className="project-import-button" type="button" disabled={projectBusy || maxProjects !== null && projects.length >= maxProjects} onClick={() => { document.getElementById('project-import-file')?.click(); }}><FileUp size={14} />Import project file</button>
-              <input id="project-import-file" type="file" accept=".arcproject,.arcproject.json" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) { setProjectImportFile(file); setProjectImportTrusted(false); setProjectImportError(''); setProjectImportCompatibility(null); setProjectImportOldVersionApproved(false); } event.target.value = ''; }} />
-              {!localDesktopWorkspace && currentUser?.role === 'admin' && <label className="project-limit-control"><span>Project limit</span><div><input aria-label="Maximum projects" type="number" min="1" step="1" value={maxProjects ?? ''} placeholder="Unlimited" onChange={(event) => { const next = event.target.value; if (next === '') setMaxProjects(null); else if (/^\d+$/.test(next)) setMaxProjects(Number(next)); }} onBlur={(event) => handleSetProjectLimit(event.target.value === '' ? 'unlimited' : Number(event.target.value))} /><button type="button" onClick={() => handleSetProjectLimit('unlimited')}>Unlimited</button></div></label>}
-            </form>
-          </aside>}
-          {projectMenu && <div className="project-context-menu" role="menu" style={{ left: projectMenu.x, top: projectMenu.y }} onPointerDown={(event) => event.stopPropagation()}>
-            {projectMenu.kind === 'create' ? <button type="button" role="menuitem" className="project-context-export" disabled={projectBusy || maxProjects !== null && projects.length >= maxProjects} onClick={() => { setProjectMenu(null); setNewProjectTemplate('ticket'); setNewProjectName('Ticket Bot'); setProjectNameManuallyEdited(false); setProjectError(''); setProjectTemplateDialog(true); }}><FileCode2 size={14} />Create from template</button> : <>
-            <button type="button" role="menuitem" className="project-context-export" disabled={projectBusy} onClick={() => { const project = projectMenu.project; setProjectMenu(null); handleExportProject(project); }}><Download size={14} />Export project</button>
-            <button type="button" role="menuitem" className="project-context-export" disabled={exportInProgress} onClick={() => {
-              const projectId = projectMenu.project.id;
-              setProjectMenu(null);
-              handleExportBot(projectId);
-            }}><Download size={14} />Export bot</button>
-            {desktopMode && localDesktopWorkspace && <button type="button" role="menuitem" className="project-context-export" disabled={projectBusy} onClick={() => { const project = projectMenu.project; setProjectMenu(null); void handleOpenProjectInNewWindow(project); }}><AppWindow size={14} />Open in new window</button>}
-            <button type="button" role="menuitem" className="project-context-delete" disabled={projects.length <= 1 || projectBusy} onClick={() => {
-              setProjectDelete(projectMenu.project);
-              setProjectDeletePromptError('');
-              setProjectDeleteError('');
-              setProjectDeleteFieldShake(false);
-              setProjectDeleteName('');
-              setProjectDeleteError('');
-              setProjectMenu(null);
-            }}><Trash2 size={14} />Delete project</button>
-            </>}
-          </div>}
-          <LazyMountedFeature Component={BotSettingsModal} isOpen={isBotSidebarOpen} loadingLabel="Opening app settings…" loadingKind="sidebar" isDesktop={desktopMode} presentation="sidebar" sidebarWidth={sidebarWidths.bot} onSidebarResize={(width) => handleSidebarResize('bot', width)} onClose={() => setIsBotSidebarOpen(false)} onViewCommands={() => setCommandBrowserRequest((request) => request + 1)} authToken={authToken} profile={botProfile} onProfileChange={setBotProfile} />
-          <LazyMountedFeature Component={PluginStoreModal} isOpen={isPluginStoreOpen} loadingLabel="Opening Plugin Store…" loadingKind="sidebar" isDesktop={desktopMode} sidebarWidth={sidebarWidths.plugins} onSidebarResize={(width) => handleSidebarResize('plugins', width)} onClose={() => setIsPluginStoreOpen(false)} authToken={authToken} canInstall={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} canManageSource={currentUser?.permissions?.includes('*')} onInstalled={handlePluginsChanged} />
-          <LazyMountedFeature Component={GraphVariablesModal} isOpen={isVariablesOpen} loadingLabel="Opening variables…" loadingKind="sidebar" isDesktop={desktopMode} presentation="sidebar" sidebarWidth={sidebarWidths.variables} activeScope={variableScope} onScopeChange={setVariableScope} onSidebarResize={(width) => handleSidebarResize('variables', width)} onClose={() => setIsVariablesOpen(false)} variables={graphVariables} projectVariables={projectVariables} canEdit={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} canEditGraph={Boolean(activeGraph && (currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write')))} canEditProject={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} onChange={handleVariablesChange} onProjectChange={handleProjectVariablesChange} onOpenTextEditor={openVariableTextEditor} onRestoreSystemVariable={handleRestoreSystemVariable} isSaving={savingProjectVariables || savingGraphIds.includes(activeTabId)} />
-        </main>
-      </div>
-
-      <ControlDock
-        logs={logs}
-        botStatus={botStatus}
-        discordAuthWarning={discordAuthWarning}
-        networkOnline={networkOnline}
-        botMetrics={botMetrics}
-        botProfile={botProfile}
-        cachedAppEmojis={appEmojis}
-        onEmojisChange={handleAppEmojisChange}
-        activeTabId={activeTabId}
-        activeProjectId={activeProjectId}
-        graphs={[...graphLookup.values()]}
-        emojiCacheScope={`${workspaceMode}:${activeProjectId}:${workspaceRevision}`}
-        graphLookup={graphLookup}
-        graphValidationReports={[...graphLookup.values()].map((graph) => ({ graph, report: validateGraph(graph, graphLookup, botProfile?.intentSummary, projectVariables) }))}
-        graphNodes={activeNodes}
-        nodeDefinitions={availableNodeDefinitions}
-        authToken={authToken}
-        isLocked={isLocked}
-        canControlBot={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('bot:control'))}
-        consoleOpenRequest={consoleOpenRequest}
-        gatewayStartedRequest={gatewayStartedRequest}
-        commandBrowserRequest={commandBrowserRequest}
-        onClearLogs={handleClearLogs}
-        onStartBot={handleStartBot}
-        onStopBot={handleStopBot}
-        onIntentSummaryChange={handleIntentSummaryChange}
-        onOpenGraph={handleOpenGraph}
-        onTraceLog={traceGraphNode}
-        onTraceIssue={traceGraphNode}
-      />
-
-      <LazyMountedFeature Component={NodePalette} isOpen={isPaletteOpen} loadingLabel="Opening node palette…" isDesktop={desktopMode} newNodesUserKey={newNodesUserKey} onClose={() => { setIsPaletteOpen(false); setPaletteNodePosition(null); }} onSelectNode={handlePlaceNode} pluginDefinitionsRevision={pluginDefinitionsRevision} definitions={availableNodeDefinitions} />
-      <LazyMountedFeature Component={CommandPalette} isOpen={isCommandPaletteOpen} loadingLabel="Opening search…" isDesktop={desktopMode}
-        graphs={[...graphLookup.values()]}
-        definitions={availableNodeDefinitions}
-        plugins={installedPlugins}
-        onClose={() => setIsCommandPaletteOpen(false)}
-        onAddNode={handlePlaceNode}
-        onOpenGraph={handleOpenGraph}
-        onOpenPlugin={() => { setIsCommandPaletteOpen(false); setIsLibraryOpen(false); setIsProjectsOpen(false); setIsPluginStoreOpen(true); }}
-        onGoToNode={traceGraphNode}
-      />
-      <EmojiPickerOverlay appEmojis={appEmojis} shortcut={(desktopMode ? settings.shortcuts?.emojiPicker : null) || DEFAULT_SHORTCUTS.emojiPicker} desktopMode={desktopMode} />
-      <LazyMountedFeature Component={EditorSettingsModal} isOpen={isSettingsOpen} loadingLabel="Opening settings…" isDesktop={desktopMode}
-        onClose={() => setIsSettingsOpen(false)}
-        settings={settings}
-        onUpdateSettings={handleUpdateSettings}
-        appUpdate={appUpdate}
-        serverUpdate={serverUpdate}
-        stableUpdateReady={stableUpdateReady}
-        releaseChannel={currentUpdateChannel}
-        networkOnline={networkOnline}
-        onOpenStudioUpdate={handleOpenStudioUpdate}
-        onAutoLayout={handleAutoLayout}
-        onExportGraph={handleExportGraph}
-        onResetLocalData={handleResetLocalData}
-        desktopMode={desktopMode}
-        localWorkspace={workspaceMode === 'local'}
-        canResetLocalWorkspace={desktopMode && workspaceMode === 'local' && currentUser?.isPrimaryAdmin === true}
-        platform={shortcutPlatform}
-        themeChoice={hasThemeChoice ? theme : 'system'}
-        onThemeChange={handleThemeChange}
-        authToken={authToken}
-        activeProjectId={activeProjectId}
-        canManageLogRetention={currentUser?.permissions?.includes('*')}
-        canManageActivityWebhook={currentUser?.isPrimaryAdmin === true}
-        idleDisconnectMinutes={projects.find((project) => project.id === activeProjectId)?.idleDisconnectMinutes ?? 15}
-        canManageIdleDisconnect={Boolean(currentUser?.permissions?.includes('*') || projects.find((project) => project.id === activeProjectId)?.ownerId === currentUser?.id)}
-        onSetIdleDisconnectMinutes={handleSetIdleDisconnectMinutes}
-      />
-      <Modal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} title="Keyboard shortcuts" subtitle="ARC Studio editor" icon={CircleHelp}>
-        <div className="keyboard-shortcut-list">
-          {[
-            ['New graph', formatShortcut((desktopMode ? settings.shortcuts?.newGraph : null) || DEFAULT_SHORTCUTS.newGraph, shortcutPlatform)],
-            ['New blank graph', formatShortcut((desktopMode ? settings.shortcuts?.newBlankGraph : null) || DEFAULT_SHORTCUTS.newBlankGraph, shortcutPlatform)],
-            ['Next / previous graph tab', `${formatShortcut((desktopMode ? settings.shortcuts?.switchTabNext : null) || DEFAULT_SHORTCUTS.switchTabNext, shortcutPlatform)} / ${formatShortcut((desktopMode ? settings.shortcuts?.switchTabPrevious : null) || DEFAULT_SHORTCUTS.switchTabPrevious, shortcutPlatform)}`],
-            ['Close active graph tab', formatShortcut((desktopMode ? settings.shortcuts?.closeTab : null) || DEFAULT_SHORTCUTS.closeTab, shortcutPlatform)],
-            ['Add node', formatShortcut((desktopMode ? settings.shortcuts?.addNode : null) || DEFAULT_SHORTCUTS.addNode, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
-            ['Add note', formatShortcut((desktopMode ? settings.shortcuts?.addNote : null) || DEFAULT_SHORTCUTS.addNote, shortcutPlatform)],
-            ['Find in sidebar or canvas', shortcutModifier === '⌘' ? '⌘F' : 'Ctrl+F'],
-            ['Next / previous find result', shortcutModifier === '⌘' ? '⌘G / ⌘⇧G' : 'Ctrl+G / Ctrl+Shift+G'],
-            ['Draw arrow', `${shortcutPlatform === 'macos' ? '⌥ Option' : 'Alt'} + Shift + drag`],
-            ...(localDesktopWorkspace ? [['Arrange nodes', formatShortcut(settings.shortcuts?.arrangeNodes || DEFAULT_SHORTCUTS.arrangeNodes, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')]] : []),
-            ['Move nodes between colored sections', `${shortcutPlatform === 'macos' ? '⌥ Option' : 'Alt'} + drag`],
-            ['Toggle Library', formatShortcut((desktopMode ? settings.shortcuts?.toggleLibrary : null) || DEFAULT_SHORTCUTS.toggleLibrary, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
-            ['Open node search', formatShortcut((desktopMode ? settings.shortcuts?.openSearch : null) || DEFAULT_SHORTCUTS.openSearch, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
-            ['Open emoji picker in a text field', formatShortcut((desktopMode ? settings.shortcuts?.emojiPicker : null) || DEFAULT_SHORTCUTS.emojiPicker, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
-            ['Toggle server console', formatShortcut((desktopMode ? settings.shortcuts?.toggleConsole : null) || DEFAULT_SHORTCUTS.toggleConsole, shortcutPlatform)],
-            ['Connect / disconnect gateway', formatShortcut((desktopMode ? settings.shortcuts?.connectGateway : null) || DEFAULT_SHORTCUTS.connectGateway, shortcutPlatform)],
-            ['Rename selected node', formatShortcut((desktopMode ? settings.shortcuts?.renameNode : null) || DEFAULT_SHORTCUTS.renameNode, shortcutPlatform)],
-            ['Reload ARC Studio', formatShortcut((desktopMode ? settings.shortcuts?.reloadStudio : null) || DEFAULT_SHORTCUTS.reloadStudio, shortcutPlatform)],
-            ['Save graph', formatShortcut((desktopMode ? settings.shortcuts?.saveGraph : null) || DEFAULT_SHORTCUTS.saveGraph, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
-            ['Undo', formatShortcut((desktopMode ? settings.shortcuts?.undo : null) || DEFAULT_SHORTCUTS.undo, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
-            ['Redo', formatShortcut((desktopMode ? settings.shortcuts?.redo : null) || DEFAULT_SHORTCUTS.redo, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
-            ['Copy / paste selected node', `${shortcutModifier} + C / V`],
-            ['Increase / decrease UI scale', `${shortcutModifier} + + / −`],
-            ['Pan canvas', 'Space + drag']
-          ].map(([label, keys]) => <div className="keyboard-shortcut-row" key={label}><span>{label}</span><span className="keyboard-shortcut-keys" aria-label={keys}>{getShortcutDisplayTokens(keys).map((key, index, tokens) => {
-            const isSeparator = key === '/' || (key === '+' && tokens[index - 1] !== '+');
-            if (isSeparator) return <span className="keyboard-shortcut-separator" key={`${key}-${index}`} aria-hidden="true">{key}</span>;
-            const isModifier = ['⌘', '⇧', '⌥', 'Ctrl', 'Shift', 'Alt'].includes(key);
-            const isSymbol = ['⌘', '⇧', '⌥'].includes(key);
-            return <kbd className={`${isModifier ? 'is-modifier ' : ''}${isSymbol ? 'is-symbol' : ''}`.trim()} key={`${key}-${index}`} aria-hidden="true">{key}</kbd>;
-          })}</span></div>)}
-        </div>
-      </Modal>
-      <LazyMountedFeature Component={BotSettingsModal} isOpen={isBotSettingsOpen} loadingLabel="Opening app settings…" isDesktop={desktopMode} onClose={() => setIsBotSettingsOpen(false)} authToken={authToken} profile={botProfile} onProfileChange={setBotProfile} />
-      <Modal
-        isOpen={Boolean(exportReview)}
-        onClose={() => setExportReview(null)}
-        title="Export Bot"
-        subtitle={`${exportReview?.issues.length || 0} finding${exportReview?.issues.length === 1 ? '' : 's'} · review the package and runtime requirements before building.`}
-        icon={PackageOpen}
-        maxWidth="max-w-2xl"
-        footer={<><Button variant="secondary" onClick={() => setExportReview(null)}>Cancel</Button><Button disabled={exportInProgress || exportReview?.issues.some((issue) => issue.kind === 'error')} onClick={() => { const review = exportReview; setExportReview(null); if (review) handleExportBot(review.projectId, true, { includeCryptoSecret: review.includeCryptoSecret, includeBotToken: review.includeBotToken }); }}>Build bot ZIP</Button></>}
-      >
-        {exportReview?.summary && <div className="export-preflight-summary">
-          <div className="export-preflight-stats"><span><strong>{exportReview.summary.graphCount}</strong> graphs</span><span><strong>{exportReview.summary.nodeCount}</strong> nodes</span><span><strong>{exportReview.summary.variableCount}</strong> variables</span></div>
-          <div className="export-preflight-disclosures">
-            <ExportReviewDisclosure title="Included in the archive" summary={`${exportReview.summary.included.length} files and folders`} expanded={Boolean(exportReviewSections.included)} onToggle={() => setExportReviewSections((current) => ({ ...current, included: !current.included }))}>
-              {exportReview.summary.included.map((item) => <span key={item}>{item}</span>)}
-            </ExportReviewDisclosure>
-            {exportReview.summary.graphNames.length > 0 && <ExportReviewDisclosure title="Graphs" summary={`${exportReview.summary.graphNames.length} included`} expanded={Boolean(exportReviewSections.graphs)} onToggle={() => setExportReviewSections((current) => ({ ...current, graphs: !current.graphs }))}>
-              <span>{exportReview.summary.graphNames.join(' · ')}</span>
-            </ExportReviewDisclosure>}
-            <ExportReviewDisclosure title="Gateway intents and permissions" summary={`${exportReview.summary.requiredIntents.length || 1} intents · ${exportReview.summary.requiredPermissions.length} permissions`} expanded={Boolean(exportReviewSections.requirements)} onToggle={() => setExportReviewSections((current) => ({ ...current, requirements: !current.requirements }))}>
-              <div className="export-preflight-columns">
-                <div className="export-preflight-section"><strong>Gateway intents</strong><span>{exportReview.summary.requiredIntents.length ? exportReview.summary.requiredIntents.join(', ') : 'Guilds (required)'}</span></div>
-                <div className="export-preflight-section"><strong>Permissions used by nodes</strong><span>{exportReview.summary.requiredPermissions.length ? exportReview.summary.requiredPermissions.join(', ') : 'No additional permissions inferred'}</span><span>Inferred from node types; verify the bot role has these in each server.</span></div>
+            {!embedStudioOpenForActiveGraph && !discordTextStudioOpenForActiveGraph && !permissionStudioOpenForActiveGraph && !slashCommandStudioOpenForActiveGraph && !modalStudioOpenForActiveGraph && <>
+              <div className="canvas-connection-guard" inert={remoteWorkspaceBlocked}>
+                <NodeCanvas
+                  graphId={activeTabId}
+                  projectId={activeProjectId}
+                  focusRequest={nodeFocusRequest}
+                  followRequest={followCollaboratorRequest}
+                  onFollowComplete={completeFollowCollaborator}
+                  nodes={activeNodes}
+                  connections={activeConnections}
+                  authToken={authToken}
+                  graphName={activeGraph?.name || 'Untitled graph'}
+                  onSelectedNodeChange={handleCanvasNodeSelect}
+                  onSelectedNodeCountChange={setSelectedCanvasNodeCount}
+                  activePulseNodeIds={activePulseGraphId === activeTabId ? activePulseNodeIds : []}
+                  debugStep={activeDebugStep}
+                  onDebugAction={(action) => { if (action === 'continue') { setActiveDebugStep(null); setActivePulseNodeIds([]); } arcEvents.emit('simulation:debug-action-request', action); }}
+                  graphVariables={availableVariables}
+                  functionGraphs={functionGraphs}
+                  callableGraphs={callableGraphs}
+                  appEmojis={appEmojis}
+                  nodeDefinitions={availableNodeDefinitions}
+                  settings={settings}
+                  isLocked={isLocked || !canWriteGraphs}
+                  canvasLocked={isLocked}
+                  canWriteGraphs={canWriteGraphs}
+                  desktopMode={desktopMode}
+                  shortcutPlatform={shortcutPlatform}
+                  onNodesChange={handleNodesChange}
+                  tagGroups={activeGraph?.tagGroups || []}
+                  notes={activeGraph?.notes || []}
+                  arrows={activeGraph?.arrows || []}
+                  transientArrows={transientCanvasArrows.filter((arrow) => arrow.projectId === activeProjectId && arrow.graphId === activeTabId)}
+                  currentUser={currentUser}
+                  projectOwnerId={projects.find((project) => project.id === activeProjectId)?.ownerId || ''}
+                  onNotesChange={handleGraphNotesChange}
+                  onArrowsChange={handleGraphArrowsChange}
+                  onCanvasArrowAction={sendCanvasArrowAction}
+                  noteEditLocks={noteEditLockState.roomKey === `${activeProjectId}:${activeTabId}` ? noteEditLockState.locks : {}}
+                  collaborationOnline={Boolean(authToken)}
+                  collaborationReady={collaborationSocketStatus === 'connected' && liveGraphReadyRef.current.has(`${activeProjectId}:${activeTabId}`)}
+                  collaborationMotionSupported={transientCanvasMotionSupported}
+                  collaborationClientId={collaborationClientIdRef.current}
+                  onRequestNoteEditLock={requestNoteEditLock}
+                  onReleaseNoteEditLock={releaseNoteEditLock}
+                  onTagGroupsChange={handleTagGroupsChange}
+                  onRequestCreateTagGroup={(nodeIds, noteIds) => openTagGroupDialog(nodeIds, null, noteIds)}
+                  onRequestEditTagGroup={(group) => openTagGroupDialog(null, group)}
+                  onRenameNode={openNodeRename}
+                  onConnectionsChange={handleConnectionsChange}
+                  onOpenPalette={openPaletteAt}
+                  onViewportCenterChange={(position) => { viewportCenterRef.current = position; }}
+                  onOpenLibrary={() => { setIsProjectsOpen(false); setIsPluginStoreOpen(false); setIsLibraryOpen(true); }}
+                  onOpenVariables={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(true); }}
+                  onHistoryGroupStart={handleHistoryGroupStart}
+                  onHistoryGroupEnd={handleHistoryGroupEnd}
+                  onNodeDrop={handleDropNode}
+                  onSaveNodePrefab={handleRequestSaveNodePrefab}
+                  onOpenEmbedStudio={openEmbedStudioForNode}
+                  onOpenTextStudio={openDiscordTextStudio}
+                  onOpenPermissionStudio={openPermissionStudio}
+                  onOpenSlashCommandStudio={openSlashCommandStudio}
+                  onOpenModalStudio={openModalStudioForNode}
+                  onOpenFunctionGraph={handleOpenGraph}
+                  remoteActions={remoteCollaborationActions}
+                  onCollaborationAction={sendCollaborationAction}
+                  graphChatEnabled={!localDesktopWorkspace && Boolean(activeGraph) && !activeGraphIsLocalRecovery}
+                  graphChatBubbles={graphChatBubbles}
+                  onSendGraphChat={sendGraphChatMessage}
+                  onMoveGraphChatBubble={moveGraphChatBubble}
+                />
               </div>
-            </ExportReviewDisclosure>
-            <ExportReviewDisclosure title="Runtime and configuration" summary={exportReview.summary.runtime} expanded={Boolean(exportReviewSections.runtime)} onToggle={() => setExportReviewSections((current) => ({ ...current, runtime: !current.runtime }))}>
-              {exportReview.summary.configuration.map((item) => <span key={item}>{item}</span>)}
-            </ExportReviewDisclosure>
-          </div>
-          <div className="export-secret-options">
-            {exportReview.summary.usesCryptoNodes && <label className="export-secret-option">
-              <input type="checkbox" checked={Boolean(exportReview.includeCryptoSecret)} onChange={(event) => setExportReview((current) => current ? { ...current, includeCryptoSecret: event.target.checked } : current)} />
-              <span><strong>Include generated crypto secret in .env</strong><small>{exportReview.includeCryptoSecret ? 'Used by AES nodes with no passphrase. Keep it private and reuse it when replacing an export that has stored ciphertext.' : 'Without a saved secret, ciphertext made with the default key cannot be decrypted after the bot restarts.'}</small></span>
-            </label>}
-            {exportReview.summary.showBotTokenOption && <label className={`export-secret-option${exportReview.summary.hasBotToken && exportReview.summary.isActiveProject ? '' : ' is-disabled'}`}>
-              <input
-                type="checkbox"
-                checked={Boolean(exportReview.includeBotToken)}
-                disabled={!exportReview.summary.canIncludeBotToken || !exportReview.summary.hasBotToken || !exportReview.summary.isActiveProject}
-                onChange={(event) => setExportReview((current) => current ? { ...current, includeBotToken: event.target.checked } : current)}
-              />
-              <span><strong>Include bot token in .env</strong><small>{!exportReview.summary.isActiveProject ? 'Switch to this project before including its bot token.' : !exportReview.summary.hasBotToken ? 'No bot token is configured for this project.' : 'Off by default. Anyone with this ZIP can use the token.'}</small></span>
-            </label>}
-          </div>
-          {exportReview.summary.unsupportedNodeCount > 0 && <div className="export-preflight-runtime-warning" role="alert">{exportReview.summary.unsupportedNodeCount} node type{exportReview.summary.unsupportedNodeCount === 1 ? ' is' : 's are'} not supported by the bundled runtime.</div>}
-        </div>}
-        <div className="validation-list">
-          {exportReview?.issues.map((issue, index) => {
-            const content = <><AlertCircle size={14} /><span>{issue.graphName && <strong>{issue.graphName}: </strong>}{issue.message}</span></>;
-            return issue.nodeId
-              ? <button key={`${issue.kind}-${issue.graphName}-${index}`} type="button" className={`validation-item is-${issue.kind} is-clickable`} title="Open graph and highlight node" onClick={() => { setExportReview(null); traceGraphNode(issue.graphId, issue.nodeId); }}>{content}</button>
-              : <div key={`${issue.kind}-${issue.graphName}-${index}`} className={`validation-item is-${issue.kind}`}>{content}</div>;
-          })}
+              <div className={`canvas-context-label ${!activeGraph ? 'is-no-graph' : graphValidation.errors.length ? 'has-validation-errors' : graphValidation.warnings.length ? 'has-validation-warnings' : 'is-validation-ready'}`}>
+                {activeGraph ? <><span className="context-dot" />
+                  {activeNodes.length} nodes <span className="context-separator">·</span> {activeConnections.length} connections
+                  <span className="context-separator">·</span> {graphValidation.errors.length || graphValidation.warnings.length
+                    ? <button type="button" className="canvas-context-validation" onClick={handleValidateGraph} aria-label={`Open graph review with ${graphValidation.errors.length ? `${graphValidation.errors.length} issues` : `${graphValidation.warnings.length} warnings`}`}>{graphValidation.errors.length ? `${graphValidation.errors.length} issues` : 'Review'}</button>
+                    : 'Ready'}</>
+                  : 'Open a graph to run checks.'}
+                {(!desktopMode || !localDesktopWorkspace) && collaborationSocketStatus !== 'connected' && <span className="collaboration-connection is-reconnecting" role="status" aria-live="polite">{collaborationSocketStatus === 'incompatible' ? `Update ARC Studio to ${minimumRequiredClientVersion} or newer to connect.` : collaborationSocketStatus === 'connecting' ? 'Connecting…' : 'Reconnecting…'}</span>}
+                {activeGraph && (!desktopMode || !localDesktopWorkspace) && collaborationSocketStatus === 'connected' && collaborationConnectionFlaky && <span className="collaboration-connection is-flaky" role="status" aria-live="polite">Flaky connection</span>}
+                {activeGraph && collaborators.length > 0 && <span className="canvas-collaborators" title={collaborators.slice(0, 8).map((person) => person.username).concat(collaborators.length > 8 ? [`…and ${collaborators.length - 8} more`] : []).join('\n')}><span className="context-separator">·</span> {collaborators.slice(0, 2).map((person) => person.username).join(', ')}{collaborators.length > 2 ? ` …and ${collaborators.length - 2} more` : ''}</span>}
+              </div>
+              {isLocked && <div className="canvas-lock-state"><LockKeyhole size={13} /> Locked</div>}
+            </>}
+
+            {isLibraryOpen && <Suspense fallback={<LazyFeatureLoading label="Opening Library…" kind="sidebar" isDesktop={desktopMode} width={sidebarWidths.library} />}><GraphLibraryPanel definitions={availableNodeDefinitions} newNodesUserKey={newNodesUserKey} graphActivity={projectCollaboration.projectId === activeProjectId ? projectCollaboration.graphActivity || [] : []} sidebarWidth={sidebarWidths.library} onSidebarResize={(width) => handleSidebarResize('library', width)} activeSection={librarySection} onActiveSectionChange={setLibrarySection} usageScope={activeProjectId} desktopMode={desktopMode} canImportGraph={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} onImportGraph={handleImportGraph} graphs={savedGraphs} templates={graphTemplates} snapshots={graphSnapshots} nodePrefabs={nodePrefabs} embedAssets={embedAssets} graphVariables={availableVariables} defaultGraphId={defaultGraphId} activeGraph={activeGraph} openGraphIds={tabs.map((tab) => tab.id)} activeTabId={activeTabId} onClose={() => setIsLibraryOpen(false)} onOpenGraph={handleOpenGraph} onUseTemplate={(template) => handleAddTab(template)} onCreateFunction={handleAddFunctionGraph} onDeleteGraph={handleDeleteSavedGraph} onDeleteGraphs={handleDeleteSavedGraphs} onDuplicateGraph={handleDuplicateGraph} onRenameGraph={handleRenameGraph} onSaveTemplate={handleSaveGraphTemplate} onDeleteTemplate={handleDeleteGraphTemplate} onSetDefault={handleSetDefaultGraph} onExportBot={handleExportBot} exportInProgress={exportInProgress} onAddNode={handlePlaceNode} onAddPrefab={(prefab) => handleDropNode({ type: 'prefab', prefabId: prefab.id })} onDeletePrefab={handleDeleteNodePrefab} onCreateEmbed={createEmbedAsset} onOpenEmbed={openEmbedAsset} onDeleteEmbed={handleDeleteEmbedAsset} onManageVariables={() => { setIsProjectsOpen(false); setIsLibraryOpen(false); setIsPluginStoreOpen(false); setIsBotSidebarOpen(false); setIsVariablesOpen(true); }} onCreateSnapshot={async (graph, name) => {
+              await ensureWorkspaceGraphsSaved();
+              const response = await fetch(apiUrl(`/api/graphs/${encodeURIComponent(graph.id)}/snapshots`), { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-arc-token': authToken }, body: JSON.stringify({ graph, name }) });
+              const data = await response.json();
+              if (!response.ok) throw new Error(data.error || 'Could not create graph snapshot.');
+              setGraphSnapshots(data.snapshots || []);
+              arcEvents.emit('toast:notify', { title: 'Snapshot saved', message: data.snapshot.name, type: 'success' });
+            }} onDeleteSnapshot={async (snapshot) => {
+              const response = await fetch(apiUrl(`/api/graphs/snapshots/${encodeURIComponent(snapshot.id)}`), { method: 'DELETE', headers: { 'x-arc-token': authToken } });
+              const data = await response.json();
+              if (!response.ok) throw new Error(data.error || 'Could not delete snapshot.');
+              setGraphSnapshots(data.snapshots || []);
+            }} onRestoreSnapshot={(snapshot) => {
+              const restored = { ...structuredClone(snapshot.graph), id: activeGraph.id, name: activeGraph.name, isDirty: true };
+              recordHistory(activeGraph.id);
+              setActiveNodes(restored.nodes || []);
+              setActiveConnections(restored.connections || []);
+              setTabs((previous) => previous.map((tab) => tab.id === activeGraph.id ? restored : tab));
+              arcEvents.emit('toast:notify', { title: 'Snapshot restored', message: `${snapshot.name} · save to keep these changes`, type: 'success' });
+            }} /></Suspense>}
+            {isProjectsOpen && <aside className="project-sidebar" aria-label="Projects" style={{ '--arc-sidebar-width': `${sidebarWidths.projects}px` }}>
+              <SidebarResizeHandle width={sidebarWidths.projects} defaultWidth={DEFAULT_SIDEBAR_WIDTHS.projects} onResize={(width) => handleSidebarResize('projects', width)} />
+              <header className="graph-library-header">
+                <span><FolderTree size={14} />Projects <small>{projects.length}</small></span>
+                <button className="icon-button compact" type="button" aria-label="Close projects" onClick={() => { if (!projectBusy) setIsProjectsOpen(false); }} disabled={projectBusy}><X size={14} /></button>
+              </header>
+              <p className="project-sidebar-description">Switch between bot projects or create a new one. {!localDesktopWorkspace && (maxProjects === null ? 'No project limit.' : `${projects.length} of ${maxProjects} projects.`)}</p>
+              {projects.length > 10 && <label className="project-sidebar-search"><Search size={14} /><input type="search" value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Search projects" aria-label="Search projects" /></label>}
+              <div className={`project-switcher-list ${projects.length ? '' : 'is-empty'}`}>
+                {filteredProjects.map((project) => <div key={project.id} className={`project-switcher-row ${project.id === activeProjectId ? 'is-active' : ''}`} onContextMenu={(event) => openProjectMenu(event, project)}>
+                  <button
+                    type="button"
+                    className="project-switcher-item"
+                    title={projectUsers[project.id]?.length ? `Online: ${projectUsers[project.id].map((user) => user.username).join(', ')}` : projectLastSeen[project.id]?.username ? `Last here: ${projectLastSeen[project.id].username} · ${formatCompactLastSeen(projectLastSeen[project.id].updatedAt)}` : 'No recent activity'}
+                    onClick={() => handleActivateProject(project.id)}
+                    disabled={projectBusy || project.id === activeProjectId}
+                    aria-current={project.id === activeProjectId ? 'page' : undefined}
+                  >
+                    <span className="project-switcher-copy"><strong>{project.name}</strong>{projectUsers[project.id]?.length > 0 && <small className="project-online-users">Online · {projectUsers[project.id].map((user) => user.username).join(', ')}</small>}{projectLastSeen[project.id]?.username && <small className="project-last-seen">Last here · {projectLastSeen[project.id].username} · {formatCompactLastSeen(projectLastSeen[project.id].updatedAt)}</small>}{!projectUsers[project.id]?.length && !projectLastSeen[project.id]?.username && <small className="project-last-seen">No recent activity</small>}</span>
+                    {project.id === activeProjectId && <span className="project-active-mark">Current</span>}
+                  </button>
+                  <button type="button" className="project-more-button" aria-label={`More actions for ${project.name}`} title="Project options" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    openProjectMenu(event, project, { x: rect.right, y: rect.bottom });
+                  }}><MoreHorizontal size={15} /></button>
+                </div>)}
+                {!projects.length && <div className="project-switcher-empty">
+                  <FolderTree size={19} aria-hidden="true" />
+                  <strong>No projects yet</strong>
+                  <span>Create a project below to start building a bot.</span>
+                </div>}
+                {projects.length > 0 && !filteredProjects.length && <div className="project-switcher-empty">
+                  <Search size={19} aria-hidden="true" />
+                  <strong>No projects found</strong>
+                  <span>Try a different search.</span>
+                </div>}
+              </div>
+              <form className="project-create-form" onSubmit={handleCreateProject}>
+                <TextInput key={projectNameShakeKey} id="new-project-name" label="New project" placeholder="e.g. Moderation bot" value={newProjectName} maxLength={64} error={projectNameInvalid ? 'Enter a project name.' : undefined} wrapperClassName={projectNameInvalid ? 'project-name-invalid-shake' : ''} onChange={(event) => { setNewProjectName(event.target.value); setProjectNameInvalid(false); setProjectError(''); }} />
+                {projectError && <p className="field-error">{projectError}</p>}
+                <Button type="submit" icon={Plus} onContextMenu={(event) => openProjectMenu(event, null)} disabled={projectBusy || maxProjects !== null && projects.length >= maxProjects} loading={projectBusy}>Create project</Button>
+                <button className="project-import-button" type="button" disabled={projectBusy || maxProjects !== null && projects.length >= maxProjects} onClick={() => { document.getElementById('project-import-file')?.click(); }}><FileUp size={14} />Import project file</button>
+                <input id="project-import-file" type="file" accept=".arcproject,.arcproject.json" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) { setProjectImportFile(file); setProjectImportTrusted(false); setProjectImportError(''); setProjectImportCompatibility(null); setProjectImportOldVersionApproved(false); } event.target.value = ''; }} />
+                {!localDesktopWorkspace && currentUser?.role === 'admin' && <label className="project-limit-control"><span>Project limit</span><div><input aria-label="Maximum projects" type="number" min="1" step="1" value={maxProjects ?? ''} placeholder="Unlimited" onChange={(event) => { const next = event.target.value; if (next === '') setMaxProjects(null); else if (/^\d+$/.test(next)) setMaxProjects(Number(next)); }} onBlur={(event) => handleSetProjectLimit(event.target.value === '' ? 'unlimited' : Number(event.target.value))} /><button type="button" onClick={() => handleSetProjectLimit('unlimited')}>Unlimited</button></div></label>}
+              </form>
+            </aside>}
+            {projectMenu && <div className="project-context-menu" role="menu" style={{ left: projectMenu.x, top: projectMenu.y }} onPointerDown={(event) => event.stopPropagation()}>
+              {projectMenu.kind === 'create' ? <button type="button" role="menuitem" className="project-context-export" disabled={projectBusy || maxProjects !== null && projects.length >= maxProjects} onClick={() => { setProjectMenu(null); setNewProjectTemplate('ticket'); setNewProjectName('Ticket Bot'); setProjectNameManuallyEdited(false); setProjectError(''); setProjectTemplateDialog(true); }}><FileCode2 size={14} />Create from template</button> : <>
+                <button type="button" role="menuitem" className="project-context-export" disabled={projectBusy} onClick={() => { const project = projectMenu.project; setProjectMenu(null); handleExportProject(project); }}><Download size={14} />Export project</button>
+                <button type="button" role="menuitem" className="project-context-export" disabled={exportInProgress} onClick={() => {
+                  const projectId = projectMenu.project.id;
+                  setProjectMenu(null);
+                  handleExportBot(projectId);
+                }}><Download size={14} />Export bot</button>
+                {desktopMode && localDesktopWorkspace && <button type="button" role="menuitem" className="project-context-export" disabled={projectBusy} onClick={() => { const project = projectMenu.project; setProjectMenu(null); void handleOpenProjectInNewWindow(project); }}><AppWindow size={14} />Open in new window</button>}
+                <button type="button" role="menuitem" className="project-context-delete" disabled={projects.length <= 1 || projectBusy} onClick={() => {
+                  setProjectDelete(projectMenu.project);
+                  setProjectDeletePromptError('');
+                  setProjectDeleteError('');
+                  setProjectDeleteFieldShake(false);
+                  setProjectDeleteName('');
+                  setProjectDeleteError('');
+                  setProjectMenu(null);
+                }}><Trash2 size={14} />Delete project</button>
+              </>}
+            </div>}
+            <LazyMountedFeature Component={BotSettingsModal} isOpen={isBotSidebarOpen} loadingLabel="Opening app settings…" loadingKind="sidebar" isDesktop={desktopMode} presentation="sidebar" sidebarWidth={sidebarWidths.bot} onSidebarResize={(width) => handleSidebarResize('bot', width)} onClose={() => setIsBotSidebarOpen(false)} onViewCommands={() => setCommandBrowserRequest((request) => request + 1)} authToken={authToken} profile={botProfile} onProfileChange={setBotProfile} />
+            <LazyMountedFeature Component={PluginStoreModal} isOpen={isPluginStoreOpen} loadingLabel="Opening Plugin Store…" loadingKind="sidebar" isDesktop={desktopMode} sidebarWidth={sidebarWidths.plugins} onSidebarResize={(width) => handleSidebarResize('plugins', width)} onClose={() => setIsPluginStoreOpen(false)} authToken={authToken} canInstall={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} canManageSource={currentUser?.permissions?.includes('*')} onInstalled={handlePluginsChanged} />
+            <LazyMountedFeature Component={GraphVariablesModal} isOpen={isVariablesOpen} loadingLabel="Opening variables…" loadingKind="sidebar" isDesktop={desktopMode} presentation="sidebar" sidebarWidth={sidebarWidths.variables} activeScope={variableScope} onScopeChange={setVariableScope} onSidebarResize={(width) => handleSidebarResize('variables', width)} onClose={() => setIsVariablesOpen(false)} variables={graphVariables} projectVariables={projectVariables} canEdit={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} canEditGraph={Boolean(activeGraph && (currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write')))} canEditProject={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('graphs:write'))} onChange={handleVariablesChange} onProjectChange={handleProjectVariablesChange} onOpenTextEditor={openVariableTextEditor} onRestoreSystemVariable={handleRestoreSystemVariable} isSaving={savingProjectVariables || savingGraphIds.includes(activeTabId)} />
+          </main>
         </div>
-      </Modal>
-      <LazyMountedFeature Component={GraphValidationModal} isOpen={Boolean(validationResult)} loadingLabel="Opening validation results…" isDesktop={desktopMode} onClose={() => setValidationResult(null)} graphName={validationResult?.graphName || activeGraph?.name} result={validationResult} onTraceIssue={traceGraphNode} />
-      <Modal
-        isOpen={gatewayIntentConfirm.length > 0}
-        onClose={() => setGatewayIntentConfirm([])}
-        title="Connect with limited gateway access?"
-        subtitle="Discord currently reports these privileged intents as disabled."
-        icon={AlertCircle}
-        footer={<><Button variant="secondary" onClick={() => setGatewayIntentConfirm([])}>Cancel</Button><Button onClick={() => { setGatewayIntentConfirm([]); handleStartBot(true); }}>Connect anyway</Button></>}
-      >
-        <p className="close-graph-copy">ARC Studio can still connect the gateway, but graphs that need {gatewayIntentConfirm.map((intent) => intent.label).join(' and ')} may not receive the required events or data. Enable them in the Discord Developer Portal for full functionality.</p>
-      </Modal>
-      <Modal
-        isOpen={Boolean(nameDialog)}
-        onClose={() => { setNameDialog(null); setNameDialogError(''); }}
-        title={nameDialog?.mode === 'save' || nameDialog?.mode === 'save-close' ? 'Save graph' : 'Rename graph'}
-        subtitle={nameDialog?.mode === 'save' || nameDialog?.mode === 'save-close' ? 'Choose a name for this graph.' : 'Update the graph name.'}
-        icon={FileCode2}
-        footer={<><Button variant="secondary" onClick={() => setNameDialog(null)}>Cancel</Button><Button onClick={handleNameDialogSubmit}>{nameDialog?.mode === 'save' || nameDialog?.mode === 'save-close' ? 'Save graph' : 'Rename graph'}</Button></>}
-      >
-        <form onSubmit={handleNameDialogSubmit}>
-          <TextInput label="Graph name" placeholder="Untitled graph" value={nameDialog?.value || ''} maxLength={80} autoFocus error={nameDialogError} onChange={(event) => { setNameDialog((current) => current ? { ...current, value: event.target.value } : current); setNameDialogError(''); }} />
-        </form>
-      </Modal>
-      <Modal
-        isOpen={Boolean(closeGraphDialog)}
-        onClose={() => setCloseGraphDialog(null)}
-        title="Save changes?"
-        subtitle={`“${closeGraphDialog?.name || 'Untitled graph'}” has unsaved changes.`}
-        icon={Save}
-        footer={<><Button variant="secondary" onClick={() => setCloseGraphDialog(null)}>Cancel</Button><Button variant="danger" onClick={handleDiscardAndCloseGraph}>Discard</Button><Button icon={Save} onClick={handleSaveAndCloseGraph}>Save and close</Button></>}
-      >
-        <p className="close-graph-copy">Save this graph to your Library before closing?</p>
-      </Modal>
-      <Modal isOpen={Boolean(nodePrefabDialog)} onClose={() => setNodePrefabDialog(null)} title="Save node prefab" subtitle="Add this configured node to Saved nodes." icon={FileCode2} footer={<><Button variant="secondary" onClick={() => setNodePrefabDialog(null)}>Cancel</Button><Button onClick={handleSaveNodePrefab}>Save node</Button></>}>
-        <form onSubmit={handleSaveNodePrefab}><TextInput label="Node name" placeholder="My node" value={nodePrefabDialog?.name || ''} maxLength={80} autoFocus error={nodePrefabError} onChange={(event) => { setNodePrefabDialog((current) => current ? { ...current, name: event.target.value } : current); setNodePrefabError(''); }} /></form>
-      </Modal>
-      <Modal isOpen={Boolean(nodeRenameDialog)} onClose={() => setNodeRenameDialog(null)} title="Rename node" subtitle="This name is saved with this graph." icon={FileCode2} footer={<><Button variant="secondary" onClick={() => setNodeRenameDialog(null)}>Cancel</Button><Button onClick={saveNodeRename}>Rename</Button></>}>
-        <form onSubmit={saveNodeRename}><TextInput label="Node name" placeholder={nodeRenameDialog?.fallback || 'Node'} value={nodeRenameValue} maxLength={64} autoFocus onChange={(event) => setNodeRenameValue(event.target.value)} /></form>
-      </Modal>
-      <Modal isOpen={Boolean(tagGroupDialog)} onClose={() => setTagGroupDialog(null)} title={tagGroupDialog?.id ? 'Edit canvas section' : 'Create canvas section'} subtitle="Group related nodes with a colored frame." icon={FolderTree} footer={<><Button variant="secondary" onClick={() => setTagGroupDialog(null)}>Cancel</Button><Button onClick={saveTagGroup}>{tagGroupDialog?.id ? 'Save section' : 'Create section'}</Button></>}>
-        <form className="canvas-tag-group-form" onSubmit={saveTagGroup}>
-          <TextInput label="Section name" placeholder="e.g. Ticket creation" value={tagGroupName} maxLength={48} autoFocus error={tagGroupError} onChange={(event) => { setTagGroupName(event.target.value); setTagGroupError(''); }} />
-          <span className="field-label">Color</span>
-          <div className="canvas-tag-group-colors">{TAG_GROUP_COLORS.map((color) => <button key={color.id} type="button" className={`canvas-tag-group-color${tagGroupColor === color.value ? ' is-selected' : ''}`} style={{ '--tag-group-color': color.value }} aria-label={`${color.label} section color`} aria-pressed={tagGroupColor === color.value} onClick={() => setTagGroupColor(color.value)} />)}</div>
-          {(activeGraph?.notes || []).length > 0 && <><span className="field-label">Notes in section</span>{activeGraph.notes.length > 12 && <TextInput label="Search notes" placeholder="Filter by note text" value={tagGroupSearch} onChange={(event) => setTagGroupSearch(event.target.value)} />}<div className="canvas-tag-group-members">{activeGraph.notes.filter((note) => !tagGroupSearch.trim() || `${note.text || ''} ${note.createdBy || ''}`.toLowerCase().includes(tagGroupSearch.trim().toLowerCase())).map((note, index) => <label key={note.id}><input type="checkbox" checked={tagGroupNoteIds.includes(note.id)} onChange={(event) => setTagGroupNoteIds((current) => event.target.checked ? [...current, note.id] : current.filter((id) => id !== note.id))} /><span>{String(note.text || `Note ${index + 1}`).split('\n')[0].slice(0, 48)}</span><small>{note.createdBy || 'Unknown'}</small></label>)}</div></>}
-        </form>
-      </Modal>
-      <Modal
-        isOpen={Boolean(projectDelete)}
-        onClose={() => { if (!projectBusy) { setProjectDelete(null); setProjectDeleteName(''); setProjectDeleteError(''); setProjectDeletePromptError(''); setProjectDeleteFieldShake(false); } }}
-        onConfirm={attemptDeleteProject}
-        title="Delete project?"
-        subtitle="This permanently removes the project and its saved data."
-        icon={Trash2}
-        footer={<><Button variant="secondary" disabled={projectBusy} onClick={() => { setProjectDelete(null); setProjectDeleteName(''); setProjectDeleteError(''); setProjectDeletePromptError(''); }}>Cancel</Button><Button variant="danger" loading={projectBusy} disabled={projectBusy || projectDeleteName.trim() !== projectDelete?.name} onClick={handleDeleteProject}>Delete project</Button></>}
-      >
-        <p className="project-delete-copy">Type <strong>{projectDelete?.name}</strong> to confirm.</p>
-        <TextInput inputRef={projectDeleteInputRef} label="Project name" placeholder={projectDelete?.name || ''} value={projectDeleteName} autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoFocus error={projectDeleteError} wrapperClassName={projectDeleteFieldShake ? 'field-shake project-delete-entry-flash' : ''} onChange={(event) => { setProjectDeleteName(event.target.value); setProjectDeleteError(''); setProjectDeletePromptError(''); }} />
-        {projectDeletePromptError && <p className="field-error" role="alert">{projectDeletePromptError}</p>}
-      </Modal>
-      <Modal
-        isOpen={Boolean(projectImportFile)}
-        onClose={() => { if (!projectBusy) cancelProjectImport(); }}
-        title="Import project file?"
-        subtitle={projectImportFile?.name || ''}
-        icon={ShieldCheck}
-        footer={<><Button variant="secondary" disabled={projectBusy} onClick={cancelProjectImport}>Cancel</Button><Button icon={FileUp} loading={projectBusy} disabled={!projectImportTrusted || projectBusy || projectImportCompatibility?.code === 'PROJECT_REQUIRES_NEWER_ARC' || projectImportCompatibility?.code === 'PROJECT_OLD_VERSION_CONFIRMATION_REQUIRED' && !projectImportOldVersionApproved} onClick={handleImportProject}>{projectImportCompatibility?.code === 'PROJECT_REQUIRES_NEWER_ARC' ? 'Newer ARC Studio required' : projectImportCompatibility?.code === 'PROJECT_OLD_VERSION_CONFIRMATION_REQUIRED' ? 'Import older project' : 'Trust and import'}</Button></>}
-      >
-        <div className="project-import-warning"><strong>Only import a project from someone you trust.</strong><p>Project files contain graphs, settings, and assets. Importing adds the project to this workspace and marks it trusted here.</p><label><input type="checkbox" checked={projectImportTrusted} onChange={(event) => setProjectImportTrusted(event.target.checked)} /><span>I trust the source of this project file.</span></label>{projectImportCompatibility?.code === 'PROJECT_OLD_VERSION_CONFIRMATION_REQUIRED' && <div className="project-import-compatibility-warning" role="alert"><strong>Older project version</strong><p>{projectImportCompatibility.unknownProjectVersion ? 'This file does not record an ARC Studio version.' : `Created with ARC Studio ${projectImportCompatibility.projectVersion}; this is at least 10 releases older than ${projectImportCompatibility.currentVersion}.`} Its graphs or settings may behave differently. Review it before using it.</p><label><input type="checkbox" checked={projectImportOldVersionApproved} onChange={(event) => setProjectImportOldVersionApproved(event.target.checked)} /><span>I understand and want to import this older project.</span></label></div>}{projectImportCompatibility?.code === 'PROJECT_REQUIRES_NEWER_ARC' && <div className="project-import-compatibility-warning" role="alert"><strong>Update ARC Studio to import this project</strong><p>Created with ARC Studio {projectImportCompatibility.projectVersion}. This workspace runs {projectImportCompatibility.currentVersion || 'an older version'}; open it with ARC Studio {projectImportCompatibility.projectVersion} or newer.</p></div>}{projectImportError && <p className="field-error" role="alert">{projectImportError}</p>}</div>
-      </Modal>
-      <Modal isOpen={projectTemplateDialog} onClose={() => { if (!projectBusy) { setProjectTemplateDialog(false); setProjectError(''); } }} title="Create from template" subtitle="Pick a starter project and give it a name." footer={<><Button variant="secondary" disabled={projectBusy} onClick={() => setProjectTemplateDialog(false)}>Cancel</Button><Button icon={Plus} loading={projectBusy} disabled={!newProjectName.trim() || projectBusy} onClick={handleCreateProjectFromTemplate}>Create project</Button></>}>
-        <div className="project-template-dialog-form">
-          <TextInput label="Project name" placeholder="e.g. Community bot" value={newProjectName} maxLength={64} autoFocus onChange={(event) => { setNewProjectName(event.target.value); setProjectNameManuallyEdited(true); setProjectNameInvalid(false); setProjectError(''); }} />
-          <span className="field-label">Choose a starting point</span>
-          <div className="splash-project-templates project-template-cards">
-            {projectStarters.map((starter) => { const Icon = PROJECT_STARTER_ICONS[starter.id] || PackageOpen; return <button key={starter.id} type="button" className={`splash-project-template ${newProjectTemplate === starter.id ? 'is-selected' : ''}`} aria-pressed={newProjectTemplate === starter.id} onClick={() => { setNewProjectTemplate(starter.id); if (!projectNameManuallyEdited) setNewProjectName(starter.name); }}><Icon size={16} /><span><strong>{starter.name}</strong><small>{starter.description}</small></span></button>; })}
+
+        <ControlDock
+          logs={logs}
+          botStatus={botStatus}
+          discordAuthWarning={discordAuthWarning}
+          networkOnline={networkOnline}
+          botMetrics={botMetrics}
+          botProfile={botProfile}
+          cachedAppEmojis={appEmojis}
+          onEmojisChange={handleAppEmojisChange}
+          activeTabId={activeTabId}
+          activeProjectId={activeProjectId}
+          graphs={[...graphLookup.values()]}
+          emojiCacheScope={`${workspaceMode}:${activeProjectId}:${workspaceRevision}`}
+          graphLookup={graphLookup}
+          graphValidationReports={[...graphLookup.values()].map((graph) => ({ graph, report: validateGraph(graph, graphLookup, botProfile?.intentSummary, projectVariables) }))}
+          graphNodes={activeNodes}
+          nodeDefinitions={availableNodeDefinitions}
+          authToken={authToken}
+          isLocked={isLocked}
+          canControlBot={Boolean(currentUser?.permissions?.includes('*') || currentUser?.permissions?.includes('bot:control'))}
+          consoleOpenRequest={consoleOpenRequest}
+          gatewayStartedRequest={gatewayStartedRequest}
+          commandBrowserRequest={commandBrowserRequest}
+          onClearLogs={handleClearLogs}
+          onStartBot={handleStartBot}
+          onStopBot={handleStopBot}
+          onIntentSummaryChange={handleIntentSummaryChange}
+          onOpenGraph={handleOpenGraph}
+          onTraceLog={traceGraphNode}
+          onTraceIssue={traceGraphNode}
+        />
+
+        <LazyMountedFeature Component={NodePalette} isOpen={isPaletteOpen} loadingLabel="Opening node palette…" isDesktop={desktopMode} newNodesUserKey={newNodesUserKey} onClose={() => { setIsPaletteOpen(false); setPaletteNodePosition(null); }} onSelectNode={handlePlaceNode} pluginDefinitionsRevision={pluginDefinitionsRevision} definitions={availableNodeDefinitions} />
+        <LazyMountedFeature Component={CommandPalette} isOpen={isCommandPaletteOpen} loadingLabel="Opening search…" isDesktop={desktopMode}
+          graphs={[...graphLookup.values()]}
+          definitions={availableNodeDefinitions}
+          plugins={installedPlugins}
+          onClose={() => setIsCommandPaletteOpen(false)}
+          onAddNode={handlePlaceNode}
+          onOpenGraph={handleOpenGraph}
+          onOpenPlugin={() => { setIsCommandPaletteOpen(false); setIsLibraryOpen(false); setIsProjectsOpen(false); setIsPluginStoreOpen(true); }}
+          onGoToNode={traceGraphNode}
+        />
+        <EmojiPickerOverlay appEmojis={appEmojis} shortcut={(desktopMode ? settings.shortcuts?.emojiPicker : null) || DEFAULT_SHORTCUTS.emojiPicker} desktopMode={desktopMode} />
+        <LazyMountedFeature Component={EditorSettingsModal} isOpen={isSettingsOpen} loadingLabel="Opening settings…" isDesktop={desktopMode}
+          onClose={() => setIsSettingsOpen(false)}
+          settings={settings}
+          onUpdateSettings={handleUpdateSettings}
+          appUpdate={appUpdate}
+          serverUpdate={serverUpdate}
+          stableUpdateReady={stableUpdateReady}
+          releaseChannel={currentUpdateChannel}
+          networkOnline={networkOnline}
+          onOpenStudioUpdate={handleOpenStudioUpdate}
+          onAutoLayout={handleAutoLayout}
+          onExportGraph={handleExportGraph}
+          onResetLocalData={handleResetLocalData}
+          desktopMode={desktopMode}
+          localWorkspace={workspaceMode === 'local'}
+          canResetLocalWorkspace={desktopMode && workspaceMode === 'local' && currentUser?.isPrimaryAdmin === true}
+          platform={shortcutPlatform}
+          themeChoice={hasThemeChoice ? theme : 'system'}
+          onThemeChange={handleThemeChange}
+          authToken={authToken}
+          activeProjectId={activeProjectId}
+          canManageLogRetention={currentUser?.permissions?.includes('*')}
+          canManageActivityWebhook={currentUser?.isPrimaryAdmin === true}
+          idleDisconnectMinutes={projects.find((project) => project.id === activeProjectId)?.idleDisconnectMinutes ?? 15}
+          canManageIdleDisconnect={Boolean(currentUser?.permissions?.includes('*') || projects.find((project) => project.id === activeProjectId)?.ownerId === currentUser?.id)}
+          onSetIdleDisconnectMinutes={handleSetIdleDisconnectMinutes}
+        />
+        <Modal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} title="Keyboard shortcuts" subtitle="ARC Studio editor" icon={CircleHelp}>
+          <div className="keyboard-shortcut-list">
+            {[
+              ['New graph', formatShortcut((desktopMode ? settings.shortcuts?.newGraph : null) || DEFAULT_SHORTCUTS.newGraph, shortcutPlatform)],
+              ['New blank graph', formatShortcut((desktopMode ? settings.shortcuts?.newBlankGraph : null) || DEFAULT_SHORTCUTS.newBlankGraph, shortcutPlatform)],
+              ['Next / previous graph tab', `${formatShortcut((desktopMode ? settings.shortcuts?.switchTabNext : null) || DEFAULT_SHORTCUTS.switchTabNext, shortcutPlatform)} / ${formatShortcut((desktopMode ? settings.shortcuts?.switchTabPrevious : null) || DEFAULT_SHORTCUTS.switchTabPrevious, shortcutPlatform)}`],
+              ['Close active graph tab', formatShortcut((desktopMode ? settings.shortcuts?.closeTab : null) || DEFAULT_SHORTCUTS.closeTab, shortcutPlatform)],
+              ['Add node', formatShortcut((desktopMode ? settings.shortcuts?.addNode : null) || DEFAULT_SHORTCUTS.addNode, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
+              ['Add note', formatShortcut((desktopMode ? settings.shortcuts?.addNote : null) || DEFAULT_SHORTCUTS.addNote, shortcutPlatform)],
+              ['Find in sidebar or canvas', shortcutModifier === '⌘' ? '⌘F' : 'Ctrl+F'],
+              ['Next / previous find result', shortcutModifier === '⌘' ? '⌘G / ⌘⇧G' : 'Ctrl+G / Ctrl+Shift+G'],
+              ['Draw arrow', `${shortcutPlatform === 'macos' ? '⌥ Option' : 'Alt'} + Shift + drag`],
+              ...(localDesktopWorkspace ? [['Arrange nodes', formatShortcut(settings.shortcuts?.arrangeNodes || DEFAULT_SHORTCUTS.arrangeNodes, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')]] : []),
+              ['Move nodes between colored sections', `${shortcutPlatform === 'macos' ? '⌥ Option' : 'Alt'} + drag`],
+              ['Toggle Library', formatShortcut((desktopMode ? settings.shortcuts?.toggleLibrary : null) || DEFAULT_SHORTCUTS.toggleLibrary, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
+              ['Open node search', formatShortcut((desktopMode ? settings.shortcuts?.openSearch : null) || DEFAULT_SHORTCUTS.openSearch, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
+              ['Open emoji picker in a text field', formatShortcut((desktopMode ? settings.shortcuts?.emojiPicker : null) || DEFAULT_SHORTCUTS.emojiPicker, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
+              ['Toggle server console', formatShortcut((desktopMode ? settings.shortcuts?.toggleConsole : null) || DEFAULT_SHORTCUTS.toggleConsole, shortcutPlatform)],
+              ['Connect / disconnect gateway', formatShortcut((desktopMode ? settings.shortcuts?.connectGateway : null) || DEFAULT_SHORTCUTS.connectGateway, shortcutPlatform)],
+              ['Rename selected node', formatShortcut((desktopMode ? settings.shortcuts?.renameNode : null) || DEFAULT_SHORTCUTS.renameNode, shortcutPlatform)],
+              ['Reload ARC Studio', formatShortcut((desktopMode ? settings.shortcuts?.reloadStudio : null) || DEFAULT_SHORTCUTS.reloadStudio, shortcutPlatform)],
+              ['Save graph', formatShortcut((desktopMode ? settings.shortcuts?.saveGraph : null) || DEFAULT_SHORTCUTS.saveGraph, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
+              ['Undo', formatShortcut((desktopMode ? settings.shortcuts?.undo : null) || DEFAULT_SHORTCUTS.undo, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
+              ['Redo', formatShortcut((desktopMode ? settings.shortcuts?.redo : null) || DEFAULT_SHORTCUTS.redo, window.__ARC_STUDIO_CONFIG__?.platform || 'browser')],
+              ['Copy / paste selected node', `${shortcutModifier} + C / V`],
+              ['Increase / decrease UI scale', `${shortcutModifier} + + / −`],
+              ['Pan canvas', 'Space + drag']
+            ].map(([label, keys]) => <div className="keyboard-shortcut-row" key={label}><span>{label}</span><span className="keyboard-shortcut-keys" aria-label={keys}>{getShortcutDisplayTokens(keys).map((key, index, tokens) => {
+              const isSeparator = key === '/' || (key === '+' && tokens[index - 1] !== '+');
+              if (isSeparator) return <span className="keyboard-shortcut-separator" key={`${key}-${index}`} aria-hidden="true">{key}</span>;
+              const isModifier = ['⌘', '⇧', '⌥', 'Ctrl', 'Shift', 'Alt'].includes(key);
+              const isSymbol = ['⌘', '⇧', '⌥'].includes(key);
+              return <kbd className={`${isModifier ? 'is-modifier ' : ''}${isSymbol ? 'is-symbol' : ''}`.trim()} key={`${key}-${index}`} aria-hidden="true">{key}</kbd>;
+            })}</span></div>)}
           </div>
-          {projectError && <p className="field-error" role="alert">{projectError}</p>}
-        </div>
-      </Modal>
-      <Modal
-        isOpen={Boolean(updateNotice)}
-        onClose={() => setUpdateNotice(null)}
-        title={updateNotice?.title || `ARC Studio ${updateNotice?.version || ''}`}
-        subtitle={updateNotice?.kind === 'staged' ? 'Update ready · release notes' : 'Update available · release notes'}
-        icon={Sparkles}
-        maxWidth="max-w-2xl"
-        footer={<>
-          <a className="studio-button studio-button-secondary" href={updateNotice?.url} target="_blank" rel="noreferrer">View release</a>
-          {updateNotice?.kind === 'install'
-            ? <><Button variant="secondary" onClick={() => setUpdateNotice(null)}>Later</Button><Button icon={Download} loading={updateInstalling} onClick={handleInstallStudioUpdate}>Install update</Button></>
-            : <Button onClick={() => setUpdateNotice(null)}>Got it</Button>}
-        </>}
-      >
-        {updateNotice?.kind === 'staged' && <p className="close-graph-copy">This update will be applied the next time you launch ARC Studio.</p>}
-        <ReleaseNotes>{updateNotice?.notes}</ReleaseNotes>
-      </Modal>
-      <Modal
-        isOpen={updateInstallPromptOpen}
-        onClose={() => !updateInstalling && setUpdateInstallPromptOpen(false)}
-        title={`Update ARC Studio to ${appUpdate?.version || 'the latest version'}?`}
-        subtitle={`Signed ${desktopReleaseChannel} update · ARC Studio will restart after installation.`}
-        icon={Download}
-        footer={<><Button variant="secondary" disabled={updateInstalling} onClick={() => setUpdateInstallPromptOpen(false)}>Later</Button><Button icon={Download} loading={updateInstalling} onClick={handleInstallStudioUpdate}>Download and install</Button></>}
-      >
-        <p className="close-graph-copy">Your graphs and settings are saved in your workspace. The update will be verified before it is installed.</p>
-        {appUpdate?.notes && <ReleaseNotes>{appUpdate.notes}</ReleaseNotes>}
-      </Modal>
-      <Modal
-        isOpen={Boolean(releaseNotesNotice) && !updateNotice && !appUpdate && !stableUpdateReady && !updateInstallPromptOpen}
-        onClose={dismissReleaseNotes}
-        title={releaseNotesNotice?.title || `What’s new in ARC Studio ${studioVersion}`}
-        subtitle="Release notes"
-        icon={Sparkles}
-        maxWidth="max-w-2xl"
-        footer={<><a className="studio-button studio-button-secondary" href={releaseNotesNotice?.url} target="_blank" rel="noreferrer">View release</a><Button onClick={dismissReleaseNotes}>Got it</Button></>}
-      >
-        <ReleaseNotes>{releaseNotesNotice?.notes}</ReleaseNotes>
-      </Modal>
-      {desktopMode && stableUpdateReady && <div className="stable-update-ready-notice" role="status">ARC Studio update ready · it will be applied on next launch.</div>}
-      <LazyMountedFeature Component={UserManagementModal} isOpen={!desktopMode && isUserMgmtOpen} loadingLabel="Opening Team access…" isDesktop={desktopMode} onClose={() => setIsUserMgmtOpen(false)} authToken={authToken} currentUsername={currentUser?.username} currentUserId={currentUser?.id} onCurrentUserChange={setCurrentUser} />
+        </Modal>
+        <LazyMountedFeature Component={BotSettingsModal} isOpen={isBotSettingsOpen} loadingLabel="Opening app settings…" isDesktop={desktopMode} onClose={() => setIsBotSettingsOpen(false)} authToken={authToken} profile={botProfile} onProfileChange={setBotProfile} />
+        <Modal
+          isOpen={Boolean(exportReview)}
+          onClose={() => setExportReview(null)}
+          title="Export Bot"
+          subtitle={`${exportReview?.issues.length || 0} finding${exportReview?.issues.length === 1 ? '' : 's'} · review the package and runtime requirements before building.`}
+          icon={PackageOpen}
+          maxWidth="max-w-2xl"
+          footer={<><Button variant="secondary" onClick={() => setExportReview(null)}>Cancel</Button><Button disabled={exportInProgress || exportReview?.issues.some((issue) => issue.kind === 'error')} onClick={() => { const review = exportReview; setExportReview(null); if (review) handleExportBot(review.projectId, true, { includeCryptoSecret: review.includeCryptoSecret, includeBotToken: review.includeBotToken }); }}>Build bot ZIP</Button></>}
+        >
+          {exportReview?.summary && <div className="export-preflight-summary">
+            <div className="export-preflight-stats"><span><strong>{exportReview.summary.graphCount}</strong> graphs</span><span><strong>{exportReview.summary.nodeCount}</strong> nodes</span><span><strong>{exportReview.summary.variableCount}</strong> variables</span></div>
+            <div className="export-preflight-disclosures">
+              <ExportReviewDisclosure title="Included in the archive" summary={`${exportReview.summary.included.length} files and folders`} expanded={Boolean(exportReviewSections.included)} onToggle={() => setExportReviewSections((current) => ({ ...current, included: !current.included }))}>
+                {exportReview.summary.included.map((item) => <span key={item}>{item}</span>)}
+              </ExportReviewDisclosure>
+              {exportReview.summary.graphNames.length > 0 && <ExportReviewDisclosure title="Graphs" summary={`${exportReview.summary.graphNames.length} included`} expanded={Boolean(exportReviewSections.graphs)} onToggle={() => setExportReviewSections((current) => ({ ...current, graphs: !current.graphs }))}>
+                <span>{exportReview.summary.graphNames.join(' · ')}</span>
+              </ExportReviewDisclosure>}
+              <ExportReviewDisclosure title="Gateway intents and permissions" summary={`${exportReview.summary.requiredIntents.length || 1} intents · ${exportReview.summary.requiredPermissions.length} permissions`} expanded={Boolean(exportReviewSections.requirements)} onToggle={() => setExportReviewSections((current) => ({ ...current, requirements: !current.requirements }))}>
+                <div className="export-preflight-columns">
+                  <div className="export-preflight-section"><strong>Gateway intents</strong><span>{exportReview.summary.requiredIntents.length ? exportReview.summary.requiredIntents.join(', ') : 'Guilds (required)'}</span></div>
+                  <div className="export-preflight-section"><strong>Permissions used by nodes</strong><span>{exportReview.summary.requiredPermissions.length ? exportReview.summary.requiredPermissions.join(', ') : 'No additional permissions inferred'}</span><span>Inferred from node types; verify the bot role has these in each server.</span></div>
+                </div>
+              </ExportReviewDisclosure>
+              <ExportReviewDisclosure title="Runtime and configuration" summary={exportReview.summary.runtime} expanded={Boolean(exportReviewSections.runtime)} onToggle={() => setExportReviewSections((current) => ({ ...current, runtime: !current.runtime }))}>
+                {exportReview.summary.configuration.map((item) => <span key={item}>{item}</span>)}
+              </ExportReviewDisclosure>
+            </div>
+            <div className="export-secret-options">
+              {exportReview.summary.usesCryptoNodes && <label className="export-secret-option">
+                <input type="checkbox" checked={Boolean(exportReview.includeCryptoSecret)} onChange={(event) => setExportReview((current) => current ? { ...current, includeCryptoSecret: event.target.checked } : current)} />
+                <span><strong>Include generated crypto secret in .env</strong><small>{exportReview.includeCryptoSecret ? 'Used by AES nodes with no passphrase. Keep it private and reuse it when replacing an export that has stored ciphertext.' : 'Without a saved secret, ciphertext made with the default key cannot be decrypted after the bot restarts.'}</small></span>
+              </label>}
+              {exportReview.summary.showBotTokenOption && <label className={`export-secret-option${exportReview.summary.hasBotToken && exportReview.summary.isActiveProject ? '' : ' is-disabled'}`}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(exportReview.includeBotToken)}
+                  disabled={!exportReview.summary.canIncludeBotToken || !exportReview.summary.hasBotToken || !exportReview.summary.isActiveProject}
+                  onChange={(event) => setExportReview((current) => current ? { ...current, includeBotToken: event.target.checked } : current)}
+                />
+                <span><strong>Include bot token in .env</strong><small>{!exportReview.summary.isActiveProject ? 'Switch to this project before including its bot token.' : !exportReview.summary.hasBotToken ? 'No bot token is configured for this project.' : 'Off by default. Anyone with this ZIP can use the token.'}</small></span>
+              </label>}
+            </div>
+            {exportReview.summary.unsupportedNodeCount > 0 && <div className="export-preflight-runtime-warning" role="alert">{exportReview.summary.unsupportedNodeCount} node type{exportReview.summary.unsupportedNodeCount === 1 ? ' is' : 's are'} not supported by the bundled runtime.</div>}
+          </div>}
+          <div className="validation-list">
+            {exportReview?.issues.map((issue, index) => {
+              const content = <><AlertCircle size={14} /><span>{issue.graphName && <strong>{issue.graphName}: </strong>}{issue.message}</span></>;
+              return issue.nodeId
+                ? <button key={`${issue.kind}-${issue.graphName}-${index}`} type="button" className={`validation-item is-${issue.kind} is-clickable`} title="Open graph and highlight node" onClick={() => { setExportReview(null); traceGraphNode(issue.graphId, issue.nodeId); }}>{content}</button>
+                : <div key={`${issue.kind}-${issue.graphName}-${index}`} className={`validation-item is-${issue.kind}`}>{content}</div>;
+            })}
+          </div>
+        </Modal>
+        <LazyMountedFeature Component={GraphValidationModal} isOpen={Boolean(validationResult)} loadingLabel="Opening validation results…" isDesktop={desktopMode} onClose={() => setValidationResult(null)} graphName={validationResult?.graphName || activeGraph?.name} result={validationResult} onTraceIssue={traceGraphNode} />
+        <Modal
+          isOpen={gatewayIntentConfirm.length > 0}
+          onClose={() => setGatewayIntentConfirm([])}
+          title="Connect with limited gateway access?"
+          subtitle="Discord currently reports these privileged intents as disabled."
+          icon={AlertCircle}
+          footer={<><Button variant="secondary" onClick={() => setGatewayIntentConfirm([])}>Cancel</Button><Button onClick={() => { setGatewayIntentConfirm([]); handleStartBot(true); }}>Connect anyway</Button></>}
+        >
+          <p className="close-graph-copy">ARC Studio can still connect the gateway, but graphs that need {gatewayIntentConfirm.map((intent) => intent.label).join(' and ')} may not receive the required events or data. Enable them in the Discord Developer Portal for full functionality.</p>
+        </Modal>
+        <Modal
+          isOpen={Boolean(nameDialog)}
+          onClose={() => { setNameDialog(null); setNameDialogError(''); }}
+          title={nameDialog?.mode === 'save' || nameDialog?.mode === 'save-close' ? 'Save graph' : 'Rename graph'}
+          subtitle={nameDialog?.mode === 'save' || nameDialog?.mode === 'save-close' ? 'Choose a name for this graph.' : 'Update the graph name.'}
+          icon={FileCode2}
+          footer={<><Button variant="secondary" onClick={() => setNameDialog(null)}>Cancel</Button><Button onClick={handleNameDialogSubmit}>{nameDialog?.mode === 'save' || nameDialog?.mode === 'save-close' ? 'Save graph' : 'Rename graph'}</Button></>}
+        >
+          <form onSubmit={handleNameDialogSubmit}>
+            <TextInput label="Graph name" placeholder="Untitled graph" value={nameDialog?.value || ''} maxLength={80} autoFocus error={nameDialogError} onChange={(event) => { setNameDialog((current) => current ? { ...current, value: event.target.value } : current); setNameDialogError(''); }} />
+          </form>
+        </Modal>
+        <Modal
+          isOpen={Boolean(closeGraphDialog)}
+          onClose={() => setCloseGraphDialog(null)}
+          title="Save changes?"
+          subtitle={`“${closeGraphDialog?.name || 'Untitled graph'}” has unsaved changes.`}
+          icon={Save}
+          footer={<><Button variant="secondary" onClick={() => setCloseGraphDialog(null)}>Cancel</Button><Button variant="danger" onClick={handleDiscardAndCloseGraph}>Discard</Button><Button icon={Save} onClick={handleSaveAndCloseGraph}>Save and close</Button></>}
+        >
+          <p className="close-graph-copy">Save this graph to your Library before closing?</p>
+        </Modal>
+        <Modal isOpen={Boolean(nodePrefabDialog)} onClose={() => setNodePrefabDialog(null)} title="Save node prefab" subtitle="Add this configured node to Saved nodes." icon={FileCode2} footer={<><Button variant="secondary" onClick={() => setNodePrefabDialog(null)}>Cancel</Button><Button onClick={handleSaveNodePrefab}>Save node</Button></>}>
+          <form onSubmit={handleSaveNodePrefab}><TextInput label="Node name" placeholder="My node" value={nodePrefabDialog?.name || ''} maxLength={80} autoFocus error={nodePrefabError} onChange={(event) => { setNodePrefabDialog((current) => current ? { ...current, name: event.target.value } : current); setNodePrefabError(''); }} /></form>
+        </Modal>
+        <Modal isOpen={Boolean(nodeRenameDialog)} onClose={() => setNodeRenameDialog(null)} title="Rename node" subtitle="This name is saved with this graph." icon={FileCode2} footer={<><Button variant="secondary" onClick={() => setNodeRenameDialog(null)}>Cancel</Button><Button onClick={saveNodeRename}>Rename</Button></>}>
+          <form onSubmit={saveNodeRename}><TextInput label="Node name" placeholder={nodeRenameDialog?.fallback || 'Node'} value={nodeRenameValue} maxLength={64} autoFocus onChange={(event) => setNodeRenameValue(event.target.value)} /></form>
+        </Modal>
+        <Modal isOpen={Boolean(tagGroupDialog)} onClose={() => setTagGroupDialog(null)} title={tagGroupDialog?.id ? 'Edit canvas section' : 'Create canvas section'} subtitle="Group related nodes with a colored frame." icon={FolderTree} footer={<><Button variant="secondary" onClick={() => setTagGroupDialog(null)}>Cancel</Button><Button onClick={saveTagGroup}>{tagGroupDialog?.id ? 'Save section' : 'Create section'}</Button></>}>
+          <form className="canvas-tag-group-form" onSubmit={saveTagGroup}>
+            <TextInput label="Section name" placeholder="e.g. Ticket creation" value={tagGroupName} maxLength={48} autoFocus error={tagGroupError} onChange={(event) => { setTagGroupName(event.target.value); setTagGroupError(''); }} />
+            <span className="field-label">Color</span>
+            <div className="canvas-tag-group-colors">{TAG_GROUP_COLORS.map((color) => <button key={color.id} type="button" className={`canvas-tag-group-color${tagGroupColor === color.value ? ' is-selected' : ''}`} style={{ '--tag-group-color': color.value }} aria-label={`${color.label} section color`} aria-pressed={tagGroupColor === color.value} onClick={() => setTagGroupColor(color.value)} />)}</div>
+            {(activeGraph?.notes || []).length > 0 && <><span className="field-label">Notes in section</span>{activeGraph.notes.length > 12 && <TextInput label="Search notes" placeholder="Filter by note text" value={tagGroupSearch} onChange={(event) => setTagGroupSearch(event.target.value)} />}<div className="canvas-tag-group-members">{activeGraph.notes.filter((note) => !tagGroupSearch.trim() || `${note.text || ''} ${note.createdBy || ''}`.toLowerCase().includes(tagGroupSearch.trim().toLowerCase())).map((note, index) => <label key={note.id}><input type="checkbox" checked={tagGroupNoteIds.includes(note.id)} onChange={(event) => setTagGroupNoteIds((current) => event.target.checked ? [...current, note.id] : current.filter((id) => id !== note.id))} /><span>{String(note.text || `Note ${index + 1}`).split('\n')[0].slice(0, 48)}</span><small>{note.createdBy || 'Unknown'}</small></label>)}</div></>}
+          </form>
+        </Modal>
+        <Modal
+          isOpen={Boolean(projectDelete)}
+          onClose={() => { if (!projectBusy) { setProjectDelete(null); setProjectDeleteName(''); setProjectDeleteError(''); setProjectDeletePromptError(''); setProjectDeleteFieldShake(false); } }}
+          onConfirm={attemptDeleteProject}
+          title="Delete project?"
+          subtitle="This permanently removes the project and its saved data."
+          icon={Trash2}
+          footer={<><Button variant="secondary" disabled={projectBusy} onClick={() => { setProjectDelete(null); setProjectDeleteName(''); setProjectDeleteError(''); setProjectDeletePromptError(''); }}>Cancel</Button><Button variant="danger" loading={projectBusy} disabled={projectBusy || projectDeleteName.trim() !== projectDelete?.name} onClick={handleDeleteProject}>Delete project</Button></>}
+        >
+          <p className="project-delete-copy">Type <strong>{projectDelete?.name}</strong> to confirm.</p>
+          <TextInput inputRef={projectDeleteInputRef} label="Project name" placeholder={projectDelete?.name || ''} value={projectDeleteName} autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} autoFocus error={projectDeleteError} wrapperClassName={projectDeleteFieldShake ? 'field-shake project-delete-entry-flash' : ''} onChange={(event) => { setProjectDeleteName(event.target.value); setProjectDeleteError(''); setProjectDeletePromptError(''); }} />
+          {projectDeletePromptError && <p className="field-error" role="alert">{projectDeletePromptError}</p>}
+        </Modal>
+        <Modal
+          isOpen={Boolean(projectImportFile)}
+          onClose={() => { if (!projectBusy) cancelProjectImport(); }}
+          title="Import project file?"
+          subtitle={projectImportFile?.name || ''}
+          icon={ShieldCheck}
+          footer={<><Button variant="secondary" disabled={projectBusy} onClick={cancelProjectImport}>Cancel</Button><Button icon={FileUp} loading={projectBusy} disabled={!projectImportTrusted || projectBusy || projectImportCompatibility?.code === 'PROJECT_REQUIRES_NEWER_ARC' || projectImportCompatibility?.code === 'PROJECT_OLD_VERSION_CONFIRMATION_REQUIRED' && !projectImportOldVersionApproved} onClick={handleImportProject}>{projectImportCompatibility?.code === 'PROJECT_REQUIRES_NEWER_ARC' ? 'Newer ARC Studio required' : projectImportCompatibility?.code === 'PROJECT_OLD_VERSION_CONFIRMATION_REQUIRED' ? 'Import older project' : 'Trust and import'}</Button></>}
+        >
+          <div className="project-import-warning"><strong>Only import a project from someone you trust.</strong><p>Project files contain graphs, settings, and assets. Importing adds the project to this workspace and marks it trusted here.</p><label><input type="checkbox" checked={projectImportTrusted} onChange={(event) => setProjectImportTrusted(event.target.checked)} /><span>I trust the source of this project file.</span></label>{projectImportCompatibility?.code === 'PROJECT_OLD_VERSION_CONFIRMATION_REQUIRED' && <div className="project-import-compatibility-warning" role="alert"><strong>Older project version</strong><p>{projectImportCompatibility.unknownProjectVersion ? 'This file does not record an ARC Studio version.' : `Created with ARC Studio ${projectImportCompatibility.projectVersion}; this is at least 10 releases older than ${projectImportCompatibility.currentVersion}.`} Its graphs or settings may behave differently. Review it before using it.</p><label><input type="checkbox" checked={projectImportOldVersionApproved} onChange={(event) => setProjectImportOldVersionApproved(event.target.checked)} /><span>I understand and want to import this older project.</span></label></div>}{projectImportCompatibility?.code === 'PROJECT_REQUIRES_NEWER_ARC' && <div className="project-import-compatibility-warning" role="alert"><strong>Update ARC Studio to import this project</strong><p>Created with ARC Studio {projectImportCompatibility.projectVersion}. This workspace runs {projectImportCompatibility.currentVersion || 'an older version'}; open it with ARC Studio {projectImportCompatibility.projectVersion} or newer.</p></div>}{projectImportError && <p className="field-error" role="alert">{projectImportError}</p>}</div>
+        </Modal>
+        <Modal isOpen={projectTemplateDialog} onClose={() => { if (!projectBusy) { setProjectTemplateDialog(false); setProjectError(''); } }} title="Create from template" subtitle="Pick a starter project and give it a name." footer={<><Button variant="secondary" disabled={projectBusy} onClick={() => setProjectTemplateDialog(false)}>Cancel</Button><Button icon={Plus} loading={projectBusy} disabled={!newProjectName.trim() || projectBusy} onClick={handleCreateProjectFromTemplate}>Create project</Button></>}>
+          <div className="project-template-dialog-form">
+            <TextInput label="Project name" placeholder="e.g. Community bot" value={newProjectName} maxLength={64} autoFocus onChange={(event) => { setNewProjectName(event.target.value); setProjectNameManuallyEdited(true); setProjectNameInvalid(false); setProjectError(''); }} />
+            <span className="field-label">Choose a starting point</span>
+            <div className="splash-project-templates project-template-cards">
+              {projectStarters.map((starter) => { const Icon = PROJECT_STARTER_ICONS[starter.id] || PackageOpen; return <button key={starter.id} type="button" className={`splash-project-template ${newProjectTemplate === starter.id ? 'is-selected' : ''}`} aria-pressed={newProjectTemplate === starter.id} onClick={() => { setNewProjectTemplate(starter.id); if (!projectNameManuallyEdited) setNewProjectName(starter.name); }}><Icon size={16} /><span><strong>{starter.name}</strong><small>{starter.description}</small></span></button>; })}
+            </div>
+            {projectError && <p className="field-error" role="alert">{projectError}</p>}
+          </div>
+        </Modal>
+        <Modal
+          isOpen={Boolean(updateNotice)}
+          onClose={() => setUpdateNotice(null)}
+          title={updateNotice?.title || `ARC Studio ${updateNotice?.version || ''}`}
+          subtitle={updateNotice?.kind === 'staged' ? 'Update ready · release notes' : 'Update available · release notes'}
+          icon={Sparkles}
+          maxWidth="max-w-2xl"
+          footer={<>
+            <a className="studio-button studio-button-secondary" href={updateNotice?.url} target="_blank" rel="noreferrer">View release</a>
+            {updateNotice?.kind === 'install'
+              ? <><Button variant="secondary" onClick={() => setUpdateNotice(null)}>Later</Button><Button icon={Download} loading={updateInstalling} onClick={handleInstallStudioUpdate}>Install update</Button></>
+              : <Button onClick={() => setUpdateNotice(null)}>Got it</Button>}
+          </>}
+        >
+          {updateNotice?.kind === 'staged' && <p className="close-graph-copy">This update will be applied the next time you launch ARC Studio.</p>}
+          <ReleaseNotes>{updateNotice?.notes}</ReleaseNotes>
+        </Modal>
+        <Modal
+          isOpen={updateInstallPromptOpen}
+          onClose={() => !updateInstalling && setUpdateInstallPromptOpen(false)}
+          title={`Update ARC Studio to ${appUpdate?.version || 'the latest version'}?`}
+          subtitle={`Signed ${desktopReleaseChannel} update · ARC Studio will restart after installation.`}
+          icon={Download}
+          footer={<><Button variant="secondary" disabled={updateInstalling} onClick={() => setUpdateInstallPromptOpen(false)}>Later</Button><Button icon={Download} loading={updateInstalling} onClick={handleInstallStudioUpdate}>Download and install</Button></>}
+        >
+          <p className="close-graph-copy">Your graphs and settings are saved in your workspace. The update will be verified before it is installed.</p>
+          {appUpdate?.notes && <ReleaseNotes>{appUpdate.notes}</ReleaseNotes>}
+        </Modal>
+        <Modal
+          isOpen={Boolean(releaseNotesNotice) && !updateNotice && !appUpdate && !stableUpdateReady && !updateInstallPromptOpen}
+          onClose={dismissReleaseNotes}
+          title={releaseNotesNotice?.title || `What’s new in ARC Studio ${studioVersion}`}
+          subtitle="Release notes"
+          icon={Sparkles}
+          maxWidth="max-w-2xl"
+          footer={<><a className="studio-button studio-button-secondary" href={releaseNotesNotice?.url} target="_blank" rel="noreferrer">View release</a><Button onClick={dismissReleaseNotes}>Got it</Button></>}
+        >
+          <ReleaseNotes>{releaseNotesNotice?.notes}</ReleaseNotes>
+        </Modal>
+        {desktopMode && stableUpdateReady && <div className="stable-update-ready-notice" role="status">ARC Studio update ready · it will be applied on next launch.</div>}
+        <LazyMountedFeature Component={UserManagementModal} isOpen={!desktopMode && isUserMgmtOpen} loadingLabel="Opening Team access…" isDesktop={desktopMode} onClose={() => setIsUserMgmtOpen(false)} authToken={authToken} currentUsername={currentUser?.username} currentUserId={currentUser?.id} onCurrentUserChange={setCurrentUser} />
       </div>
       <ToastContainer />
       <TooltipLayer />
@@ -6562,8 +6561,8 @@ function validateGraph(graph, graphLookup = null, intentSummary = null, projectV
     if (source.type === 'variable_get' && pinId === 'value') return initialVariableValue(variableById.get(source.data?.variableId));
     if (source.type === 'variable_create' && pinId === 'value') return initialVariableValue(variableById.get(`nodevar_${source.id}`));
     if (source.type === 'function_input' && pinId === 'value') return source.data?.defaultValue ?? '';
-    if (['value_text', 'value_number', 'value_boolean'].includes(source.type) && pinId === 'value') {
-      const fallback = source.data?.value ?? (source.type === 'value_text' ? 'Hello World' : source.type === 'value_boolean');
+    if (['value_number', 'value_boolean'].includes(source.type) && pinId === 'value') {
+      const fallback = source.data?.value ?? (source.type === 'value_boolean');
       const wire = findInputWire(source.id, 'value');
       return wire ? resolveKnownStringOutput(wire.sourceNodeId, wire.sourcePinId, nextSeen) : fallback;
     }
@@ -6598,7 +6597,7 @@ function validateGraph(graph, graphLookup = null, intentSummary = null, projectV
     if (!execTargets.has(wire.sourceNodeId)) execTargets.set(wire.sourceNodeId, []);
     execTargets.get(wire.sourceNodeId).push(wire.targetNodeId);
   }
-  const walkExec = (startIds, visit = () => {}) => {
+  const walkExec = (startIds, visit = () => { }) => {
     const pending = [...startIds];
     const visited = new Set();
     while (pending.length) {
@@ -6711,7 +6710,7 @@ function validateGraph(graph, graphLookup = null, intentSummary = null, projectV
     }
   }
   if (isFunction && nodes.some((node) => String(node.type).startsWith('event_'))) errors.push('Function graphs cannot contain event trigger nodes.');
-    if (graphLookup && hasFunctionCycle(graph, graphLookup)) errors.push('Graphs cannot call themselves, directly or indirectly.');
+  if (graphLookup && hasFunctionCycle(graph, graphLookup)) errors.push('Graphs cannot call themselves, directly or indirectly.');
   const hasEventNode = nodes.some((node) => String(node.type).startsWith('event_'));
   const hasActionNode = nodes.some((node) => String(node.type).startsWith('action_'));
   if (!isFunction && !hasEventNode && hasActionNode) warnings.push('This graph has Discord actions but no event node to run them.');

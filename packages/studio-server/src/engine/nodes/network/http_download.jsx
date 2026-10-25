@@ -66,5 +66,26 @@ export const registry = {
       "label": "Error",
       "type": "string"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  node,
+  templateInput,
+  isConnected,
+  FallbackField,
+  NodeNumberInput,
+  numericNodeInputValue,
+  update
+}) {
+  if (node.type === 'action_http_download') {
+    return <div className="node-config node-config-stack">
+      {templateInput('url', 'URL', { inputMode: 'url', maxLength: 4096, placeholder: 'Direct public file URL' })}
+      {templateInput('user_agent', 'User-Agent', { maxLength: 512, placeholder: 'Optional' })}
+      {!isConnected('timeout_ms') && <FallbackField label="Timeout (ms)"><NodeNumberInput min="1000" max="30000" value={node.data?.timeout_ms ?? 20000} onChange={(event) => update('timeout_ms', numericNodeInputValue(event.target.value, { min: 1000, max: 30000, fallback: 1000 }))} onPointerDown={(event) => event.stopPropagation()} aria-label="File download timeout in milliseconds" /></FallbackField>}
+      {!isConnected('max_bytes') && <FallbackField label="Max file bytes"><NodeNumberInput min="1024" max="20971520" value={node.data?.max_bytes ?? 20971520} onChange={(event) => update('max_bytes', numericNodeInputValue(event.target.value, { min: 1024, max: 20971520, integer: true, fallback: 1024 }))} onPointerDown={(event) => event.stopPropagation()} aria-label="Maximum file size in bytes" /></FallbackField>}
+      <span className="node-config-hint">Connect File to a message or interaction reply Files input. Maximum file size is 20 MiB.</span>
+    </div>;
+  }
+}

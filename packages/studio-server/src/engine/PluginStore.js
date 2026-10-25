@@ -36,7 +36,6 @@ const LOCAL_HOST_ADAPTERS = new Map([...localHostAdapters].map(([id, plugin]) =>
 const allowedNode = (type) => type === 'function_input'
   || type === 'function_return'
   || type === 'function_call'
-  || type === 'function_math'
   || type === 'format_text'
   || type === 'compare_text'
   || type.startsWith('math_')
@@ -236,7 +235,7 @@ async function installNpmDependencies(stagedDirectory, stageRoot, dependencies, 
       clearTimeout(killTimer);
       error ? reject(error) : resolve();
     };
-    child.stdout.on('data', () => {});
+    child.stdout.on('data', () => { });
     child.stderr.on('data', (chunk) => { stderr = `${stderr}${chunk}`.slice(-12000); });
     child.on('error', (error) => finish(new Error(`Could not start npm for ${pluginId}: ${error.message}`)));
     child.on('close', (code) => finish(timedOut
@@ -1444,7 +1443,7 @@ export class PluginStore {
 
   static readProjectSettings(projectDir, pluginId, schema = this.settingsSchema(pluginId), revealSecrets = false) {
     let saved = {};
-    try { saved = JSON.parse(fs.readFileSync(path.join(projectDir, 'plugin-settings.json'), 'utf8'))?.[pluginId] || {}; } catch {}
+    try { saved = JSON.parse(fs.readFileSync(path.join(projectDir, 'plugin-settings.json'), 'utf8'))?.[pluginId] || {}; } catch { }
     const values = {};
     for (const field of schema) {
       const value = saved[field.id];
@@ -1469,7 +1468,7 @@ export class PluginStore {
     if (!schema.length) throw new Error('This plugin has no project settings.');
     const filePath = path.join(projectDir, 'plugin-settings.json');
     let saved = {};
-    try { saved = JSON.parse(fs.readFileSync(filePath, 'utf8')) || {}; } catch {}
+    try { saved = JSON.parse(fs.readFileSync(filePath, 'utf8')) || {}; } catch { }
     const current = saved[pluginId] || {};
     const next = { ...current };
     for (const field of schema) {
@@ -1502,7 +1501,7 @@ export class PluginStore {
     fs.writeFileSync(temporary, JSON.stringify(saved, null, 2), { mode: 0o600 });
     fs.renameSync(temporary, filePath);
     const bundled = LOCAL_HOST_ADAPTERS.get(pluginId);
-    if (bundled?.runtime.closeProject) void loadHostAdapterRuntime(bundled).then((runtime) => runtime[bundled.runtime.closeProject]?.(projectDir)).catch(() => {});
+    if (bundled?.runtime.closeProject) void loadHostAdapterRuntime(bundled).then((runtime) => runtime[bundled.runtime.closeProject]?.(projectDir)).catch(() => { });
     return this.publicProjectSettings(projectDir, pluginId);
   }
 }

@@ -63,7 +63,7 @@ export const registry = {
       "type": "object"
     }
   ],
-  ui: ui
+  ui
 };
 
 function ui({

@@ -23,7 +23,7 @@ export const registry = {
     }
   ],
   "outputs": [],
-  ui: ui
+  ui
 };
 
 function ui({

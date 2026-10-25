@@ -33,5 +33,18 @@ export const registry = {
       "label": "Index (0-based)",
       "type": "number"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  isConnected,
+  NodeNumberInput,
+  FallbackField,
+  node,
+  numericNodeInputValue
+}) {
+  return <div className="node-config node-config-stack">
+    {!isConnected('count') && <FallbackField label="Iterations"><NodeNumberInput min="0" max="1000" step="1" value={node.data?.count ?? 1} onChange={(event) => update('count', numericNodeInputValue(event.target.value, { min: 0, max: 1000, integer: true }))} onPointerDown={(event) => event.stopPropagation()} aria-label="Loop iteration count" /></FallbackField>}
+  </div>;
+}

@@ -90,7 +90,7 @@ export const registry = {
       "type": "string"
     }
   ],
-  ui: ui
+  ui
 };
 
 function ui({
@@ -99,7 +99,8 @@ function ui({
   node,
   textEditor,
   FallbackCheckbox,
-  authToken
+  authToken,
+  onOpenEmbedStudio
 }) {
   const componentsConnected = isConnected("components");
   return <div className="node-config node-config-stack">

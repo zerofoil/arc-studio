@@ -44,5 +44,20 @@ export const registry = {
       "label": "Iteration",
       "type": "number"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  isConnected,
+  FallbackField,
+  NodeNumberInput,
+  numericNodeInputValue,
+  update,
+  node
+}) {
+  return <div className="node-config node-config-stack">
+    {!isConnected('interval_ms') && <FallbackField label="Wait between passes (ms)"><NodeNumberInput min="100" max="604800000" step="100" value={node.data?.interval_ms ?? 500} onChange={(event) => update('interval_ms', numericNodeInputValue(event.target.value, { min: 100, max: 604800000, fallback: 500 }))} onPointerDown={(event) => event.stopPropagation()} aria-label="Repeat interval in milliseconds" /></FallbackField>}
+    <span className="node-config-hint">At least 100 ms. Set Condition false to stop; an always-true condition keeps the task running.</span>
+  </div>;
+}

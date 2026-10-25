@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+
 export const registry = {
   "description": "Builds a Discord modal with 1–5 labeled inputs, selects, or checkbox groups.",
   "type": "build_modal",
@@ -28,5 +30,13 @@ export const registry = {
       "label": "Modal",
       "type": "object"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  node,
+  onOpenModalStudio
+}) {
+  if (node.type === 'build_modal') return <div className="node-config node-config-stack"><button type="button" className="node-config-action node-config-studio-action" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => { event.preventDefault(); event.stopPropagation(); onOpenModalStudio?.(node); }}><Plus size={12} /> Edit popup modal{node.data?.modal?.components?.length ? ` · ${node.data.modal.components.length} fields` : ''}</button></div>;
+}

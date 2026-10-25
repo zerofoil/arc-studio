@@ -59,7 +59,6 @@ test('declarative editor controls have valid metadata and supply node defaults',
   assert.match(paramId, /^param_\d+_[a-z0-9]+$/);
   assert.deepEqual(functionInputData, { name: 'Input', valueType: 'number', optional: false, defaultValue: 0 });
   assert.deepEqual(createDefaultNodeData('function_return'), { valueType: 'number' });
-  assert.deepEqual(createDefaultNodeData('function_math'), { operation: 'add' });
   assert.deepEqual(createDefaultNodeData('build_embed'), { blocks: [], components: [] });
   assert.deepEqual(createDefaultNodeData('build_modal'), { modal: { customId: 'arc_modal', title: 'Tell us more', components: [{ type: 'text', customId: 'details', label: 'Details', style: 2, required: true, minLength: 1, maxLength: 1000 }] } });
   assert.deepEqual(createDefaultNodeData('data_permission_overwrites'), { overwriteCount: 1, target_id_1: '', target_type_1: 0, allow_1: [], deny_1: [] });

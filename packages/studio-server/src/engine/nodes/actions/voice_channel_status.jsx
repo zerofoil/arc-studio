@@ -35,5 +35,14 @@ export const registry = {
       "label": "Exec",
       "type": "exec"
     }
-  ]
+  ],
+  ui
 };
+
+function ui({
+  textField
+}) {
+  return <div className="node-config node-config-stack">
+    {textField('channel_id', 'Voice channel ID')}{textField('status', 'Status (blank clears)')}{textField('reason', 'Audit Log Reason')}
+  </div>
+}
