@@ -907,7 +907,7 @@ export class GraphRunner {
           })) : [];
           try {
             NodeDefinitions[targetNode.type].exec({
-              targetNode,
+              node: targetNode,
               currentExecWires,
               findExecOutputs,
               localVariableDefinitions,
@@ -920,12 +920,11 @@ export class GraphRunner {
             });
           } catch (e) {
             if (NodeDefinitions[targetNode.type]?.exec) {
-              console.log(`EXEC error at ${targetNode.type}\n${e}`)
+              console.log(`EXEC error at ${targetNode.type}\n${e}`);
+              log(`EXEC error at ${targetNode.type}\n${e}`);
             }
           }
-          if (targetNode.type === 'utility_wire_extender') {
-            currentExecWires.push(...findExecOutputs(targetNode.id, 'exec_out'));
-          } else if (targetNode.type === 'variable_create') {
+          if (targetNode.type === 'variable_create') {
             const name = String(targetNode.data?.name || '').trim();
             const variableId = `nodevar_${targetNode.id}`;
             const definition = localVariableDefinitions.get(variableId);

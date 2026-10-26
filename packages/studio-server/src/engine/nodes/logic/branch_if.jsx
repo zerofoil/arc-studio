@@ -1,16 +1,4 @@
 import { GitBranch } from "lucide-react";
-function exec({
-  targetNode,
-  selectIfBranch,
-  resolveDataInput,
-  findExecOutputs,
-  currentExecWires,
-  log
-}) {
-  const decision = selectIfBranch(resolveDataInput(targetNode, 'condition', false));
-  log(decision.logMessage);
-  currentExecWires.push(...findExecOutputs(targetNode.id, decision.branchPin));
-}
 
 export const registry = {
   "description": "Splits execution flow based on a boolean condition",
@@ -44,5 +32,18 @@ export const registry = {
       "type": "exec"
     }
   ],
-  "exec": exec
+  exec
 };
+
+function exec({
+  node,
+  selectIfBranch,
+  resolveDataInput,
+  findExecOutputs,
+  currentExecWires,
+  log
+}) {
+  const decision = selectIfBranch(resolveDataInput(node, 'condition', false));
+  log(decision.logMessage);
+  currentExecWires.push(...findExecOutputs(node.id, decision.branchPin));
+}

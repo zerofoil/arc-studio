@@ -28,5 +28,14 @@ export const registry = {
       "label": "Any Value 1",
       "type": "any"
     }
-  ]
+  ],
+  exec
 };
+
+function exec({
+  currentExecWires,
+  findExecOutputs,
+  node
+}) {
+  currentExecWires.push(...findExecOutputs(node.id, 'exec_out'));
+}

@@ -590,355 +590,373 @@ wss.on('connection', (ws) => {
             ...(Number.isFinite(msg.clientSentAt) ? { clientSentAt: msg.clientSentAt } : {})
           }));
         } else if (msg.type === 'USER_ACTIVITY') {
-        ws.arcLastActivityAt = Date.now();
-        if (collaborationLastSeen.record(ws.arcProjectId, ws.arcPresence?.graphId || '', ws.arcUser)) {
-          broadcastProjectLastSeen();
-          publishProjectCollaboration(ws.arcProjectId);
-        }
-        const room = ws.arcRoomKey && liveCollaborationActions.get(ws.arcRoomKey);
-        const active = room?.get(ws.arcUser?.id);
-        if (active?.action?.cursor && (active.action.kind === 'idle' || active.action.cursorIdle)) {
-          const action = { ...active.action };
-          if (action.kind === 'idle') { action.kind = 'cursor'; action.mode = 'move'; }
-          delete action.cursorIdle;
-          const resumed = { ...active, action, updatedAt: Date.now(), revision: nextCollaborationActionRevision() };
-          room.set(ws.arcUser.id, resumed);
-          sendToCollaborationRoom(ws.arcRoomKey, { type: 'COLLAB_ACTION_UPDATED', payload: resumed }, ws);
-          scheduleCollaborationActionExpiry();
-        } else if (ws.arcActionExpiry) scheduleCollaborationActionExpiry();
-      } else if (['PROJECT_TABS_SYNC', 'PROJECT_TAB_OPEN', 'PROJECT_TAB_CLOSE'].includes(msg.type)) {
-        const projectId = ws.arcProjectId;
-        if (!projectId || !projectStore.projects.some((project) => project.id === projectId)) return;
-        const availableGraphIds = new Set(ws.arcManager.getGraphs().map((graph) => graph.id));
-        const isSync = msg.type === 'PROJECT_TABS_SYNC';
-        const requestedIds = isSync && Array.isArray(msg.graphIds) ? msg.graphIds.slice(0, 12) : [msg.graphId];
-        const requestedSet = new Set(requestedIds.filter((id) => typeof id === 'string'));
-        const graphSnapshots = isSync && Array.isArray(msg.graphs) ? msg.graphs.slice(0, 12) : msg.type === 'PROJECT_TAB_OPEN' && msg.graph ? [msg.graph] : [];
-        const snapshotBytes = graphSnapshots.reduce((size, graph) => {
-          try { return size + JSON.stringify(graph).length; } catch { return size; }
-        }, 0);
-        if (snapshotBytes > (isSync ? 20_000_000 : 30_000_000)) return;
-        let acceptedSnapshots = 0;
-        for (const candidate of graphSnapshots) {
-          if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate) || !requestedSet.has(candidate.id)
-            || availableGraphIds.has(candidate.id) || ws.arcManager.deletedGraphIds?.has(candidate.id)
-            || typeof candidate.id !== 'string' || candidate.id.length > 100
-            || !Array.isArray(candidate.nodes) || !Array.isArray(candidate.connections)
-            || candidate.nodes.length > 2000 || candidate.connections.length > 10000) continue;
-          if (!ws.arcUser?.permissions?.includes('*') && !ws.arcUser?.permissions?.includes('graphs:write')) continue;
-          let serialized;
-          try { serialized = JSON.stringify(candidate); } catch { continue; }
-          if (serialized.length > 30_000_000) continue;
-          const graphKey = `${projectId}:${candidate.id}`;
-          if (!liveGraphStates.has(graphKey)) {
-            const graph = JSON.parse(serialized);
-            liveGraphStates.set(graphKey, { projectId, graphId: graph.id, graph, revision: 0, updatedAt: Date.now(), user: { id: ws.arcUser.id, username: ws.arcUser.username }, serializedGraph: serialized, history: [{ revision: 0, graph }] });
+          ws.arcLastActivityAt = Date.now();
+          if (collaborationLastSeen.record(ws.arcProjectId, ws.arcPresence?.graphId || '', ws.arcUser)) {
+            broadcastProjectLastSeen();
+            publishProjectCollaboration(ws.arcProjectId);
           }
-          const sharedGraph = liveGraphStates.get(graphKey)?.graph;
-          if (sharedGraph) {
-            const message = JSON.stringify({ type: 'PROJECT_TAB_GRAPH_UPDATED', payload: { projectId, graph: sharedGraph } });
-            for (const client of wss.clients) if (client.arcAuthenticated && client.readyState === WebSocket.OPEN && client.arcProjectId === projectId) client.send(message);
+          const room = ws.arcRoomKey && liveCollaborationActions.get(ws.arcRoomKey);
+          const active = room?.get(ws.arcUser?.id);
+          if (active?.action?.cursor && (active.action.kind === 'idle' || active.action.cursorIdle)) {
+            const action = { ...active.action };
+            if (action.kind === 'idle') { action.kind = 'cursor'; action.mode = 'move'; }
+            delete action.cursorIdle;
+            const resumed = { ...active, action, updatedAt: Date.now(), revision: nextCollaborationActionRevision() };
+            room.set(ws.arcUser.id, resumed);
+            sendToCollaborationRoom(ws.arcRoomKey, { type: 'COLLAB_ACTION_UPDATED', payload: resumed }, ws);
+            scheduleCollaborationActionExpiry();
+          } else if (ws.arcActionExpiry) scheduleCollaborationActionExpiry();
+        } else if (['PROJECT_TABS_SYNC', 'PROJECT_TAB_OPEN', 'PROJECT_TAB_CLOSE'].includes(msg.type)) {
+          const projectId = ws.arcProjectId;
+          if (!projectId || !projectStore.projects.some((project) => project.id === projectId)) return;
+          const availableGraphIds = new Set(ws.arcManager.getGraphs().map((graph) => graph.id));
+          const isSync = msg.type === 'PROJECT_TABS_SYNC';
+          const requestedIds = isSync && Array.isArray(msg.graphIds) ? msg.graphIds.slice(0, 12) : [msg.graphId];
+          const requestedSet = new Set(requestedIds.filter((id) => typeof id === 'string'));
+          const graphSnapshots = isSync && Array.isArray(msg.graphs) ? msg.graphs.slice(0, 12) : msg.type === 'PROJECT_TAB_OPEN' && msg.graph ? [msg.graph] : [];
+          const snapshotBytes = graphSnapshots.reduce((size, graph) => {
+            try { return size + JSON.stringify(graph).length; } catch { return size; }
+          }, 0);
+          if (snapshotBytes > (isSync ? 20_000_000 : 30_000_000)) return;
+          let acceptedSnapshots = 0;
+          for (const candidate of graphSnapshots) {
+            if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate) || !requestedSet.has(candidate.id)
+              || availableGraphIds.has(candidate.id) || ws.arcManager.deletedGraphIds?.has(candidate.id)
+              || typeof candidate.id !== 'string' || candidate.id.length > 100
+              || !Array.isArray(candidate.nodes) || !Array.isArray(candidate.connections)
+              || candidate.nodes.length > 2000 || candidate.connections.length > 10000) continue;
+            if (!ws.arcUser?.permissions?.includes('*') && !ws.arcUser?.permissions?.includes('graphs:write')) continue;
+            let serialized;
+            try { serialized = JSON.stringify(candidate); } catch { continue; }
+            if (serialized.length > 30_000_000) continue;
+            const graphKey = `${projectId}:${candidate.id}`;
+            if (!liveGraphStates.has(graphKey)) {
+              const graph = JSON.parse(serialized);
+              liveGraphStates.set(graphKey, { projectId, graphId: graph.id, graph, revision: 0, updatedAt: Date.now(), user: { id: ws.arcUser.id, username: ws.arcUser.username }, serializedGraph: serialized, history: [{ revision: 0, graph }] });
+            }
+            const sharedGraph = liveGraphStates.get(graphKey)?.graph;
+            if (sharedGraph) {
+              const message = JSON.stringify({ type: 'PROJECT_TAB_GRAPH_UPDATED', payload: { projectId, graph: sharedGraph } });
+              for (const client of wss.clients) if (client.arcAuthenticated && client.readyState === WebSocket.OPEN && client.arcProjectId === projectId) client.send(message);
+            }
+            availableGraphIds.add(candidate.id);
+            acceptedSnapshots += 1;
           }
-          availableGraphIds.add(candidate.id);
-          acceptedSnapshots += 1;
-        }
-        let changed = false;
-        let rejectedForLimit = false;
-        if (isSync) {
-          ws.arcOpenGraphIds = new Set();
-          ws.arcTabsInitialized = true;
-        }
-        for (const graphId of requestedIds) {
-          if (typeof graphId !== 'string' || graphId.length > 100 || ws.arcManager.deletedGraphIds?.has(graphId)) continue;
-          if (msg.type === 'PROJECT_TAB_CLOSE') {
-            changed = ws.arcOpenGraphIds.delete(graphId) || changed;
-            continue;
+          let changed = false;
+          let rejectedForLimit = false;
+          if (isSync) {
+            ws.arcOpenGraphIds = new Set();
+            ws.arcTabsInitialized = true;
           }
-          const available = availableGraphIds.has(graphId) || liveGraphStates.has(`${projectId}:${graphId}`);
-          if (!available) continue;
-          if (!ws.arcOpenGraphIds.has(graphId)) {
-            const projectOpenIds = new Set([...wss.clients]
-              .filter((client) => client.arcAuthenticated && client.arcProjectId === projectId)
-              .flatMap((client) => [...(client.arcOpenGraphIds || [])]));
-            if (projectOpenIds.size < 12 || projectOpenIds.has(graphId)) {
-              ws.arcOpenGraphIds.add(graphId);
-              changed = true;
-            } else rejectedForLimit = true;
+          for (const graphId of requestedIds) {
+            if (typeof graphId !== 'string' || graphId.length > 100 || ws.arcManager.deletedGraphIds?.has(graphId)) continue;
+            if (msg.type === 'PROJECT_TAB_CLOSE') {
+              changed = ws.arcOpenGraphIds.delete(graphId) || changed;
+              continue;
+            }
+            const available = availableGraphIds.has(graphId) || liveGraphStates.has(`${projectId}:${graphId}`);
+            if (!available) continue;
+            if (!ws.arcOpenGraphIds.has(graphId)) {
+              const projectOpenIds = new Set([...wss.clients]
+                .filter((client) => client.arcAuthenticated && client.arcProjectId === projectId)
+                .flatMap((client) => [...(client.arcOpenGraphIds || [])]));
+              if (projectOpenIds.size < 12 || projectOpenIds.has(graphId)) {
+                ws.arcOpenGraphIds.add(graphId);
+                changed = true;
+              } else rejectedForLimit = true;
+            }
           }
-        }
-        for (const graphId of ws.arcOpenGraphIds) {
-          if (availableGraphIds.has(graphId)) continue;
-          const liveState = liveGraphStates.get(`${projectId}:${graphId}`);
-          if (liveState?.graph) ws.send(JSON.stringify({ type: 'PROJECT_TAB_GRAPH_UPDATED', payload: { projectId, graph: liveState.graph } }));
-          else { ws.arcOpenGraphIds.delete(graphId); changed = true; }
-        }
-        if (isSync) for (const graphId of requestedIds) {
-          if (typeof graphId === 'string' && ws.arcManager.deletedGraphIds?.has(graphId)) {
-            ws.send(JSON.stringify({ type: 'GRAPH_DELETED', payload: { projectId, graphId } }));
+          for (const graphId of ws.arcOpenGraphIds) {
+            if (availableGraphIds.has(graphId)) continue;
+            const liveState = liveGraphStates.get(`${projectId}:${graphId}`);
+            if (liveState?.graph) ws.send(JSON.stringify({ type: 'PROJECT_TAB_GRAPH_UPDATED', payload: { projectId, graph: liveState.graph } }));
+            else { ws.arcOpenGraphIds.delete(graphId); changed = true; }
           }
-        }
-        if (msg.type === 'PROJECT_TAB_OPEN' && typeof msg.graphId === 'string' && ws.arcManager.deletedGraphIds?.has(msg.graphId)) {
-          ws.send(JSON.stringify({ type: 'GRAPH_DELETED', payload: { projectId, graphId: msg.graphId } }));
-        } else if (msg.type === 'PROJECT_TAB_OPEN' && typeof msg.graphId === 'string' && rejectedForLimit) {
-          ws.send(JSON.stringify({ type: 'PROJECT_TAB_REJECTED', payload: { projectId, graphId: msg.graphId, reason: 'limit', message: 'The shared workspace already has 12 open graphs. Close a shared tab before opening another.' } }));
-        } else if (msg.type === 'PROJECT_TAB_OPEN' && typeof msg.graphId === 'string'
-          && (ws.arcManager.deletedGraphIds?.has(msg.graphId) || (!availableGraphIds.has(msg.graphId) && !liveGraphStates.has(`${projectId}:${msg.graphId}`)))) {
-          ws.send(JSON.stringify({ type: 'PROJECT_TAB_REJECTED', payload: { projectId, graphId: msg.graphId, reason: 'unavailable', message: 'This unsaved graph could not be shared. Save it first, then reopen it.' } }));
-        }
-        if (changed || isSync || acceptedSnapshots) publishProjectCollaboration(projectId);
-      } else if (msg.type === 'PRESENCE') {
-        const projectId = typeof msg.projectId === 'string' && projectStore.projects.some((project) => project.id === msg.projectId) ? msg.projectId : '';
-        if (projectId && projectId !== ws.arcProjectId) {
-          const owner = userStore.users.find((item) => item.id === ws.arcUser.id);
-          if (owner) owner.activeProjectId = projectId;
-          ws.arcProjectId = projectId;
-          ws.arcManager = managerForUser({ ...ws.arcUser, activeProjectId: projectId });
-          if (owner) userStore.saveState();
-        }
-        let graphId = typeof msg.graphId === 'string' && msg.graphId.length <= 100 ? msg.graphId : '';
-        if (graphId && ws.arcManager.deletedGraphIds?.has(graphId)) graphId = '';
-        const nextRoomKey = projectId && graphId ? collaborationRoomKey(projectId, graphId) : null;
-        if (ws.arcRoomKey !== nextRoomKey) {
-          clearNoteEditLocksForSocket(ws, ws.arcRoomKey);
-          clearCollaborationAction();
-        }
-        ws.arcPresence = projectId && graphId ? { projectId, graphId } : null;
-        ws.arcRoomKey = nextRoomKey;
-        const lastSeenUpdated = collaborationLastSeen.record(projectId, graphId, ws.arcUser);
-        if (projectId && graphId) {
-          const now = Date.now();
-          recentProjectGraphUse.set(`${projectId}:${graphId}`, { projectId, graphId, userId: ws.arcUser.id, username: ws.arcUser.username, updatedAt: now });
-        }
-        if (nextRoomKey) {
-          const room = liveCollaborationActions.get(nextRoomKey);
-          if (room) for (const action of room.values()) ws.send(JSON.stringify({ type: 'COLLAB_ACTION_UPDATED', payload: action }));
-          ws.send(JSON.stringify({ type: 'NOTE_EDIT_LOCKS_UPDATED', payload: { projectId, graphId, locks: noteLockSnapshot(nextRoomKey) } }));
-          sendGraphChatSnapshot(ws, nextRoomKey);
-          sendCanvasArrowSnapshot(ws, nextRoomKey);
-        }
-        let liveState = ws.arcPresence ? liveGraphStates.get(`${projectId}:${graphId}`) : null;
-        if (ws.arcPresence && !liveState) {
-          const initialGraph = ws.arcManager.getGraphs().find((graph) => graph.id === graphId);
-          if (initialGraph) {
-            const serializedGraph = JSON.stringify(initialGraph);
-            liveState = { projectId, graphId, graph: initialGraph, revision: 0, updatedAt: Date.now(), user: null, serializedGraph, history: [{ revision: 0, graph: initialGraph }] };
-            liveGraphStates.set(`${projectId}:${graphId}`, liveState);
+          if (isSync) for (const graphId of requestedIds) {
+            if (typeof graphId === 'string' && ws.arcManager.deletedGraphIds?.has(graphId)) {
+              ws.send(JSON.stringify({ type: 'GRAPH_DELETED', payload: { projectId, graphId } }));
+            }
           }
-        }
-        if (liveState) {
-          const payload = { ...liveState };
-          delete payload.serializedGraph;
-          ws.send(JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload }));
-        } else if (ws.arcPresence) ws.send(JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload: { projectId, graphId, ready: true, revision: 0 } }));
-        publishPresence();
-        if (lastSeenUpdated) broadcastProjectLastSeen();
-      } else if (msg.type === 'NOTE_EDIT_LOCK_REQUEST' || msg.type === 'NOTE_EDIT_LOCK_RELEASE') {
-        const roomKey = ws.arcRoomKey;
-        const actionProjectId = typeof msg.projectId === 'string' ? msg.projectId : '';
-        const actionGraphId = typeof msg.graphId === 'string' ? msg.graphId : '';
-        const noteId = typeof msg.noteId === 'string' ? msg.noteId : '';
-        if (!roomKey || !ws.arcPresence || actionProjectId !== ws.arcPresence.projectId || actionGraphId !== ws.arcPresence.graphId
-          || !noteId || noteId.length > 100) return;
-        if (msg.type === 'NOTE_EDIT_LOCK_RELEASE') {
-          const room = liveNoteEditLocks.get(roomKey);
-          if (room?.get(noteId)?.socket === ws) removeNoteEditLock(roomKey, noteId);
-          return;
-        }
-        const now = Date.now();
-        if (!ws.arcNoteLockRate || now - ws.arcNoteLockRate.windowAt >= 1000) ws.arcNoteLockRate = { windowAt: now, count: 0 };
-        if (++ws.arcNoteLockRate.count > 20) return;
-        const permissions = ws.arcUser?.permissions || [];
-        if (!permissions.includes('*') && !permissions.includes('graphs:write')) return;
-        const clientId = typeof msg.clientId === 'string' && msg.clientId.length <= 120 ? msg.clientId : '';
-        if (!clientId) return;
-        const liveState = liveGraphStates.get(`${actionProjectId}:${actionGraphId}`);
-        const sourceGraph = liveState?.graph || ws.arcManager.getGraphs().find((graph) => graph.id === actionGraphId);
-        const note = sourceGraph?.notes?.find((item) => item.id === noteId);
-        if (!note) {
-          ws.send(JSON.stringify({ type: 'NOTE_EDIT_LOCK_REJECTED', payload: { projectId: actionProjectId, graphId: actionGraphId, noteId, message: 'This note is no longer in the graph.' } }));
-          return;
-        }
-        let room = liveNoteEditLocks.get(roomKey);
-        if (!room) { room = new Map(); liveNoteEditLocks.set(roomKey, room); }
-        const existing = room.get(noteId);
-        if (existing && existing.expiresAt <= now) removeNoteEditLock(roomKey, noteId, { expired: true });
-        const current = liveNoteEditLocks.get(roomKey)?.get(noteId);
-        if (current && (current.socket !== ws || current.clientId !== clientId || current.userId !== ws.arcUser.id)) {
-          ws.send(JSON.stringify({ type: 'NOTE_EDIT_LOCKS_UPDATED', payload: { projectId: actionProjectId, graphId: actionGraphId, locks: noteLockSnapshot(roomKey) } }));
-          return;
-        }
-        const isRenewal = Boolean(current);
-        if (current) clearTimeout(current.timer);
-        const lock = {
-          projectId: actionProjectId,
-          graphId: actionGraphId,
-          noteId,
-          userId: ws.arcUser.id,
-          username: ws.arcUser.username,
-          color: ws.arcColor || collaboratorColor(ws.arcUser.id),
-          clientId,
-          expiresAt: now + NOTE_EDIT_LOCK_TTL_MS,
-          socket: ws,
-          note: JSON.parse(JSON.stringify(note))
-        };
-        lock.timer = setTimeout(() => {
-          if (liveNoteEditLocks.get(roomKey)?.get(noteId) === lock) removeNoteEditLock(roomKey, noteId, { expired: true });
-        }, NOTE_EDIT_LOCK_TTL_MS + 10);
-        lock.timer.unref?.();
-        room = liveNoteEditLocks.get(roomKey) || new Map();
-        room.set(noteId, lock);
-        liveNoteEditLocks.set(roomKey, room);
-        publishNoteEditLocks(roomKey);
-      } else if (msg.type === 'GRAPH_CHAT_SEND' || msg.type === 'GRAPH_CHAT_MOVE') {
-        const roomKey = ws.arcRoomKey;
-        const payload = msg.payload;
-        const projectId = typeof msg.projectId === 'string' ? msg.projectId : '';
-        const graphId = typeof msg.graphId === 'string' ? msg.graphId : '';
-        if (!roomKey || !ws.arcPresence || projectId !== ws.arcPresence.projectId || graphId !== ws.arcPresence.graphId
-          || !payload || typeof payload !== 'object' || Array.isArray(payload)) return;
-        const graphExists = liveGraphStates.has(`${projectId}:${graphId}`)
-          || ws.arcManager?.getGraphs().some((graph) => graph.id === graphId);
-        if (!graphExists) return;
-        const point = payload.position;
-        if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)
-          || Math.abs(point.x) > 1_000_000 || Math.abs(point.y) > 1_000_000) return;
-        const now = Date.now();
-        if (msg.type === 'GRAPH_CHAT_SEND') {
-          const recent = (ws.arcGraphChatSendTimes || []).filter((time) => now - time < 10_000);
-          if (recent.length >= 5) {
-            ws.arcGraphChatSendTimes = recent;
-            ws.send(JSON.stringify({ type: 'GRAPH_CHAT_REJECTED', payload: { reason: 'rate-limit', message: 'Please wait a moment before sending another canvas message.' } }));
+          if (msg.type === 'PROJECT_TAB_OPEN' && typeof msg.graphId === 'string' && ws.arcManager.deletedGraphIds?.has(msg.graphId)) {
+            ws.send(JSON.stringify({ type: 'GRAPH_DELETED', payload: { projectId, graphId: msg.graphId } }));
+          } else if (msg.type === 'PROJECT_TAB_OPEN' && typeof msg.graphId === 'string' && rejectedForLimit) {
+            ws.send(JSON.stringify({ type: 'PROJECT_TAB_REJECTED', payload: { projectId, graphId: msg.graphId, reason: 'limit', message: 'The shared workspace already has 12 open graphs. Close a shared tab before opening another.' } }));
+          } else if (msg.type === 'PROJECT_TAB_OPEN' && typeof msg.graphId === 'string'
+            && (ws.arcManager.deletedGraphIds?.has(msg.graphId) || (!availableGraphIds.has(msg.graphId) && !liveGraphStates.has(`${projectId}:${msg.graphId}`)))) {
+            ws.send(JSON.stringify({ type: 'PROJECT_TAB_REJECTED', payload: { projectId, graphId: msg.graphId, reason: 'unavailable', message: 'This unsaved graph could not be shared. Save it first, then reopen it.' } }));
+          }
+          if (changed || isSync || acceptedSnapshots) publishProjectCollaboration(projectId);
+        } else if (msg.type === 'PRESENCE') {
+          const projectId = typeof msg.projectId === 'string' && projectStore.projects.some((project) => project.id === msg.projectId) ? msg.projectId : '';
+          if (projectId && projectId !== ws.arcProjectId) {
+            const owner = userStore.users.find((item) => item.id === ws.arcUser.id);
+            if (owner) owner.activeProjectId = projectId;
+            ws.arcProjectId = projectId;
+            ws.arcManager = managerForUser({ ...ws.arcUser, activeProjectId: projectId });
+            if (owner) userStore.saveState();
+          }
+          let graphId = typeof msg.graphId === 'string' && msg.graphId.length <= 100 ? msg.graphId : '';
+          if (graphId && ws.arcManager.deletedGraphIds?.has(graphId)) graphId = '';
+          const nextRoomKey = projectId && graphId ? collaborationRoomKey(projectId, graphId) : null;
+          if (ws.arcRoomKey !== nextRoomKey) {
+            clearNoteEditLocksForSocket(ws, ws.arcRoomKey);
+            clearCollaborationAction();
+          }
+          ws.arcPresence = projectId && graphId ? { projectId, graphId } : null;
+          ws.arcRoomKey = nextRoomKey;
+          const lastSeenUpdated = collaborationLastSeen.record(projectId, graphId, ws.arcUser);
+          if (projectId && graphId) {
+            const now = Date.now();
+            recentProjectGraphUse.set(`${projectId}:${graphId}`, { projectId, graphId, userId: ws.arcUser.id, username: ws.arcUser.username, updatedAt: now });
+          }
+          if (nextRoomKey) {
+            const room = liveCollaborationActions.get(nextRoomKey);
+            if (room) for (const action of room.values()) ws.send(JSON.stringify({ type: 'COLLAB_ACTION_UPDATED', payload: action }));
+            ws.send(JSON.stringify({ type: 'NOTE_EDIT_LOCKS_UPDATED', payload: { projectId, graphId, locks: noteLockSnapshot(nextRoomKey) } }));
+            sendGraphChatSnapshot(ws, nextRoomKey);
+            sendCanvasArrowSnapshot(ws, nextRoomKey);
+          }
+          let liveState = ws.arcPresence ? liveGraphStates.get(`${projectId}:${graphId}`) : null;
+          if (ws.arcPresence && !liveState) {
+            const initialGraph = ws.arcManager.getGraphs().find((graph) => graph.id === graphId);
+            if (initialGraph) {
+              const serializedGraph = JSON.stringify(initialGraph);
+              liveState = { projectId, graphId, graph: initialGraph, revision: 0, updatedAt: Date.now(), user: null, serializedGraph, history: [{ revision: 0, graph: initialGraph }] };
+              liveGraphStates.set(`${projectId}:${graphId}`, liveState);
+            }
+          }
+          if (liveState) {
+            const payload = { ...liveState };
+            delete payload.serializedGraph;
+            ws.send(JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload }));
+          } else if (ws.arcPresence) ws.send(JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload: { projectId, graphId, ready: true, revision: 0 } }));
+          publishPresence();
+          if (lastSeenUpdated) broadcastProjectLastSeen();
+        } else if (msg.type === 'NOTE_EDIT_LOCK_REQUEST' || msg.type === 'NOTE_EDIT_LOCK_RELEASE') {
+          const roomKey = ws.arcRoomKey;
+          const actionProjectId = typeof msg.projectId === 'string' ? msg.projectId : '';
+          const actionGraphId = typeof msg.graphId === 'string' ? msg.graphId : '';
+          const noteId = typeof msg.noteId === 'string' ? msg.noteId : '';
+          if (!roomKey || !ws.arcPresence || actionProjectId !== ws.arcPresence.projectId || actionGraphId !== ws.arcPresence.graphId
+            || !noteId || noteId.length > 100) return;
+          if (msg.type === 'NOTE_EDIT_LOCK_RELEASE') {
+            const room = liveNoteEditLocks.get(roomKey);
+            if (room?.get(noteId)?.socket === ws) removeNoteEditLock(roomKey, noteId);
             return;
           }
-          recent.push(now);
-          ws.arcGraphChatSendTimes = recent;
-          const content = Array.from(typeof payload.content === 'string' ? payload.content.trim() : '').slice(0, 280).join('');
-          if (!content) return;
-          const length = Array.from(content).length;
-          const stayMs = Math.min(20_000, 5_000 + Math.ceil((length / 280) * 15_000));
-          const fadeMs = Math.min(2_000, 500 + Math.ceil((length / 280) * 1_500));
-          const bubble = {
-            id: randomUUID(),
-            projectId,
-            graphId,
+          const now = Date.now();
+          if (!ws.arcNoteLockRate || now - ws.arcNoteLockRate.windowAt >= 1000) ws.arcNoteLockRate = { windowAt: now, count: 0 };
+          if (++ws.arcNoteLockRate.count > 20) return;
+          const permissions = ws.arcUser?.permissions || [];
+          if (!permissions.includes('*') && !permissions.includes('graphs:write')) return;
+          const clientId = typeof msg.clientId === 'string' && msg.clientId.length <= 120 ? msg.clientId : '';
+          if (!clientId) return;
+          const liveState = liveGraphStates.get(`${actionProjectId}:${actionGraphId}`);
+          const sourceGraph = liveState?.graph || ws.arcManager.getGraphs().find((graph) => graph.id === actionGraphId);
+          const note = sourceGraph?.notes?.find((item) => item.id === noteId);
+          if (!note) {
+            ws.send(JSON.stringify({ type: 'NOTE_EDIT_LOCK_REJECTED', payload: { projectId: actionProjectId, graphId: actionGraphId, noteId, message: 'This note is no longer in the graph.' } }));
+            return;
+          }
+          let room = liveNoteEditLocks.get(roomKey);
+          if (!room) { room = new Map(); liveNoteEditLocks.set(roomKey, room); }
+          const existing = room.get(noteId);
+          if (existing && existing.expiresAt <= now) removeNoteEditLock(roomKey, noteId, { expired: true });
+          const current = liveNoteEditLocks.get(roomKey)?.get(noteId);
+          if (current && (current.socket !== ws || current.clientId !== clientId || current.userId !== ws.arcUser.id)) {
+            ws.send(JSON.stringify({ type: 'NOTE_EDIT_LOCKS_UPDATED', payload: { projectId: actionProjectId, graphId: actionGraphId, locks: noteLockSnapshot(roomKey) } }));
+            return;
+          }
+          const isRenewal = Boolean(current);
+          if (current) clearTimeout(current.timer);
+          const lock = {
+            projectId: actionProjectId,
+            graphId: actionGraphId,
+            noteId,
             userId: ws.arcUser.id,
             username: ws.arcUser.username,
             color: ws.arcColor || collaboratorColor(ws.arcUser.id),
-            content,
-            x: point.x,
-            y: point.y,
-            createdAt: now,
-            stayMs,
-            fadeMs,
-            expiresAt: now + stayMs + fadeMs
+            clientId,
+            expiresAt: now + NOTE_EDIT_LOCK_TTL_MS,
+            socket: ws,
+            note: JSON.parse(JSON.stringify(note))
           };
-          let room = liveGraphChatBubbles.get(roomKey);
-          if (!room) { room = new Map(); liveGraphChatBubbles.set(roomKey, room); }
-          room.set(bubble.id, { bubble, timer: null });
-          const entry = room.get(bubble.id);
-          entry.timer = setTimeout(() => removeGraphChatBubble(roomKey, bubble.id), stayMs + fadeMs + 10);
-          entry.timer.unref?.();
-          sendToCollaborationRoom(roomKey, { type: 'GRAPH_CHAT_BUBBLE', payload: bubble });
-          return;
-        }
-        const bubbleId = typeof payload.id === 'string' ? payload.id : '';
-        const entry = liveGraphChatBubbles.get(roomKey)?.get(bubbleId);
-        if (!entry || entry.bubble.userId !== ws.arcUser.id || entry.bubble.expiresAt <= now) return;
-        if (!ws.arcGraphChatMoveTimes || now - ws.arcGraphChatMoveTimes.windowAt >= 1000) ws.arcGraphChatMoveTimes = { windowAt: now, count: 0 };
-        if (++ws.arcGraphChatMoveTimes.count > 30) return;
-        entry.bubble = { ...entry.bubble, x: point.x, y: point.y };
-        sendToCollaborationRoom(roomKey, { type: 'GRAPH_CHAT_BUBBLE', payload: entry.bubble });
-      } else if (msg.type === 'CANVAS_ARROW_ACTION') {
-        const roomKey = ws.arcRoomKey;
-        const payload = msg.payload;
-        const projectId = typeof msg.projectId === 'string' ? msg.projectId : '';
-        const graphId = typeof msg.graphId === 'string' ? msg.graphId : '';
-        const permissions = ws.arcUser?.permissions || [];
-        const operation = payload?.operation;
-        if (!roomKey || !ws.arcPresence || projectId !== ws.arcPresence.projectId || graphId !== ws.arcPresence.graphId
-          || !payload || typeof payload !== 'object' || Array.isArray(payload)) return;
-        if (['lock', 'unlock'].includes(operation) && !permissions.includes('*') && !permissions.includes('graphs:write')) return;
-        const graphExists = liveGraphStates.has(`${projectId}:${graphId}`)
-          || ws.arcManager?.getGraphs().some((graph) => graph.id === graphId);
-        if (!graphExists) return;
-        const now = Date.now();
-        if (!ws.arcCanvasArrowRate || now - ws.arcCanvasArrowRate.windowAt >= 1000) ws.arcCanvasArrowRate = { windowAt: now, count: 0 };
-        if (++ws.arcCanvasArrowRate.count > 40) return;
-        let room = liveCanvasArrows.get(roomKey);
-        if (operation === 'create') {
-          const recent = (ws.arcCanvasArrowCreateTimes || []).filter((time) => now - time < 10_000);
-          if (recent.length >= 20) return;
-          ws.arcCanvasArrowCreateTimes = [...recent, now];
-          const start = canvasArrowPoint(payload.start);
-          const end = canvasArrowPoint(payload.end);
-          if (!start || !end || Math.hypot(end.x - start.x, end.y - start.y) < 8 || (room?.size || 0) >= 300) return;
-          const arrow = {
-            id: randomUUID(),
-            projectId,
-            graphId,
-            start,
-            end,
-            color: ws.arcColor || collaboratorColor(ws.arcUser.id),
-            createdBy: ws.arcUser.username,
-            createdById: ws.arcUser.id,
-            createdByRole: ws.arcUser.role,
-            createdAt: now,
-            expiresAt: now + 12_000,
-            locked: false
-          };
-          if (!room) { room = new Map(); liveCanvasArrows.set(roomKey, room); }
-          const entry = { arrow, timer: null };
-          entry.timer = setTimeout(() => removeCanvasArrow(roomKey, arrow.id), 12_010);
-          entry.timer.unref?.();
-          room.set(arrow.id, entry);
-          sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: arrow });
-          return;
-        }
-        const arrowId = typeof payload.id === 'string' ? payload.id : '';
-        if (operation !== 'move-many' && (!arrowId || arrowId.length > 100)) return;
-        if (operation === 'move-many') {
-          if (!Array.isArray(payload.arrows) || payload.arrows.length > 300) return;
-          if (!ws.arcCanvasArrowMoveBudget || now - ws.arcCanvasArrowMoveBudget.windowAt >= 1000) {
-            ws.arcCanvasArrowMoveBudget = { windowAt: now, count: 0 };
-          }
-          if (ws.arcCanvasArrowMoveBudget.count + payload.arrows.length > 300) return;
-          ws.arcCanvasArrowMoveBudget.count += payload.arrows.length;
-          const moves = payload.arrows.flatMap((item) => {
-            const id = typeof item?.id === 'string' && item.id.length <= 100 ? item.id : '';
-            const start = canvasArrowPoint(item?.start);
-            const end = canvasArrowPoint(item?.end);
-            const entry = liveCanvasArrows.get(roomKey)?.get(id);
-            return entry && entry.arrow.expiresAt > now && start && end && Math.hypot(end.x - start.x, end.y - start.y) >= 8
-              ? [{ entry, start, end }]
-              : [];
-          });
-          for (const move of moves) {
-            move.entry.arrow = { ...move.entry.arrow, start: move.start, end: move.end };
-            sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: move.entry.arrow });
-          }
-          return;
-        }
-        if (operation === 'lock' || operation === 'unlock') {
-          const key = `${projectId}:${graphId}`;
-          let state = liveGraphStates.get(key);
-          if (!state) {
-            const graph = ws.arcManager?.getGraphs().find((item) => item.id === graphId);
-            if (!graph) return;
-            const serializedGraph = JSON.stringify(graph);
-            state = { projectId, graphId, graph, revision: 0, updatedAt: now, user: null, serializedGraph, history: [{ revision: 0, graph }] };
-            liveGraphStates.set(key, state);
-          }
-          if (operation === 'lock') {
-            const entry = liveCanvasArrows.get(roomKey)?.get(arrowId);
-            if (!entry || entry.arrow.expiresAt <= now || !canManageLockedCanvasArrow(ws.arcUser, entry.arrow, projectId)) return;
-            if ((state.graph.arrows || []).filter((item) => item?.locked).length >= 300) {
-              ws.send(JSON.stringify({ type: 'CANVAS_ARROW_REJECTED', payload: { projectId, graphId, id: arrowId, message: 'This graph already has the maximum of 300 saved arrows.' } }));
+          lock.timer = setTimeout(() => {
+            if (liveNoteEditLocks.get(roomKey)?.get(noteId) === lock) removeNoteEditLock(roomKey, noteId, { expired: true });
+          }, NOTE_EDIT_LOCK_TTL_MS + 10);
+          lock.timer.unref?.();
+          room = liveNoteEditLocks.get(roomKey) || new Map();
+          room.set(noteId, lock);
+          liveNoteEditLocks.set(roomKey, room);
+          publishNoteEditLocks(roomKey);
+        } else if (msg.type === 'GRAPH_CHAT_SEND' || msg.type === 'GRAPH_CHAT_MOVE') {
+          const roomKey = ws.arcRoomKey;
+          const payload = msg.payload;
+          const projectId = typeof msg.projectId === 'string' ? msg.projectId : '';
+          const graphId = typeof msg.graphId === 'string' ? msg.graphId : '';
+          if (!roomKey || !ws.arcPresence || projectId !== ws.arcPresence.projectId || graphId !== ws.arcPresence.graphId
+            || !payload || typeof payload !== 'object' || Array.isArray(payload)) return;
+          const graphExists = liveGraphStates.has(`${projectId}:${graphId}`)
+            || ws.arcManager?.getGraphs().some((graph) => graph.id === graphId);
+          if (!graphExists) return;
+          const point = payload.position;
+          if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)
+            || Math.abs(point.x) > 1_000_000 || Math.abs(point.y) > 1_000_000) return;
+          const now = Date.now();
+          if (msg.type === 'GRAPH_CHAT_SEND') {
+            const recent = (ws.arcGraphChatSendTimes || []).filter((time) => now - time < 10_000);
+            if (recent.length >= 5) {
+              ws.arcGraphChatSendTimes = recent;
+              ws.send(JSON.stringify({ type: 'GRAPH_CHAT_REJECTED', payload: { reason: 'rate-limit', message: 'Please wait a moment before sending another canvas message.' } }));
               return;
             }
-            const arrow = { ...entry.arrow, locked: true, expiresAt: null };
-            const arrows = [...(state.graph.arrows || []).filter((item) => item.id !== arrow.id), arrow];
-            const graph = { ...state.graph, arrows };
-            removeCanvasArrow(roomKey, arrowId);
+            recent.push(now);
+            ws.arcGraphChatSendTimes = recent;
+            const content = Array.from(typeof payload.content === 'string' ? payload.content.trim() : '').slice(0, 280).join('');
+            if (!content) return;
+            const length = Array.from(content).length;
+            const stayMs = Math.min(20_000, 5_000 + Math.ceil((length / 280) * 15_000));
+            const fadeMs = Math.min(2_000, 500 + Math.ceil((length / 280) * 1_500));
+            const bubble = {
+              id: randomUUID(),
+              projectId,
+              graphId,
+              userId: ws.arcUser.id,
+              username: ws.arcUser.username,
+              color: ws.arcColor || collaboratorColor(ws.arcUser.id),
+              content,
+              x: point.x,
+              y: point.y,
+              createdAt: now,
+              stayMs,
+              fadeMs,
+              expiresAt: now + stayMs + fadeMs
+            };
+            let room = liveGraphChatBubbles.get(roomKey);
+            if (!room) { room = new Map(); liveGraphChatBubbles.set(roomKey, room); }
+            room.set(bubble.id, { bubble, timer: null });
+            const entry = room.get(bubble.id);
+            entry.timer = setTimeout(() => removeGraphChatBubble(roomKey, bubble.id), stayMs + fadeMs + 10);
+            entry.timer.unref?.();
+            sendToCollaborationRoom(roomKey, { type: 'GRAPH_CHAT_BUBBLE', payload: bubble });
+            return;
+          }
+          const bubbleId = typeof payload.id === 'string' ? payload.id : '';
+          const entry = liveGraphChatBubbles.get(roomKey)?.get(bubbleId);
+          if (!entry || entry.bubble.userId !== ws.arcUser.id || entry.bubble.expiresAt <= now) return;
+          if (!ws.arcGraphChatMoveTimes || now - ws.arcGraphChatMoveTimes.windowAt >= 1000) ws.arcGraphChatMoveTimes = { windowAt: now, count: 0 };
+          if (++ws.arcGraphChatMoveTimes.count > 30) return;
+          entry.bubble = { ...entry.bubble, x: point.x, y: point.y };
+          sendToCollaborationRoom(roomKey, { type: 'GRAPH_CHAT_BUBBLE', payload: entry.bubble });
+        } else if (msg.type === 'CANVAS_ARROW_ACTION') {
+          const roomKey = ws.arcRoomKey;
+          const payload = msg.payload;
+          const projectId = typeof msg.projectId === 'string' ? msg.projectId : '';
+          const graphId = typeof msg.graphId === 'string' ? msg.graphId : '';
+          const permissions = ws.arcUser?.permissions || [];
+          const operation = payload?.operation;
+          if (!roomKey || !ws.arcPresence || projectId !== ws.arcPresence.projectId || graphId !== ws.arcPresence.graphId
+            || !payload || typeof payload !== 'object' || Array.isArray(payload)) return;
+          if (['lock', 'unlock'].includes(operation) && !permissions.includes('*') && !permissions.includes('graphs:write')) return;
+          const graphExists = liveGraphStates.has(`${projectId}:${graphId}`)
+            || ws.arcManager?.getGraphs().some((graph) => graph.id === graphId);
+          if (!graphExists) return;
+          const now = Date.now();
+          if (!ws.arcCanvasArrowRate || now - ws.arcCanvasArrowRate.windowAt >= 1000) ws.arcCanvasArrowRate = { windowAt: now, count: 0 };
+          if (++ws.arcCanvasArrowRate.count > 40) return;
+          let room = liveCanvasArrows.get(roomKey);
+          if (operation === 'create') {
+            const recent = (ws.arcCanvasArrowCreateTimes || []).filter((time) => now - time < 10_000);
+            if (recent.length >= 20) return;
+            ws.arcCanvasArrowCreateTimes = [...recent, now];
+            const start = canvasArrowPoint(payload.start);
+            const end = canvasArrowPoint(payload.end);
+            if (!start || !end || Math.hypot(end.x - start.x, end.y - start.y) < 8 || (room?.size || 0) >= 300) return;
+            const arrow = {
+              id: randomUUID(),
+              projectId,
+              graphId,
+              start,
+              end,
+              color: ws.arcColor || collaboratorColor(ws.arcUser.id),
+              createdBy: ws.arcUser.username,
+              createdById: ws.arcUser.id,
+              createdByRole: ws.arcUser.role,
+              createdAt: now,
+              expiresAt: now + 12_000,
+              locked: false
+            };
+            if (!room) { room = new Map(); liveCanvasArrows.set(roomKey, room); }
+            const entry = { arrow, timer: null };
+            entry.timer = setTimeout(() => removeCanvasArrow(roomKey, arrow.id), 12_010);
+            entry.timer.unref?.();
+            room.set(arrow.id, entry);
+            sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: arrow });
+            return;
+          }
+          const arrowId = typeof payload.id === 'string' ? payload.id : '';
+          if (operation !== 'move-many' && (!arrowId || arrowId.length > 100)) return;
+          if (operation === 'move-many') {
+            if (!Array.isArray(payload.arrows) || payload.arrows.length > 300) return;
+            if (!ws.arcCanvasArrowMoveBudget || now - ws.arcCanvasArrowMoveBudget.windowAt >= 1000) {
+              ws.arcCanvasArrowMoveBudget = { windowAt: now, count: 0 };
+            }
+            if (ws.arcCanvasArrowMoveBudget.count + payload.arrows.length > 300) return;
+            ws.arcCanvasArrowMoveBudget.count += payload.arrows.length;
+            const moves = payload.arrows.flatMap((item) => {
+              const id = typeof item?.id === 'string' && item.id.length <= 100 ? item.id : '';
+              const start = canvasArrowPoint(item?.start);
+              const end = canvasArrowPoint(item?.end);
+              const entry = liveCanvasArrows.get(roomKey)?.get(id);
+              return entry && entry.arrow.expiresAt > now && start && end && Math.hypot(end.x - start.x, end.y - start.y) >= 8
+                ? [{ entry, start, end }]
+                : [];
+            });
+            for (const move of moves) {
+              move.entry.arrow = { ...move.entry.arrow, start: move.start, end: move.end };
+              sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: move.entry.arrow });
+            }
+            return;
+          }
+          if (operation === 'lock' || operation === 'unlock') {
+            const key = `${projectId}:${graphId}`;
+            let state = liveGraphStates.get(key);
+            if (!state) {
+              const graph = ws.arcManager?.getGraphs().find((item) => item.id === graphId);
+              if (!graph) return;
+              const serializedGraph = JSON.stringify(graph);
+              state = { projectId, graphId, graph, revision: 0, updatedAt: now, user: null, serializedGraph, history: [{ revision: 0, graph }] };
+              liveGraphStates.set(key, state);
+            }
+            if (operation === 'lock') {
+              const entry = liveCanvasArrows.get(roomKey)?.get(arrowId);
+              if (!entry || entry.arrow.expiresAt <= now || !canManageLockedCanvasArrow(ws.arcUser, entry.arrow, projectId)) return;
+              if ((state.graph.arrows || []).filter((item) => item?.locked).length >= 300) {
+                ws.send(JSON.stringify({ type: 'CANVAS_ARROW_REJECTED', payload: { projectId, graphId, id: arrowId, message: 'This graph already has the maximum of 300 saved arrows.' } }));
+                return;
+              }
+              const arrow = { ...entry.arrow, locked: true, expiresAt: null };
+              const arrows = [...(state.graph.arrows || []).filter((item) => item.id !== arrow.id), arrow];
+              const graph = { ...state.graph, arrows };
+              removeCanvasArrow(roomKey, arrowId);
+              const serializedGraph = JSON.stringify(graph);
+              const revision = state.revision + 1;
+              const nextState = {
+                projectId, graphId, graph, revision, updatedAt: now,
+                user: { id: ws.arcUser.id, username: ws.arcUser.username },
+                serializedGraph,
+                history: [...(state.history || []), { revision, graph }].slice(-(serializedGraph.length <= 1_000_000 ? 8 : 2))
+              };
+              liveGraphStates.set(key, nextState);
+              const syncPayload = { ...nextState, sourceUserId: ws.arcUser.id };
+              delete syncPayload.serializedGraph;
+              delete syncPayload.history;
+              sendToCollaborationRoom(roomKey, { type: 'GRAPH_STATE_SYNC', payload: syncPayload });
+              return;
+            }
+            const savedArrow = (state.graph.arrows || []).find((item) => item.id === arrowId && item.locked);
+            if (!savedArrow || !canManageLockedCanvasArrow(ws.arcUser, savedArrow, projectId)) return;
+            const graph = { ...state.graph, arrows: state.graph.arrows.filter((item) => item.id !== arrowId) };
             const serializedGraph = JSON.stringify(graph);
             const revision = state.revision + 1;
             const nextState = {
@@ -952,357 +970,339 @@ wss.on('connection', (ws) => {
             delete syncPayload.serializedGraph;
             delete syncPayload.history;
             sendToCollaborationRoom(roomKey, { type: 'GRAPH_STATE_SYNC', payload: syncPayload });
+            const unlockedArrow = { ...savedArrow, locked: false, createdAt: now, expiresAt: now + 12_000 };
+            if (!room) { room = new Map(); liveCanvasArrows.set(roomKey, room); }
+            const entry = { arrow: unlockedArrow, timer: null };
+            entry.timer = setTimeout(() => removeCanvasArrow(roomKey, arrowId), 12_010);
+            entry.timer.unref?.();
+            room.set(arrowId, entry);
+            sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: unlockedArrow });
             return;
           }
-          const savedArrow = (state.graph.arrows || []).find((item) => item.id === arrowId && item.locked);
-          if (!savedArrow || !canManageLockedCanvasArrow(ws.arcUser, savedArrow, projectId)) return;
-          const graph = { ...state.graph, arrows: state.graph.arrows.filter((item) => item.id !== arrowId) };
-          const serializedGraph = JSON.stringify(graph);
-          const revision = state.revision + 1;
-          const nextState = {
-            projectId, graphId, graph, revision, updatedAt: now,
-            user: { id: ws.arcUser.id, username: ws.arcUser.username },
-            serializedGraph,
-            history: [...(state.history || []), { revision, graph }].slice(-(serializedGraph.length <= 1_000_000 ? 8 : 2))
-          };
-          liveGraphStates.set(key, nextState);
-          const syncPayload = { ...nextState, sourceUserId: ws.arcUser.id };
-          delete syncPayload.serializedGraph;
-          delete syncPayload.history;
-          sendToCollaborationRoom(roomKey, { type: 'GRAPH_STATE_SYNC', payload: syncPayload });
-          const unlockedArrow = { ...savedArrow, locked: false, createdAt: now, expiresAt: now + 12_000 };
-          if (!room) { room = new Map(); liveCanvasArrows.set(roomKey, room); }
-          const entry = { arrow: unlockedArrow, timer: null };
-          entry.timer = setTimeout(() => removeCanvasArrow(roomKey, arrowId), 12_010);
-          entry.timer.unref?.();
-          room.set(arrowId, entry);
-          sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: unlockedArrow });
-          return;
-        }
-        const entry = liveCanvasArrows.get(roomKey)?.get(arrowId);
-        if (!entry || entry.arrow.expiresAt <= now) return;
-        if (operation === 'delete') {
-          removeCanvasArrow(roomKey, arrowId, 'CANVAS_ARROW_DELETED');
-          return;
-        }
-        if (operation !== 'move') return;
-        const start = canvasArrowPoint(payload.start);
-        const end = canvasArrowPoint(payload.end);
-        if (!start || !end || Math.hypot(end.x - start.x, end.y - start.y) < 8) return;
-        entry.arrow = { ...entry.arrow, start, end };
-        sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: entry.arrow });
-      } else if (msg.type === 'COLLAB_ACTION') {
-        const roomKey = ws.arcRoomKey;
-        const action = msg.action;
-        const permissions = ws.arcUser?.permissions || [];
-        if (!roomKey || !ws.arcPresence || msg.projectId !== ws.arcPresence.projectId || msg.graphId !== ws.arcPresence.graphId
-          || !action || typeof action !== 'object' || Array.isArray(action)) return;
-        if (ws.arcManager?.deletedGraphIds?.has(msg.graphId)) return;
-        const now = Date.now();
-        const kind = action.kind;
-        if (!['cursor', 'selection', 'node-drag', 'note-drag', 'wire-drag', 'arrow-drag', 'library-drag', 'navigation', 'node-edit', 'studio-focus', 'studio-draft', 'studio-cursor', 'idle'].includes(kind)) return;
-        if (!ws.arcActionRates || now - ws.arcActionRates.windowAt >= 1000) ws.arcActionRates = { windowAt: now, counts: Object.create(null) };
-        const rateGroup = kind === 'studio-draft' ? 'studio-draft' : ['cursor', 'selection', 'node-drag', 'note-drag', 'wire-drag', 'arrow-drag', 'library-drag'].includes(kind) ? 'canvas' : 'other';
-        ws.arcActionRates.counts[rateGroup] = (ws.arcActionRates.counts[rateGroup] || 0) + 1;
-        const limit = rateGroup === 'studio-draft' ? 30 : rateGroup === 'canvas' ? 90 : 35;
-        if (ws.arcActionRates.counts[rateGroup] > limit) return;
-        const point = (value) => value && Number.isFinite(value.x) && Number.isFinite(value.y) && Math.abs(value.x) <= 1_000_000 && Math.abs(value.y) <= 1_000_000 ? { x: value.x, y: value.y } : null;
-        const positions = (value) => Array.isArray(value) ? value.slice(0, 50).flatMap((item) => {
-          if (!item || typeof item.id !== 'string' || item.id.length > 100) return [];
-          const position = point(item);
-          return position ? [{ id: item.id, x: Math.round(position.x), y: Math.round(position.y) }] : [];
-        }) : [];
-        if (kind === 'idle') {
-          const cursor = point(action.cursor);
-          if (!cursor) { clearCollaborationAction(false, true, typeof action.studioId === 'string' ? action.studioId : ''); return; }
+          const entry = liveCanvasArrows.get(roomKey)?.get(arrowId);
+          if (!entry || entry.arrow.expiresAt <= now) return;
+          if (operation === 'delete') {
+            removeCanvasArrow(roomKey, arrowId, 'CANVAS_ARROW_DELETED');
+            return;
+          }
+          if (operation !== 'move') return;
+          const start = canvasArrowPoint(payload.start);
+          const end = canvasArrowPoint(payload.end);
+          if (!start || !end || Math.hypot(end.x - start.x, end.y - start.y) < 8) return;
+          entry.arrow = { ...entry.arrow, start, end };
+          sendToCollaborationRoom(roomKey, { type: 'CANVAS_ARROW_UPDATED', payload: entry.arrow });
+        } else if (msg.type === 'COLLAB_ACTION') {
+          const roomKey = ws.arcRoomKey;
+          const action = msg.action;
+          const permissions = ws.arcUser?.permissions || [];
+          if (!roomKey || !ws.arcPresence || msg.projectId !== ws.arcPresence.projectId || msg.graphId !== ws.arcPresence.graphId
+            || !action || typeof action !== 'object' || Array.isArray(action)) return;
+          if (ws.arcManager?.deletedGraphIds?.has(msg.graphId)) return;
+          const now = Date.now();
+          const kind = action.kind;
+          if (!['cursor', 'selection', 'node-drag', 'note-drag', 'wire-drag', 'arrow-drag', 'library-drag', 'navigation', 'node-edit', 'studio-focus', 'studio-draft', 'studio-cursor', 'idle'].includes(kind)) return;
+          if (!ws.arcActionRates || now - ws.arcActionRates.windowAt >= 1000) ws.arcActionRates = { windowAt: now, counts: Object.create(null) };
+          const rateGroup = kind === 'studio-draft' ? 'studio-draft' : ['cursor', 'selection', 'node-drag', 'note-drag', 'wire-drag', 'arrow-drag', 'library-drag'].includes(kind) ? 'canvas' : 'other';
+          ws.arcActionRates.counts[rateGroup] = (ws.arcActionRates.counts[rateGroup] || 0) + 1;
+          const limit = rateGroup === 'studio-draft' ? 30 : rateGroup === 'canvas' ? 90 : 35;
+          if (ws.arcActionRates.counts[rateGroup] > limit) return;
+          const point = (value) => value && Number.isFinite(value.x) && Number.isFinite(value.y) && Math.abs(value.x) <= 1_000_000 && Math.abs(value.y) <= 1_000_000 ? { x: value.x, y: value.y } : null;
+          const positions = (value) => Array.isArray(value) ? value.slice(0, 50).flatMap((item) => {
+            if (!item || typeof item.id !== 'string' || item.id.length > 100) return [];
+            const position = point(item);
+            return position ? [{ id: item.id, x: Math.round(position.x), y: Math.round(position.y) }] : [];
+          }) : [];
+          if (kind === 'idle') {
+            const cursor = point(action.cursor);
+            if (!cursor) { clearCollaborationAction(false, true, typeof action.studioId === 'string' ? action.studioId : ''); return; }
+            const room = liveCollaborationActions.get(roomKey) || new Map();
+            const envelope = { userId: ws.arcUser.id, username: ws.arcUser.username, color: ws.arcColor || collaboratorColor(ws.arcUser.id), projectId: ws.arcPresence.projectId, graphId: ws.arcPresence.graphId, action: { kind: 'idle', cursor }, updatedAt: now, revision: nextCollaborationActionRevision() };
+            room.set(ws.arcUser.id, envelope);
+            liveCollaborationActions.set(roomKey, room);
+            sendToCollaborationRoom(roomKey, { type: 'COLLAB_ACTION_UPDATED', payload: envelope }, ws);
+            clearTimeout(ws.arcActionExpiry);
+            ws.arcActionExpiry = null;
+            return;
+          }
+          const readOnlyCollaboration = ['cursor', 'selection', 'navigation', 'studio-focus', 'studio-cursor'].includes(kind);
+          if ((Array.isArray(action.nodePositions) || Array.isArray(action.notePositions)) && !permissions.includes('*') && !permissions.includes('graphs:write')) return;
+          if (!readOnlyCollaboration && !permissions.includes('*') && !permissions.includes('graphs:write')) return;
+          let cleanAction;
+          if (kind === 'navigation') {
+            cleanAction = { kind: 'navigation', label: typeof action.label === 'string' ? action.label.slice(0, 32) : 'Navigating menus' };
+          } else if (['cursor', 'selection', 'node-drag', 'note-drag', 'wire-drag', 'arrow-drag', 'library-drag'].includes(kind)) {
+            const cursor = point(action.cursor);
+            if (kind !== 'selection' && !cursor) return;
+            cleanAction = { kind, ...(cursor ? { cursor } : {}), mode: typeof action.mode === 'string' ? action.mode.slice(0, 24) : kind };
+            if (Array.isArray(action.selectedNodeIds)) cleanAction.selectedNodeIds = action.selectedNodeIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 2000);
+            if (Array.isArray(action.selectedNoteIds)) cleanAction.selectedNoteIds = action.selectedNoteIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 2000);
+            if (Array.isArray(action.selectedArrowIds)) cleanAction.selectedArrowIds = action.selectedArrowIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 300);
+            const nodePositions = positions(action.nodePositions);
+            const notePositions = positions(action.notePositions);
+            if (nodePositions.length) cleanAction.nodePositions = nodePositions;
+            if (notePositions.length) cleanAction.notePositions = notePositions;
+            if (kind === 'selection' && action.selectionRect && typeof action.selectionRect === 'object') {
+              const left = Number(action.selectionRect.left); const top = Number(action.selectionRect.top);
+              const right = Number(action.selectionRect.right); const bottom = Number(action.selectionRect.bottom);
+              if ([left, top, right, bottom].every((value) => Number.isFinite(value) && Math.abs(value) <= 1_000_000) && right >= left && bottom >= top) {
+                cleanAction.selectionRect = { left, top, right, bottom };
+              }
+            }
+            if (kind === 'library-drag') {
+              if (typeof action.nodeType !== 'string' || action.nodeType.length > 100) return;
+              cleanAction.nodeType = action.nodeType;
+              cleanAction.label = typeof action.label === 'string' ? action.label.slice(0, 80) : '';
+            }
+            if (kind === 'node-drag' && Array.isArray(action.nodeIds)) cleanAction.nodeIds = action.nodeIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 50);
+            if (kind === 'note-drag') {
+              if (typeof action.noteId === 'string') cleanAction.noteId = action.noteId.slice(0, 100);
+              if (Array.isArray(action.noteIds)) cleanAction.noteIds = action.noteIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 50);
+              const notePositions = positions(action.notePositions);
+              if (notePositions.length) cleanAction.notePositions = notePositions;
+            }
+            if (kind === 'wire-drag') {
+              const start = point(action.start);
+              if (!start) return;
+              cleanAction.start = start;
+              cleanAction.pinType = typeof action.pinType === 'string' ? action.pinType.slice(0, 32) : 'any';
+            }
+            if (kind === 'arrow-drag') {
+              const start = point(action.start);
+              if (!start) return;
+              cleanAction.start = start;
+            }
+            if (kind === 'node-edit' && typeof action.nodeId === 'string') cleanAction.nodeId = action.nodeId.slice(0, 100);
+          } else if (kind === 'studio-draft') {
+            if (typeof action.studioId !== 'string' || action.studioId.length > 240 || !['embed', 'text', 'arguments'].includes(action.studioType) || !action.draft || typeof action.draft !== 'object' || Array.isArray(action.draft)) return;
+            let serialized;
+            try { serialized = JSON.stringify(action.draft); } catch { return; }
+            if (serialized.length > 300_000) return;
+            cleanAction = { kind, studioId: action.studioId, studioType: action.studioType, draft: JSON.parse(serialized) };
+            if (Number.isInteger(action.draft.caret) && action.draft.caret >= 0 && action.draft.caret <= 1_000_000) cleanAction.draft.caret = action.draft.caret;
+          } else if (kind === 'studio-cursor') {
+            if (typeof action.studioId !== 'string' || action.studioId.length > 240 || !Number.isInteger(action.caret) || action.caret < 0 || action.caret > 1_000_000) return;
+            cleanAction = { kind, studioId: action.studioId, caret: action.caret };
+          } else if (kind === 'studio-focus') {
+            if (typeof action.studioId !== 'string' || action.studioId.length > 240 || !['embed', 'text', 'arguments'].includes(action.studioType)) return;
+            cleanAction = { kind, studioId: action.studioId, studioType: action.studioType, label: typeof action.label === 'string' ? action.label.slice(0, 80) : '' };
+          } else if (kind === 'node-edit') {
+            if (typeof action.nodeId !== 'string' || action.nodeId.length > 100) return;
+            cleanAction = { kind, nodeId: action.nodeId.slice(0, 100), mode: 'text' };
+          } else cleanAction = { kind: 'idle' };
           const room = liveCollaborationActions.get(roomKey) || new Map();
-          const envelope = { userId: ws.arcUser.id, username: ws.arcUser.username, color: ws.arcColor || collaboratorColor(ws.arcUser.id), projectId: ws.arcPresence.projectId, graphId: ws.arcPresence.graphId, action: { kind: 'idle', cursor }, updatedAt: now, revision: nextCollaborationActionRevision() };
+          const priorAction = room.get(ws.arcUser.id)?.action;
+          if (kind !== 'idle' && !cleanAction.cursor && priorAction?.cursor) cleanAction.cursor = priorAction.cursor;
+          if (kind !== 'idle' && !Array.isArray(cleanAction.selectedNodeIds) && Array.isArray(priorAction?.selectedNodeIds)) cleanAction.selectedNodeIds = priorAction.selectedNodeIds;
+          const envelope = { userId: ws.arcUser.id, username: ws.arcUser.username, color: ws.arcColor || collaboratorColor(ws.arcUser.id), projectId: ws.arcPresence.projectId, graphId: ws.arcPresence.graphId, action: cleanAction, updatedAt: now, revision: nextCollaborationActionRevision() };
+          if (kind === 'studio-draft') {
+            const drafts = liveCollaborationStudioDrafts.get(roomKey) || new Map();
+            drafts.set(`${ws.arcUser.id}:${cleanAction.studioId}`, envelope);
+            liveCollaborationStudioDrafts.set(roomKey, drafts);
+          } else if (kind === 'studio-focus' || kind === 'studio-cursor') {
+            const drafts = liveCollaborationStudioDrafts.get(roomKey);
+            const requestedStudioId = cleanAction.studioId;
+            if (drafts) for (const draft of drafts.values()) {
+              if (draft.userId !== ws.arcUser.id && draft.action.studioId === requestedStudioId) {
+                ws.send(JSON.stringify({ type: 'COLLAB_ACTION_UPDATED', payload: { ...draft, updatedAt: now, revision: nextCollaborationActionRevision() } }));
+              }
+            }
+          }
           room.set(ws.arcUser.id, envelope);
           liveCollaborationActions.set(roomKey, room);
           sendToCollaborationRoom(roomKey, { type: 'COLLAB_ACTION_UPDATED', payload: envelope }, ws);
-          clearTimeout(ws.arcActionExpiry);
-          ws.arcActionExpiry = null;
-          return;
-        }
-        const readOnlyCollaboration = ['cursor', 'selection', 'navigation', 'studio-focus', 'studio-cursor'].includes(kind);
-        if ((Array.isArray(action.nodePositions) || Array.isArray(action.notePositions)) && !permissions.includes('*') && !permissions.includes('graphs:write')) return;
-        if (!readOnlyCollaboration && !permissions.includes('*') && !permissions.includes('graphs:write')) return;
-        let cleanAction;
-        if (kind === 'navigation') {
-          cleanAction = { kind: 'navigation', label: typeof action.label === 'string' ? action.label.slice(0, 32) : 'Navigating menus' };
-        } else if (['cursor', 'selection', 'node-drag', 'note-drag', 'wire-drag', 'arrow-drag', 'library-drag'].includes(kind)) {
-          const cursor = point(action.cursor);
-          if (kind !== 'selection' && !cursor) return;
-          cleanAction = { kind, ...(cursor ? { cursor } : {}), mode: typeof action.mode === 'string' ? action.mode.slice(0, 24) : kind };
-          if (Array.isArray(action.selectedNodeIds)) cleanAction.selectedNodeIds = action.selectedNodeIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 2000);
-          if (Array.isArray(action.selectedNoteIds)) cleanAction.selectedNoteIds = action.selectedNoteIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 2000);
-          if (Array.isArray(action.selectedArrowIds)) cleanAction.selectedArrowIds = action.selectedArrowIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 300);
-          const nodePositions = positions(action.nodePositions);
-          const notePositions = positions(action.notePositions);
-          if (nodePositions.length) cleanAction.nodePositions = nodePositions;
-          if (notePositions.length) cleanAction.notePositions = notePositions;
-          if (kind === 'selection' && action.selectionRect && typeof action.selectionRect === 'object') {
-            const left = Number(action.selectionRect.left); const top = Number(action.selectionRect.top);
-            const right = Number(action.selectionRect.right); const bottom = Number(action.selectionRect.bottom);
-            if ([left, top, right, bottom].every((value) => Number.isFinite(value) && Math.abs(value) <= 1_000_000) && right >= left && bottom >= top) {
-              cleanAction.selectionRect = { left, top, right, bottom };
+          scheduleCollaborationActionExpiry();
+        } else if (msg.type === 'GRAPH_STATE') {
+          const payload = msg.payload || msg;
+          const projectId = typeof payload.projectId === 'string' ? payload.projectId : '';
+          const graph = payload.graph;
+          const permissions = ws.arcUser?.permissions || [];
+          const rejectGraphState = (message) => {
+            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'GRAPH_STATE_REJECTED', payload: { graphId: payload.graphId, message } }));
+          };
+          if (!permissions.includes('*') && !permissions.includes('graphs:write')) {
+            rejectGraphState('Your account has read-only graph access. Ask a workspace admin for graph edit permission.');
+            return;
+          }
+          if (!ws.arcPresence || projectId !== ws.arcProjectId || projectId !== ws.arcPresence.projectId || payload.graphId !== ws.arcPresence.graphId) {
+            rejectGraphState('Open the graph in this workspace before editing it collaboratively.');
+            return;
+          }
+          if (ws.arcManager?.deletedGraphIds?.has(payload.graphId)) {
+            rejectGraphState('This graph was deleted. Close the stale tab and open a current graph.');
+            return;
+          }
+          if (!graph || graph.id !== payload.graphId || !Array.isArray(graph.nodes) || !Array.isArray(graph.connections)
+            || graph.nodes.length > 2000 || graph.connections.length > 10000) {
+            rejectGraphState('This graph update is invalid or exceeds the collaboration limits.');
+            return;
+          }
+          const key = `${projectId}:${graph.id}`;
+          const graphExists = ws.arcOpenGraphIds?.has(graph.id)
+            || ws.arcManager.getGraphs().some((item) => item.id === graph.id)
+            || liveGraphStates.has(key);
+          if (!graphExists) {
+            rejectGraphState('This graph is no longer open in the workspace. Reopen it before editing.');
+            return;
+          }
+          for (const [stateKey, stateValue] of liveGraphStates) {
+            if (Date.now() - stateValue.updatedAt > 30 * 60 * 1000) liveGraphStates.delete(stateKey);
+          }
+          let previous = liveGraphStates.get(key);
+          if (!previous) {
+            const initialGraph = ws.arcManager.getGraphs().find((item) => item.id === graph.id);
+            if (initialGraph) {
+              const initialSerialized = JSON.stringify(initialGraph);
+              previous = { projectId, graphId: graph.id, graph: initialGraph, revision: 0, updatedAt: Date.now(), user: null, serializedGraph: initialSerialized, history: [{ revision: 0, graph: initialGraph }] };
+              liveGraphStates.set(key, previous);
             }
           }
-          if (kind === 'library-drag') {
-            if (typeof action.nodeType !== 'string' || action.nodeType.length > 100) return;
-            cleanAction.nodeType = action.nodeType;
-            cleanAction.label = typeof action.label === 'string' ? action.label.slice(0, 80) : '';
-          }
-          if (kind === 'node-drag' && Array.isArray(action.nodeIds)) cleanAction.nodeIds = action.nodeIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 50);
-          if (kind === 'note-drag') {
-            if (typeof action.noteId === 'string') cleanAction.noteId = action.noteId.slice(0, 100);
-            if (Array.isArray(action.noteIds)) cleanAction.noteIds = action.noteIds.filter((id) => typeof id === 'string' && id.length <= 100).slice(0, 50);
-            const notePositions = positions(action.notePositions);
-            if (notePositions.length) cleanAction.notePositions = notePositions;
-          }
-          if (kind === 'wire-drag') {
-            const start = point(action.start);
-            if (!start) return;
-            cleanAction.start = start;
-            cleanAction.pinType = typeof action.pinType === 'string' ? action.pinType.slice(0, 32) : 'any';
-          }
-          if (kind === 'arrow-drag') {
-            const start = point(action.start);
-            if (!start) return;
-            cleanAction.start = start;
-          }
-          if (kind === 'node-edit' && typeof action.nodeId === 'string') cleanAction.nodeId = action.nodeId.slice(0, 100);
-        } else if (kind === 'studio-draft') {
-          if (typeof action.studioId !== 'string' || action.studioId.length > 240 || !['embed', 'text', 'arguments'].includes(action.studioType) || !action.draft || typeof action.draft !== 'object' || Array.isArray(action.draft)) return;
-          let serialized;
-          try { serialized = JSON.stringify(action.draft); } catch { return; }
-          if (serialized.length > 300_000) return;
-          cleanAction = { kind, studioId: action.studioId, studioType: action.studioType, draft: JSON.parse(serialized) };
-          if (Number.isInteger(action.draft.caret) && action.draft.caret >= 0 && action.draft.caret <= 1_000_000) cleanAction.draft.caret = action.draft.caret;
-        } else if (kind === 'studio-cursor') {
-          if (typeof action.studioId !== 'string' || action.studioId.length > 240 || !Number.isInteger(action.caret) || action.caret < 0 || action.caret > 1_000_000) return;
-          cleanAction = { kind, studioId: action.studioId, caret: action.caret };
-        } else if (kind === 'studio-focus') {
-          if (typeof action.studioId !== 'string' || action.studioId.length > 240 || !['embed', 'text', 'arguments'].includes(action.studioType)) return;
-          cleanAction = { kind, studioId: action.studioId, studioType: action.studioType, label: typeof action.label === 'string' ? action.label.slice(0, 80) : '' };
-        } else if (kind === 'node-edit') {
-          if (typeof action.nodeId !== 'string' || action.nodeId.length > 100) return;
-          cleanAction = { kind, nodeId: action.nodeId.slice(0, 100), mode: 'text' };
-        } else cleanAction = { kind: 'idle' };
-        const room = liveCollaborationActions.get(roomKey) || new Map();
-        const priorAction = room.get(ws.arcUser.id)?.action;
-        if (kind !== 'idle' && !cleanAction.cursor && priorAction?.cursor) cleanAction.cursor = priorAction.cursor;
-        if (kind !== 'idle' && !Array.isArray(cleanAction.selectedNodeIds) && Array.isArray(priorAction?.selectedNodeIds)) cleanAction.selectedNodeIds = priorAction.selectedNodeIds;
-        const envelope = { userId: ws.arcUser.id, username: ws.arcUser.username, color: ws.arcColor || collaboratorColor(ws.arcUser.id), projectId: ws.arcPresence.projectId, graphId: ws.arcPresence.graphId, action: cleanAction, updatedAt: now, revision: nextCollaborationActionRevision() };
-        if (kind === 'studio-draft') {
-          const drafts = liveCollaborationStudioDrafts.get(roomKey) || new Map();
-          drafts.set(`${ws.arcUser.id}:${cleanAction.studioId}`, envelope);
-          liveCollaborationStudioDrafts.set(roomKey, drafts);
-        } else if (kind === 'studio-focus' || kind === 'studio-cursor') {
-          const drafts = liveCollaborationStudioDrafts.get(roomKey);
-          const requestedStudioId = cleanAction.studioId;
-          if (drafts) for (const draft of drafts.values()) {
-            if (draft.userId !== ws.arcUser.id && draft.action.studioId === requestedStudioId) {
-              ws.send(JSON.stringify({ type: 'COLLAB_ACTION_UPDATED', payload: { ...draft, updatedAt: now, revision: nextCollaborationActionRevision() } }));
+          let candidateGraph = { ...graph };
+          const baseRevision = Number(payload.baseRevision);
+          if (previous && Number.isInteger(baseRevision) && baseRevision !== previous.revision) {
+            const baseState = previous.history?.find((entry) => entry.revision === baseRevision);
+            if (baseState) candidateGraph = mergeConcurrentGraphValue(baseState.graph, previous.graph, candidateGraph);
+            else {
+              const syncPayload = { ...previous, clientId: payload.clientId, syncId: payload.syncId, resync: true };
+              delete syncPayload.serializedGraph;
+              delete syncPayload.history;
+              ws.send(JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload: syncPayload }));
+              return;
             }
           }
-        }
-        room.set(ws.arcUser.id, envelope);
-        liveCollaborationActions.set(roomKey, room);
-        sendToCollaborationRoom(roomKey, { type: 'COLLAB_ACTION_UPDATED', payload: envelope }, ws);
-        scheduleCollaborationActionExpiry();
-      } else if (msg.type === 'GRAPH_STATE') {
-        const payload = msg.payload || msg;
-        const projectId = typeof payload.projectId === 'string' ? payload.projectId : '';
-        const graph = payload.graph;
-        const permissions = ws.arcUser?.permissions || [];
-        const rejectGraphState = (message) => {
-          if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'GRAPH_STATE_REJECTED', payload: { graphId: payload.graphId, message } }));
-        };
-        if (!permissions.includes('*') && !permissions.includes('graphs:write')) {
-          rejectGraphState('Your account has read-only graph access. Ask a workspace admin for graph edit permission.');
-          return;
-        }
-        if (!ws.arcPresence || projectId !== ws.arcProjectId || projectId !== ws.arcPresence.projectId || payload.graphId !== ws.arcPresence.graphId) {
-          rejectGraphState('Open the graph in this workspace before editing it collaboratively.');
-          return;
-        }
-        if (ws.arcManager?.deletedGraphIds?.has(payload.graphId)) {
-          rejectGraphState('This graph was deleted. Close the stale tab and open a current graph.');
-          return;
-        }
-        if (!graph || graph.id !== payload.graphId || !Array.isArray(graph.nodes) || !Array.isArray(graph.connections)
-          || graph.nodes.length > 2000 || graph.connections.length > 10000) {
-          rejectGraphState('This graph update is invalid or exceeds the collaboration limits.');
-          return;
-        }
-        const key = `${projectId}:${graph.id}`;
-        const graphExists = ws.arcOpenGraphIds?.has(graph.id)
-          || ws.arcManager.getGraphs().some((item) => item.id === graph.id)
-          || liveGraphStates.has(key);
-        if (!graphExists) {
-          rejectGraphState('This graph is no longer open in the workspace. Reopen it before editing.');
-          return;
-        }
-        for (const [stateKey, stateValue] of liveGraphStates) {
-          if (Date.now() - stateValue.updatedAt > 30 * 60 * 1000) liveGraphStates.delete(stateKey);
-        }
-        let previous = liveGraphStates.get(key);
-        if (!previous) {
-          const initialGraph = ws.arcManager.getGraphs().find((item) => item.id === graph.id);
-          if (initialGraph) {
-            const initialSerialized = JSON.stringify(initialGraph);
-            previous = { projectId, graphId: graph.id, graph: initialGraph, revision: 0, updatedAt: Date.now(), user: null, serializedGraph: initialSerialized, history: [{ revision: 0, graph: initialGraph }] };
-            liveGraphStates.set(key, previous);
+          if (Array.isArray(candidateGraph.notes)) candidateGraph.notes = candidateGraph.notes.map((note) => ({ ...note }));
+          const previousNotes = new Map((previous?.graph?.notes || []).map((note) => [note.id, note]));
+          const incomingNotes = Array.isArray(candidateGraph.notes)
+            ? candidateGraph.notes
+            : (previous?.graph?.notes || []).map((note) => ({ ...note }));
+          const incomingById = new Map(incomingNotes.map((note) => [note.id, note]));
+          const roomKey = collaborationRoomKey(projectId, graph.id);
+          const locks = liveNoteEditLocks.get(roomKey);
+          let adjustedNotes = false;
+          const rejectedNoteEdits = [];
+          for (const noteId of new Set([...previousNotes.keys(), ...incomingById.keys(), ...(locks?.keys() || [])])) {
+            const previousNote = previousNotes.get(noteId);
+            const incomingNote = incomingById.get(noteId);
+            const lock = locks?.get(noteId);
+            if (lock && lock.expiresAt <= Date.now()) removeNoteEditLock(roomKey, noteId, { expired: true });
+            const activeLock = liveNoteEditLocks.get(roomKey)?.get(noteId);
+            const ownsLock = activeLock && activeLock.socket === ws && activeLock.clientId === payload.clientId
+              && activeLock.userId === ws.arcUser.id;
+            if (activeLock && !ownsLock) {
+              const authoritative = activeLock.note || previousNote;
+              if (!authoritative) continue;
+              if (!incomingNote || !sameCollaborationValue(incomingNote, authoritative)) {
+                if (incomingNote) {
+                  const index = incomingNotes.findIndex((item) => item.id === noteId);
+                  incomingNotes[index] = JSON.parse(JSON.stringify(authoritative));
+                  incomingById.set(noteId, incomingNotes[index]);
+                } else {
+                  incomingNotes.push(JSON.parse(JSON.stringify(authoritative)));
+                  incomingById.set(noteId, incomingNotes[incomingNotes.length - 1]);
+                }
+                rejectedNoteEdits.push({ noteId, note: authoritative });
+                adjustedNotes = true;
+              }
+            } else if (previousNote && incomingNote && incomingNote.text !== previousNote.text && !ownsLock) {
+              incomingNote.text = previousNote.text;
+              if (Object.hasOwn(previousNote, 'editedAt')) incomingNote.editedAt = previousNote.editedAt;
+              else delete incomingNote.editedAt;
+              if (Object.hasOwn(previousNote, 'editedBy')) incomingNote.editedBy = previousNote.editedBy;
+              else delete incomingNote.editedBy;
+              rejectedNoteEdits.push({ noteId, note: incomingNote });
+              adjustedNotes = true;
+            }
+            if (ownsLock && incomingNote) activeLock.note = JSON.parse(JSON.stringify(incomingNote));
+            if (ownsLock && !incomingNote) removeNoteEditLock(roomKey, noteId);
           }
-        }
-        let candidateGraph = { ...graph };
-        const baseRevision = Number(payload.baseRevision);
-        if (previous && Number.isInteger(baseRevision) && baseRevision !== previous.revision) {
-          const baseState = previous.history?.find((entry) => entry.revision === baseRevision);
-          if (baseState) candidateGraph = mergeConcurrentGraphValue(baseState.graph, previous.graph, candidateGraph);
-          else {
-            const syncPayload = { ...previous, clientId: payload.clientId, syncId: payload.syncId, resync: true };
+          if (Array.isArray(graph.notes) || adjustedNotes || Array.isArray(previous?.graph?.notes)) candidateGraph.notes = incomingNotes;
+          const previousArrows = (previous?.graph?.arrows || []).filter((arrow) => arrow?.locked === true);
+          const incomingArrows = Array.isArray(candidateGraph.arrows) ? candidateGraph.arrows : previousArrows;
+          const incomingArrowById = new Map(incomingArrows.filter((arrow) => typeof arrow?.id === 'string').map((arrow) => [arrow.id, arrow]));
+          const nextArrows = [];
+          const rejectedCanvasArrowIds = [];
+          const validLockedArrow = (arrow) => {
+            const start = canvasArrowPoint(arrow?.start);
+            const end = canvasArrowPoint(arrow?.end);
+            return arrow && typeof arrow.id === 'string' && arrow.id.length <= 100 && arrow.locked === true
+              && start && end && Math.hypot(end.x - start.x, end.y - start.y) >= 8
+              && typeof arrow.createdById === 'string' && arrow.createdById.length <= 100
+              && typeof arrow.createdBy === 'string' && arrow.createdBy.length <= 80
+              && typeof arrow.color === 'string' && /^#[0-9a-f]{6}$/i.test(arrow.color);
+          };
+          const previousArrowIds = new Set(previousArrows.map((arrow) => arrow.id));
+          for (const previousArrow of previousArrows) {
+            const incomingArrow = incomingArrowById.get(previousArrow.id);
+            if ((!incomingArrow || !sameCollaborationValue(incomingArrow, previousArrow))
+              && !canManageLockedCanvasArrow(ws.arcUser, previousArrow, projectId)) {
+              nextArrows.push(previousArrow);
+              rejectedCanvasArrowIds.push(previousArrow.id);
+            } else if (incomingArrow && validLockedArrow(incomingArrow)) {
+              nextArrows.push({
+                ...previousArrow,
+                start: canvasArrowPoint(incomingArrow.start),
+                end: canvasArrowPoint(incomingArrow.end)
+              });
+            }
+          }
+          for (const incomingArrow of incomingArrows) {
+            if (previousArrowIds.has(incomingArrow?.id) || !validLockedArrow(incomingArrow)
+              || incomingArrow.createdById !== ws.arcUser.id) continue;
+            if (nextArrows.length >= 300) {
+              rejectedCanvasArrowIds.push(incomingArrow.id);
+              continue;
+            }
+            nextArrows.push({
+              ...incomingArrow,
+              start: canvasArrowPoint(incomingArrow.start),
+              end: canvasArrowPoint(incomingArrow.end),
+              createdBy: ws.arcUser.username,
+              createdByRole: ws.arcUser.role
+            });
+          }
+          if (Array.isArray(graph.arrows) || previousArrows.length) candidateGraph.arrows = nextArrows;
+          const serializedGraph = JSON.stringify(candidateGraph);
+          const reportRejectedNoteEdits = () => {
+            for (const rejected of rejectedNoteEdits) ws.send(JSON.stringify({ type: 'NOTE_EDIT_REJECTED', payload: { projectId, graphId: graph.id, ...rejected } }));
+            if (rejectedCanvasArrowIds.length) ws.send(JSON.stringify({
+              type: 'CANVAS_ARROW_REJECTED',
+              payload: { projectId, graphId: graph.id, ids: rejectedCanvasArrowIds, message: 'Only the arrow creator or a project owner with higher permission can change a locked arrow.' }
+            }));
+          };
+          if (previous?.serializedGraph === serializedGraph) {
+            const syncPayload = { ...previous, clientId: payload.clientId, syncId: payload.syncId || null, sourceUserId: ws.arcUser.id };
             delete syncPayload.serializedGraph;
             delete syncPayload.history;
             ws.send(JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload: syncPayload }));
+            ws.send(JSON.stringify({ type: 'GRAPH_STATE_ACK', payload: { graphId: graph.id, revision: previous.revision, syncId: payload.syncId || null } }));
+            reportRejectedNoteEdits();
             return;
           }
-        }
-        if (Array.isArray(candidateGraph.notes)) candidateGraph.notes = candidateGraph.notes.map((note) => ({ ...note }));
-        const previousNotes = new Map((previous?.graph?.notes || []).map((note) => [note.id, note]));
-        const incomingNotes = Array.isArray(candidateGraph.notes)
-          ? candidateGraph.notes
-          : (previous?.graph?.notes || []).map((note) => ({ ...note }));
-        const incomingById = new Map(incomingNotes.map((note) => [note.id, note]));
-        const roomKey = collaborationRoomKey(projectId, graph.id);
-        const locks = liveNoteEditLocks.get(roomKey);
-        let adjustedNotes = false;
-        const rejectedNoteEdits = [];
-        for (const noteId of new Set([...previousNotes.keys(), ...incomingById.keys(), ...(locks?.keys() || [])])) {
-          const previousNote = previousNotes.get(noteId);
-          const incomingNote = incomingById.get(noteId);
-          const lock = locks?.get(noteId);
-          if (lock && lock.expiresAt <= Date.now()) removeNoteEditLock(roomKey, noteId, { expired: true });
-          const activeLock = liveNoteEditLocks.get(roomKey)?.get(noteId);
-          const ownsLock = activeLock && activeLock.socket === ws && activeLock.clientId === payload.clientId
-            && activeLock.userId === ws.arcUser.id;
-          if (activeLock && !ownsLock) {
-            const authoritative = activeLock.note || previousNote;
-            if (!authoritative) continue;
-            if (!incomingNote || !sameCollaborationValue(incomingNote, authoritative)) {
-              if (incomingNote) {
-                const index = incomingNotes.findIndex((item) => item.id === noteId);
-                incomingNotes[index] = JSON.parse(JSON.stringify(authoritative));
-                incomingById.set(noteId, incomingNotes[index]);
-              } else {
-                incomingNotes.push(JSON.parse(JSON.stringify(authoritative)));
-                incomingById.set(noteId, incomingNotes[incomingNotes.length - 1]);
-              }
-              rejectedNoteEdits.push({ noteId, note: authoritative });
-              adjustedNotes = true;
-            }
-          } else if (previousNote && incomingNote && incomingNote.text !== previousNote.text && !ownsLock) {
-            incomingNote.text = previousNote.text;
-            if (Object.hasOwn(previousNote, 'editedAt')) incomingNote.editedAt = previousNote.editedAt;
-            else delete incomingNote.editedAt;
-            if (Object.hasOwn(previousNote, 'editedBy')) incomingNote.editedBy = previousNote.editedBy;
-            else delete incomingNote.editedBy;
-            rejectedNoteEdits.push({ noteId, note: incomingNote });
-            adjustedNotes = true;
-          }
-          if (ownsLock && incomingNote) activeLock.note = JSON.parse(JSON.stringify(incomingNote));
-          if (ownsLock && !incomingNote) removeNoteEditLock(roomKey, noteId);
-        }
-        if (Array.isArray(graph.notes) || adjustedNotes || Array.isArray(previous?.graph?.notes)) candidateGraph.notes = incomingNotes;
-        const previousArrows = (previous?.graph?.arrows || []).filter((arrow) => arrow?.locked === true);
-        const incomingArrows = Array.isArray(candidateGraph.arrows) ? candidateGraph.arrows : previousArrows;
-        const incomingArrowById = new Map(incomingArrows.filter((arrow) => typeof arrow?.id === 'string').map((arrow) => [arrow.id, arrow]));
-        const nextArrows = [];
-        const rejectedCanvasArrowIds = [];
-        const validLockedArrow = (arrow) => {
-          const start = canvasArrowPoint(arrow?.start);
-          const end = canvasArrowPoint(arrow?.end);
-          return arrow && typeof arrow.id === 'string' && arrow.id.length <= 100 && arrow.locked === true
-            && start && end && Math.hypot(end.x - start.x, end.y - start.y) >= 8
-            && typeof arrow.createdById === 'string' && arrow.createdById.length <= 100
-            && typeof arrow.createdBy === 'string' && arrow.createdBy.length <= 80
-            && typeof arrow.color === 'string' && /^#[0-9a-f]{6}$/i.test(arrow.color);
-        };
-        const previousArrowIds = new Set(previousArrows.map((arrow) => arrow.id));
-        for (const previousArrow of previousArrows) {
-          const incomingArrow = incomingArrowById.get(previousArrow.id);
-          if ((!incomingArrow || !sameCollaborationValue(incomingArrow, previousArrow))
-            && !canManageLockedCanvasArrow(ws.arcUser, previousArrow, projectId)) {
-            nextArrows.push(previousArrow);
-            rejectedCanvasArrowIds.push(previousArrow.id);
-          } else if (incomingArrow && validLockedArrow(incomingArrow)) {
-            nextArrows.push({
-              ...previousArrow,
-              start: canvasArrowPoint(incomingArrow.start),
-              end: canvasArrowPoint(incomingArrow.end)
-            });
-          }
-        }
-        for (const incomingArrow of incomingArrows) {
-          if (previousArrowIds.has(incomingArrow?.id) || !validLockedArrow(incomingArrow)
-            || incomingArrow.createdById !== ws.arcUser.id) continue;
-          if (nextArrows.length >= 300) {
-            rejectedCanvasArrowIds.push(incomingArrow.id);
-            continue;
-          }
-          nextArrows.push({
-            ...incomingArrow,
-            start: canvasArrowPoint(incomingArrow.start),
-            end: canvasArrowPoint(incomingArrow.end),
-            createdBy: ws.arcUser.username,
-            createdByRole: ws.arcUser.role
-          });
-        }
-        if (Array.isArray(graph.arrows) || previousArrows.length) candidateGraph.arrows = nextArrows;
-        const serializedGraph = JSON.stringify(candidateGraph);
-        const reportRejectedNoteEdits = () => {
-          for (const rejected of rejectedNoteEdits) ws.send(JSON.stringify({ type: 'NOTE_EDIT_REJECTED', payload: { projectId, graphId: graph.id, ...rejected } }));
-          if (rejectedCanvasArrowIds.length) ws.send(JSON.stringify({
-            type: 'CANVAS_ARROW_REJECTED',
-            payload: { projectId, graphId: graph.id, ids: rejectedCanvasArrowIds, message: 'Only the arrow creator or a project owner with higher permission can change a locked arrow.' }
-          }));
-        };
-        if (previous?.serializedGraph === serializedGraph) {
-          const syncPayload = { ...previous, clientId: payload.clientId, syncId: payload.syncId || null, sourceUserId: ws.arcUser.id };
+          const revision = (previous?.revision || 0) + 1;
+          const state = {
+            projectId,
+            graphId: graph.id,
+            graph: candidateGraph,
+            revision,
+            updatedAt: Date.now(),
+            user: { id: ws.arcUser.id, username: ws.arcUser.username },
+            serializedGraph,
+            history: [...(previous?.history || (previous ? [{ revision: previous.revision, graph: previous.graph }] : [])), { revision, graph: candidateGraph }].slice(-(serializedGraph.length <= 1_000_000 ? 8 : 2))
+          };
+          liveGraphStates.set(key, state);
+          reportRejectedNoteEdits();
+          const syncPayload = { ...state, clientId: payload.clientId, syncId: payload.syncId || null, sourceUserId: ws.arcUser.id };
           delete syncPayload.serializedGraph;
           delete syncPayload.history;
-          ws.send(JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload: syncPayload }));
-          ws.send(JSON.stringify({ type: 'GRAPH_STATE_ACK', payload: { graphId: graph.id, revision: previous.revision, syncId: payload.syncId || null } }));
-          reportRejectedNoteEdits();
-          return;
-        }
-        const revision = (previous?.revision || 0) + 1;
-        const state = {
-          projectId,
-          graphId: graph.id,
-          graph: candidateGraph,
-          revision,
-          updatedAt: Date.now(),
-          user: { id: ws.arcUser.id, username: ws.arcUser.username },
-          serializedGraph,
-          history: [...(previous?.history || (previous ? [{ revision: previous.revision, graph: previous.graph }] : [])), { revision, graph: candidateGraph }].slice(-(serializedGraph.length <= 1_000_000 ? 8 : 2))
-        };
-        liveGraphStates.set(key, state);
-        reportRejectedNoteEdits();
-        const syncPayload = { ...state, clientId: payload.clientId, syncId: payload.syncId || null, sourceUserId: ws.arcUser.id };
-        delete syncPayload.serializedGraph;
-        delete syncPayload.history;
-        const message = JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload: syncPayload });
-        for (const client of wss.clients) {
-          if (client.arcAuthenticated && client.readyState === WebSocket.OPEN
-            && client.arcPresence?.projectId === projectId && client.arcPresence?.graphId === graph.id) client.send(message);
-        }
-        ws.send(JSON.stringify({ type: 'GRAPH_STATE_ACK', payload: { graphId: graph.id, revision: state.revision, syncId: payload.syncId || null } }));
-        publishProjectCollaboration(projectId);
+          const message = JSON.stringify({ type: 'GRAPH_STATE_SYNC', payload: syncPayload });
+          for (const client of wss.clients) {
+            if (client.arcAuthenticated && client.readyState === WebSocket.OPEN
+              && client.arcPresence?.projectId === projectId && client.arcPresence?.graphId === graph.id) client.send(message);
+          }
+          ws.send(JSON.stringify({ type: 'GRAPH_STATE_ACK', payload: { graphId: graph.id, revision: state.revision, syncId: payload.syncId || null } }));
+          publishProjectCollaboration(projectId);
         }
       }
-    } catch {}
+    } catch { }
   });
 });
 
