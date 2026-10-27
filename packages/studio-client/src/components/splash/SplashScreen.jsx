@@ -151,14 +151,14 @@ export function SplashScreen({
     let cancelled = false;
     setPassword('');
     let remember = true;
-    try { remember = localStorage.getItem(rememberStorageKey) !== 'false'; } catch {}
+    try { remember = localStorage.getItem(rememberStorageKey) !== 'false'; } catch { }
     setRememberPassword(remember);
     if (!remember) return undefined;
     const invoke = window.__TAURI_INTERNALS__?.invoke;
     if (typeof invoke !== 'function') return undefined;
     invoke('get_workspace_password', { origin: credentialOrigin })
       .then((savedPassword) => { if (!cancelled && typeof savedPassword === 'string') setPassword(savedPassword); })
-      .catch(() => {});
+      .catch(() => { });
     return () => { cancelled = true; };
   }, [desktopMode, workspaceMode, needsSetup, credentialOrigin, rememberStorageKey]);
   useEffect(() => {
@@ -173,7 +173,7 @@ export function SplashScreen({
       update();
       battery.addEventListener('levelchange', update);
       battery.addEventListener('chargingchange', update);
-    }).catch(() => {});
+    }).catch(() => { });
     return () => {
       mounted = false;
       if (battery && update) {
@@ -193,10 +193,10 @@ export function SplashScreen({
     const canvas = snowCanvasRef.current;
     if (!canvas) return undefined;
     let cancelled = false;
-    let stopSnow = () => {};
+    let stopSnow = () => { };
     import('./snow.js')
       .then(({ startSnow }) => { if (!cancelled) stopSnow = startSnow(canvas) || stopSnow; })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       cancelled = true;
       stopSnow();
@@ -289,7 +289,7 @@ export function SplashScreen({
     if (rememberTrustedWorkspace && !trustedWorkspaces.includes(trustPrompt)) {
       const nextTrusted = [...trustedWorkspaces, trustPrompt];
       setTrustedWorkspaces(nextTrusted);
-      try { localStorage.setItem('arc_trusted_workspaces', JSON.stringify(nextTrusted)); } catch {}
+      try { localStorage.setItem('arc_trusted_workspaces', JSON.stringify(nextTrusted)); } catch { }
     }
     setConnecting(true);
     try {
@@ -394,7 +394,7 @@ export function SplashScreen({
         }
       }
       if (desktopMode && workspaceMode === 'local') {
-        try { localStorage.setItem('arc_local_username', username.trim()); } catch {}
+        try { localStorage.setItem('arc_local_username', username.trim()); } catch { }
       }
       await onAuthComplete(data.token, data.user, persistSession);
       arcEvents.emit('toast:notify', {
@@ -413,7 +413,7 @@ export function SplashScreen({
             onLocalSetupRequired?.();
             return;
           }
-        } catch {}
+        } catch { }
       }
       setError(submitError.name === 'AbortError'
         ? 'The server took too long to respond. Try again.'
@@ -485,7 +485,7 @@ export function SplashScreen({
       const nextToken = data.token || passwordChangeSession.token;
       if (desktopMode && workspaceMode === 'remote' && credentialOrigin) {
         const invoke = window.__TAURI_INTERNALS__?.invoke;
-        if (rememberPassword && typeof invoke === 'function') await invoke('save_workspace_password', { origin: credentialOrigin, password: recoveryPassword }).catch(() => {});
+        if (rememberPassword && typeof invoke === 'function') await invoke('save_workspace_password', { origin: credentialOrigin, password: recoveryPassword }).catch(() => { });
       }
       await onAuthComplete(nextToken, updatedUser, passwordChangeSession.persistSession);
       setPasswordChangeSession(null);
@@ -620,20 +620,20 @@ export function SplashScreen({
               {needsSetup && !desktopMode && <><label className="field-label" htmlFor="workspace-name">Workspace name</label><div ref={(element) => { fieldRefs.current.workspaceName = element; }} className={`auth-input-wrap ${fieldErrors.workspaceName ? 'has-error' : ''}`}><input id="workspace-name" autoComplete="organization" autoCapitalize="none" autoCorrect="off" spellCheck="false" maxLength={35} value={serverWorkspaceName} onChange={updateField('workspaceName', setServerWorkspaceName)} placeholder="My Workspace" aria-invalid={Boolean(fieldErrors.workspaceName)} /></div><p className={`auth-field-hint ${fieldErrors.workspaceName ? 'has-error' : ''}`} role={fieldErrors.workspaceName ? 'alert' : undefined}>{fieldErrors.workspaceName || '2–35 characters · letters, numbers, spaces, - and _'} <span>{serverWorkspaceName.length}/35</span></p></>}
               <label className="field-label" htmlFor="username">{desktopMode && workspaceMode === 'local' && needsSetup ? 'Owner username' : 'Username'}</label>
               <div ref={(element) => { fieldRefs.current.username = element; }} className={`auth-input-wrap ${fieldErrors.username ? 'has-error' : ''} ${desktopMode && workspaceMode === 'local' && !localUsernameEditable ? 'is-readonly' : ''}`}>
-                <input id="username" autoFocus={!needsSetup} autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck="false" value={username} disabled={desktopMode && workspaceMode === 'local' && !localUsernameEditable} onChange={(event) => { updateField('username', setUsername)(event); setOwnerResetPromptForUsername(''); if (desktopMode && workspaceMode === 'remote' && usernameStorageKey) { try { localStorage.setItem(usernameStorageKey, event.target.value); } catch {} } }} placeholder="Username" aria-invalid={Boolean(fieldErrors.username)} />
+                <input id="username" autoFocus={!needsSetup} autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck="false" value={username} disabled={desktopMode && workspaceMode === 'local' && !localUsernameEditable} onChange={(event) => { updateField('username', setUsername)(event); setOwnerResetPromptForUsername(''); if (desktopMode && workspaceMode === 'remote' && usernameStorageKey) { try { localStorage.setItem(usernameStorageKey, event.target.value); } catch { } } }} placeholder="Username" aria-invalid={Boolean(fieldErrors.username)} />
                 {desktopMode && workspaceMode === 'local' && <button className="auth-edit-username" type="button" onClick={() => setLocalUsernameEditable((editable) => !editable)} aria-label={localUsernameEditable ? 'Lock username field' : 'Edit username'} title={localUsernameEditable ? 'Done editing username' : 'Edit username'}>{localUsernameEditable ? 'Done' : <><Pencil size={13} /> Edit</>}</button>}
               </div>
               {fieldErrors.username && <p className="auth-field-error" role="alert">{fieldErrors.username}</p>}
               <label className="field-label" htmlFor="password">Password</label>
               <div ref={(element) => { fieldRefs.current.password = element; }} className={`auth-input-wrap ${fieldErrors.password ? 'has-error' : ''}`}><LockKeyhole size={16} /><input id="password" type={showPassword ? 'text' : 'password'} autoComplete={needsSetup ? 'new-password' : 'current-password'} autoCapitalize="none" autoCorrect="off" spellCheck="false" value={password} onChange={(event) => { updateField('password', setPassword)(event); setOwnerResetPromptForUsername(''); }} placeholder="Password" aria-invalid={Boolean(fieldErrors.password)} /><button className="auth-reveal" type="button" onClick={() => setShowPassword((show) => !show)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
               {fieldErrors.password && <p className="auth-field-error" role="alert">{fieldErrors.password}</p>}
-              {desktopMode && workspaceMode === 'remote' && <label className="remember-password"><input type="checkbox" checked={rememberPassword} onChange={(event) => { const checked = event.target.checked; setRememberPassword(checked); try { if (rememberStorageKey) localStorage.setItem(rememberStorageKey, String(checked)); } catch {} if (!checked && credentialOrigin) window.__TAURI_INTERNALS__?.invoke?.('delete_workspace_password', { origin: credentialOrigin }).catch(() => {}); }} /><span>Remember password on this device</span></label>}
-              {desktopMode && workspaceMode === 'local' && !needsSetup && <label className="remember-password"><input type="checkbox" checked={keepLocalSignedIn} onChange={(event) => { const checked = event.target.checked; setKeepLocalSignedIn(checked); try { localStorage.setItem('arc_local_keep_signed_in', String(checked)); if (!checked) localStorage.removeItem('arc_local_session_token'); } catch {} if (!checked) window.__TAURI_INTERNALS__?.invoke?.('delete_local_session_token').catch(() => {}); }} /><span>Keep me signed in</span></label>}
+              {desktopMode && workspaceMode === 'remote' && <label className="remember-password"><input type="checkbox" checked={rememberPassword} onChange={(event) => { const checked = event.target.checked; setRememberPassword(checked); try { if (rememberStorageKey) localStorage.setItem(rememberStorageKey, String(checked)); } catch { } if (!checked && credentialOrigin) window.__TAURI_INTERNALS__?.invoke?.('delete_workspace_password', { origin: credentialOrigin }).catch(() => { }); }} /><span>Remember password on this device</span></label>}
+              {desktopMode && workspaceMode === 'local' && !needsSetup && <label className="remember-password"><input type="checkbox" checked={keepLocalSignedIn} onChange={(event) => { const checked = event.target.checked; setKeepLocalSignedIn(checked); try { localStorage.setItem('arc_local_keep_signed_in', String(checked)); if (!checked) localStorage.removeItem('arc_local_session_token'); } catch { } if (!checked) window.__TAURI_INTERNALS__?.invoke?.('delete_local_session_token').catch(() => { }); }} /><span>Keep me signed in</span></label>}
               {recoveryMessage && <p className="auth-field-hint" role="status">{recoveryMessage}</p>}
               {!needsSetup && desktopMode && workspaceMode === 'local' && <button className="auth-back" type="button" onClick={() => { setRecoveryMode('local'); setError(''); setRecoveryMessage(''); }}>Forgot password?</button>}
               {showMasterPasswordReset && <button className="auth-back" type="button" onClick={() => { setRecoveryMode('master'); setError(''); setRecoveryMessage(''); }}>Reset owner password with master key</button>}
               {needsSetup && <><label className="field-label" htmlFor="confirm-password">Confirm password</label><div ref={(element) => { fieldRefs.current.confirmPassword = element; }} className={`auth-input-wrap ${fieldErrors.confirmPassword ? 'has-error' : ''}`}><LockKeyhole size={16} /><input id="confirm-password" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" autoCapitalize="none" autoCorrect="off" spellCheck="false" value={confirmPassword} onChange={updateField('confirmPassword', setConfirmPassword)} placeholder="Confirm password" aria-invalid={Boolean(fieldErrors.confirmPassword)} /><button className="auth-reveal" type="button" onClick={() => setShowConfirmPassword((show) => !show)} aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}>{showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>{fieldErrors.confirmPassword && <p className="auth-field-error" role="alert">{fieldErrors.confirmPassword}</p>}</>}
-              {needsSetup && desktopMode && workspaceMode === 'local' && <label className="remember-password"><input type="checkbox" checked={keepLocalSignedIn} onChange={(event) => { const checked = event.target.checked; setKeepLocalSignedIn(checked); try { localStorage.setItem('arc_local_keep_signed_in', String(checked)); if (!checked) localStorage.removeItem('arc_local_session_token'); } catch {} if (!checked) window.__TAURI_INTERNALS__?.invoke?.('delete_local_session_token').catch(() => {}); }} /><span>Keep me signed in</span></label>}
+              {needsSetup && desktopMode && workspaceMode === 'local' && <label className="remember-password"><input type="checkbox" checked={keepLocalSignedIn} onChange={(event) => { const checked = event.target.checked; setKeepLocalSignedIn(checked); try { localStorage.setItem('arc_local_keep_signed_in', String(checked)); if (!checked) localStorage.removeItem('arc_local_session_token'); } catch { } if (!checked) window.__TAURI_INTERNALS__?.invoke?.('delete_local_session_token').catch(() => { }); }} /><span>Keep me signed in</span></label>}
               {error && <p className="form-error" role="alert">{error}</p>}
               {workspaceError && <p className="form-error" role="alert">{workspaceError}</p>}
               {workspaceError && !startupError && <button className="auth-retry" type="button" onClick={onRetryWorkspace}>Retry connection</button>}

@@ -43,7 +43,8 @@ export const registry = {
       "type": "arg"
     }
   ],
-  ui
+  ui,
+  exec
 };
 
 function ui({
@@ -79,4 +80,33 @@ function ui({
     <FallbackCheckbox label="Persist between runs" checked={node.data?.persist !== false} onChange={(persist) => update('persist', persist)} />
     <span className="node-config-hint">Create Variable makes a graph variable. Project variables are managed in Variables and always persist.</span>
   </div>;
+}
+
+function exec({
+  node,
+  localVariableDefinitions,
+  resolveDataInput,
+  setVariableValue,
+  currentExecWires,
+  findExecOutputs,
+  dataCache,
+  log
+}) {
+  const name = String(node.data?.name || '').trim();
+  const variableId = `nodevar_${node.id}`;
+  const definition = localVariableDefinitions.get(variableId);
+  if (!definition) {
+    log('[Variable] Create skipped: enter a valid variable name.');
+  } else {
+    const value = resolveDataInput(node, 'value', definition.initialValue);
+    const inferredType = Array.isArray(value) ? 'array' : value !== null && typeof value === 'object' ? 'object' : typeof value;
+    if (['string', 'number', 'boolean', 'array', 'object'].includes(inferredType)) {
+      definition.type = inferredType;
+      definition.valueType = inferredType;
+    }
+    const createdValue = setVariableValue(variableId, 'graph', value, definition);
+    dataCache.set(`${node.id}:value`, createdValue);
+    log(`[Variable] Created or updated ${name} (${definition.valueType}).`);
+  }
+  currentExecWires.push(...findExecOutputs(node.id, 'exec'));
 }

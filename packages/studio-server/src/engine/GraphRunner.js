@@ -924,25 +924,7 @@ export class GraphRunner {
               log(`EXEC error at ${targetNode.type}\n${e}`);
             }
           }
-          if (targetNode.type === 'variable_create') {
-            const name = String(targetNode.data?.name || '').trim();
-            const variableId = `nodevar_${targetNode.id}`;
-            const definition = localVariableDefinitions.get(variableId);
-            if (!definition) {
-              log('[Variable] Create skipped: enter a valid variable name.');
-            } else {
-              const value = resolveDataInput(targetNode, 'value', definition.initialValue);
-              const inferredType = Array.isArray(value) ? 'array' : value !== null && typeof value === 'object' ? 'object' : typeof value;
-              if (['string', 'number', 'boolean', 'array', 'object'].includes(inferredType)) {
-                definition.type = inferredType;
-                definition.valueType = inferredType;
-              }
-              const createdValue = setVariableValue(variableId, 'graph', value, definition);
-              dataCache.set(`${targetNode.id}:value`, createdValue);
-              log(`[Variable] Created or updated ${name} (${definition.valueType}).`);
-            }
-            currentExecWires.push(...findExecOutputs(targetNode.id, 'exec'));
-          } else if (targetNode.type === 'variable_set') {
+          if (targetNode.type === 'variable_set') {
             const reference = resolveDataInput(targetNode, 'variable', variableReference(targetNode.data?.variableId, targetNode.data?.scope));
             const variableId = reference?.__arcVariableRef ? reference.variableId : targetNode.data?.variableId;
             const variableScope = reference?.__arcVariableRef ? reference.scope : targetNode.data?.scope === 'project' ? 'project' : 'graph';
