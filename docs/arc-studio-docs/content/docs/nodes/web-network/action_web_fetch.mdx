@@ -1,0 +1,24 @@
+---
+title: "HTTP Request"
+---
+
+Make a bounded HTTP request with headers and an optional body. Local/private network destinations and redirects are blocked.
+
+## Inputs
+
+- URL (string)
+- Method (string)
+- Headers (JSON) (string)
+- User-Agent (string)
+- Body (string)
+- Timeout (ms) (number)
+- Max response bytes (number)
+
+## Outputs
+
+- Status (number)
+- Success (2xx) (boolean)
+- Response Body (string)
+- Response Headers (JSON) (string)
+- JSON (object)
+- Error (string)

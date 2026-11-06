@@ -1,0 +1,28 @@
+---
+title: "HTTP Request (Retry)"
+---
+
+Retries temporary network errors and HTTP 408, 425, 429, and 5xx responses with bounded backoff. Non-idempotent methods are not retried unless explicitly enabled.
+
+## Inputs
+
+- URL (string)
+- Method (string)
+- Headers (JSON) (string)
+- User-Agent (string)
+- Body (string)
+- Timeout (ms) (number)
+- Max response bytes (number)
+- Max attempts (number)
+- Base retry delay (ms) (number)
+- Retry POST/other methods (boolean)
+
+## Outputs
+
+- Status (number)
+- Success (2xx) (boolean)
+- Response Body (string)
+- Response Headers (JSON) (string)
+- JSON (object)
+- Attempts (number)
+- Error (string)

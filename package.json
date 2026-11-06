@@ -9,7 +9,8 @@
   "author": "relentiousdragon (https://github.com/relentiousdragon)",
   "license": "Apache-2.0",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "docs/arc-studio-docs"
   ],
   "type": "module",
   "scripts": {
@@ -26,6 +27,8 @@
     "dev": "npm run dev --workspace=packages/studio-server",
     "build:client": "npm run sync:version && npm run build --workspace=packages/studio-client && node scripts/mark-client-build.mjs",
     "build": "npm run build:client",
+    "dev:docs": "npm run dev --workspace=docs/arc-studio-docs",
+    "build:docs": "npm run build --workspace=docs/arc-studio-docs",
     "test:chezcord": "npm run test --workspace=packages/chezcord",
     "test:server": "npm run test --workspace=packages/studio-server",
     "test": "npm run test:chezcord && npm run test:server"
